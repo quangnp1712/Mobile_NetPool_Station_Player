@@ -4,9 +4,19 @@ const light = Color(0xFFF7F8FC);
 const lightGrey = Color(0xFFA4A6B3);
 const dark = Color(0xFF363740);
 const active = Color(0xFF3C19C0);
+const Color kScaffoldBackground = Color(0xFF000000);
+const Color kAppBarBackground = Color(0xFF323236); // Dùng chung màu nền
+const Color kGradientStart = Color(0xFF00F0FF);
+const Color kGradientEnd = Color(0xFFCB30E0);
+const Color kHintColor = Color(0xFFD9D9D9);
+const Color kUnderlineColor = Color(0xFFD9D9D9);
+const Color kLinkForgot = Color(0xFF00F0FF);
+const Color kLinkActive = Color(0xFFCB30E0);
+const Color kBoxBackground = Color(0xFF323236);
 
 class AppColors {
-  static const bgDark = Color(0xFF0C0C0A);
+  static const bgDark = Color(0xFF3B1F5A);
+  static const bgBlue = Color.fromARGB(255, 30, 232, 251);
   static const btnPrimary = Color(0xFFAB41F0);
   static const bgLight = Color(0xFFFFFFFF);
   static const btnSecondary = Color(0xFFE0E0E0);

@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
             getPages: RouteGenerator().routes(),
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
-              primarySwatch: Colors.grey,
+              primarySwatch: Colors.purple,
               textTheme: GoogleFonts.quicksandTextTheme(
                 Theme.of(context).textTheme,
               ),

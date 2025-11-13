@@ -1,0 +1,11 @@
+flutter_native_splash:
+  android: true
+  fullscreen: true
+
+  background_image: "assets/images/bg_mobile.png"
+  background_image_android: "assets/images/bg_mobile.png"
+  image: "assets/images/logo_mobile.png"
+
+  android_12:
+    color: "#0C0C0A"
+    image: "assets/images/logo_mobile.png"

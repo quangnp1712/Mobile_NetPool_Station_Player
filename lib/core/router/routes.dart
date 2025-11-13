@@ -1,5 +1,4 @@
 // PAGE //
-const String splashPageRoute = "/splash";
 const String landingNavBottomWidgetRoute = "/netpool";
 
 const testRoute = "/test";
@@ -10,19 +9,27 @@ const testRoute = "/test";
 
 const rootRoute = "/";
 
-// 1: Home Page //
+// 0: Splash Page //
+const String splashPageRoute = "/splash";
+
+// 1: Authentication Page //
+const loginPageRoute = "/netpool/login";
+const register1PageRoute = "/netpool/register/1";
+const register2PageRoute = "/netpool/register/2";
+
+// 2: Home Page //
 const homePageRoute = "/netpool/homepage";
 
-// 2: Statiom Page //
+// 3: Statiom Page //
 const stationPageRoute = "/netpool/station";
 
-// 3: Booking Page //
+// 4: Booking Page //
 const bookingPageRoute = "/netpool/booking";
 
-// 4: Match Page //
+// 5: Match Page //
 const matchingPageRoute = "/netpool/matching";
 
-// 5: Home Page //
+// 6: Menu Page //
 const menuPageRoute = "/netpool/menu";
 
 // ĐĂNG XUẤT //

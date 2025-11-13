@@ -4,6 +4,8 @@ import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
+import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
+import 'package:mobile_netpool_station_player/core/theme/app_text_styles.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/pages/station_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
@@ -28,12 +30,6 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
   int bottomIndex = 0;
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
-  late final HomePage homePage;
-  late final StationPage stationPage;
-  late final BookingPage bookingPage;
-  late final MatchingPage matchingPage;
-  late final MenuPage menuPage;
-
   void setPage(index) {
     final CurvedNavigationBarState? navBarState =
         _bottomNavigationKey.currentState;
@@ -43,7 +39,7 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
   @override
   void initState() {
     // Lấy token từ arguments
-    // LandingNavBottomWidgetBloc.add(LandingNavBottomWidgetInitial(bottomIndex: 0) as LandingNavBottomWidgetEvent);
+    // landingBloc.add(LandingNavigationBottomInitialEvent());0
     // print('Current Route: ${Get.currentRoute}');
     super.initState();
   }
@@ -61,6 +57,7 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
 
   @override
   void dispose() {
+    // landingBloc.close(); // Đừng quên đóng Bloc
     super.dispose();
   }
 
@@ -74,52 +71,113 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
       MenuPage(setPage),
     ];
     return BlocConsumer<LandingNavigationBottomBloc,
-            LandingNavigationBottomInitial>(
-        bloc: landingBloc,
-        listener: (context, state) {},
-        builder: (context, state) {
-          return SafeArea(
-            child: PopScope(
-              canPop: false,
-              child: Scaffold(
-                // key: _bottomNavigationKey,
-                body: pages[state.bottomIndex],
-                bottomNavigationBar: CurvedNavigationBar(
-                  key: _bottomNavigationKey,
-                  color: Colors.white,
-                  backgroundColor: Color(0xFFF36439),
-                  items: const [
-                    CurvedNavigationBarItem(
-                      child: Icon(Icons.home_outlined),
-                      label: 'Trang chủ',
-                    ),
-                    CurvedNavigationBarItem(
-                      child: Icon(Icons.list_alt),
-                      label: 'Station',
-                    ),
-                    CurvedNavigationBarItem(
-                      child: Icon(Icons.calendar_month),
-                      label: 'Đặt lịch',
-                    ),
-                    CurvedNavigationBarItem(
-                      // child: Icon(Icons.newspaper),
-                      child:
-                          Icon(CommunityMaterialIcons.ticket_percent_outline),
-                      label: 'Ghép đội',
-                    ),
-                    CurvedNavigationBarItem(
-                      child: Icon(Icons.perm_identity),
-                      label: 'Tài khoản',
-                    ),
-                  ],
-                  onTap: (index) {
-                    landingBloc.add(LandingNavigationBottomTabChangeEvent(
-                        bottomIndex: index));
-                  },
+        LandingNavigationBottomInitial>(
+      bloc: landingBloc,
+      listener: (context, state) {},
+      builder: (context, state) {
+        // --- THAY ĐỔI BẮT ĐẦU TỪ ĐÂY ---
+
+        // 1. Sử dụng Stack để chồng các lớp lên nhau
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // LỚP 1: NỀN CHÍNH CỦA APP (ảnh nền từ file trước)
+            Container(
+              color: AppColors.bgDark,
+            ),
+
+            // LỚP 2: NỀN GRADIENT MỚI CHO NAV BAR
+            // Đặt nó ở dưới cùng, bên dưới mọi thứ
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                height: 60.0, // Phải bằng chiều cao của nav bar
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    // Gradient Tím -> Đen -> Lam
+                    colors: [
+                      Color(0xFF8A2387), // Tím
+                      Colors.black, // Đen
+                      Color(0xFF004D7A), // Lam (Xanh)
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
                 ),
               ),
             ),
-          );
-        });
+
+            // LỚP 3: SCAFFOLD VÀ NỘI DUNG (lớp trên cùng)
+            SafeArea(
+              child: PopScope(
+                canPop: false,
+                child: Scaffold(
+                  // Nền Scaffold và page phải TRONG SUỐT
+                  backgroundColor: Colors.transparent,
+
+                  body: pages[state.bottomIndex],
+
+                  bottomNavigationBar: CurvedNavigationBar(
+                    key: _bottomNavigationKey,
+
+                    // 1. Nền thanh bar (color) -> TRONG SUỐT
+                    color: Colors.transparent,
+
+                    // 2. Nền cutout (backgroundColor) -> TRONG SUỐT
+                    // Cả hai sẽ lộ ra LỚP 2 (gradient)
+                    backgroundColor: Colors.transparent,
+
+                    // Nền icon được chọn vẫn là đen
+                    buttonBackgroundColor: AppColors.menuActive,
+                    height: 60.0,
+
+                    items: const [
+                      // ... (items của bạn giữ nguyên)
+                      CurvedNavigationBarItem(
+                        child: Icon(Icons.home_outlined, color: Colors.white),
+                        label: 'Trang chủ',
+                        labelStyle:
+                            TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                      CurvedNavigationBarItem(
+                        child: Icon(Icons.list_alt, color: Colors.white),
+                        label: 'Station',
+                        labelStyle:
+                            TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                      CurvedNavigationBarItem(
+                        child: Icon(Icons.calendar_month, color: Colors.white),
+                        label: 'Đặt lịch',
+                        labelStyle:
+                            TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                      CurvedNavigationBarItem(
+                        child: Icon(
+                            CommunityMaterialIcons.ticket_percent_outline,
+                            color: Colors.white),
+                        label: 'Ghép đội',
+                        labelStyle:
+                            TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                      CurvedNavigationBarItem(
+                        child: Icon(Icons.perm_identity, color: Colors.white),
+                        label: 'Tài khoản',
+                        labelStyle:
+                            TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                    onTap: (index) {
+                      landingBloc.add(LandingNavigationBottomTabChangeEvent(
+                          bottomIndex: index));
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+        // --- THAY ĐỔI KẾT THÚC TẠI ĐÂY ---
+      },
+    );
   }
 }
