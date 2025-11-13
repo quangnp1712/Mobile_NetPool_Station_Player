@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/features/0_Splash_Page/pages/splash_page.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.2_Login/pages/login_page.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_Register_1.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_register_1.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.2_Register_2.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
@@ -16,7 +16,7 @@ class RouteGenerator {
     return [
       // PAGE //
       GetPage(
-        name: landingNavBottomWidgetRoute,
+        name: landingRoute,
         page: () => BlocProvider<LandingNavigationBottomBloc>.value(
             value: landingBloc, child: const LandingNavBottomWidget()),
       ),

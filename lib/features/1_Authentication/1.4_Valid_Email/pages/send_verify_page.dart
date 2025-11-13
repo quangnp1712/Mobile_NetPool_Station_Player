@@ -1,32 +1,32 @@
+// ignore_for_file: type_literal_in_constant_pattern
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/appbar.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/custom_text_field.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/form_container.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/gradient_button.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/switch_link.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/bloc/register_bloc.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/bloc/valid_email_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
-class RegisterPage2 extends StatefulWidget {
-  const RegisterPage2({super.key});
+//! Send Valid !//
+class SendValidPage extends StatefulWidget {
+  const SendValidPage({super.key});
 
   @override
-  State<RegisterPage2> createState() => _RegisterPage2State();
+  State<SendValidPage> createState() => _SendValidPageState();
 }
 
-class _RegisterPage2State extends State<RegisterPage2> {
+class _SendValidPageState extends State<SendValidPage> {
   final _formKey = GlobalKey<FormState>();
+  final FocusNode _formFocusNode = FocusNode();
 
-  final RegisterBloc registerPageBloc = RegisterBloc();
+  final ValidEmailBloc validEmailBloc = ValidEmailBloc();
 
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,20 +47,17 @@ class _RegisterPage2State extends State<RegisterPage2> {
       child: Scaffold(
         backgroundColor: Colors.transparent, // <-- QUAN TRỌNG
         extendBodyBehindAppBar: true,
-        appBar: const AuthenticationAppBar(title: 'ĐĂNG NHẬP'),
+        appBar: const AuthenticationAppBar(title: 'XÁC THỰC EMAIL'),
         body: SafeArea(
+          //$
           //$ ---- $//
           //$ Bloc
-
-          child: BlocConsumer<RegisterBloc, RegisterState>(
-            bloc: registerPageBloc,
-            listenWhen: (previous, current) => current is RegisterActionState,
-            buildWhen: (previous, current) => current is! RegisterActionState,
+          child: BlocConsumer<ValidEmailBloc, ValidEmailState>(
+            bloc: validEmailBloc,
+            listenWhen: (previous, current) => current is ValidEmailActionState,
+            buildWhen: (previous, current) => current is! ValidEmailActionState,
             listener: (context, state) {
               switch (state.runtimeType) {
-                case Register2SuccessState:
-                  Get.toNamed(validEmailPageRoute);
-                  break;
                 case ShowSnackBarActionState:
                   final snackBarState = state as ShowSnackBarActionState;
                   ShowSnackBar(snackBarState.message, snackBarState.success);
@@ -101,9 +98,9 @@ class _RegisterPage2State extends State<RegisterPage2> {
                             ),
                             const SizedBox(height: 30),
                             CustomTextField(
-                              label: 'Email đăng nhập',
+                              label: 'Email',
                               hint: '',
-                              icon: Icons.lock_outline,
+                              icon: Icons.email_outlined,
                               controller: emailController,
                               keyboardType: TextInputType.text,
                               inputFormatters: [
@@ -125,66 +122,20 @@ class _RegisterPage2State extends State<RegisterPage2> {
                                 return null;
                               },
                             ),
-                            const SizedBox(height: 25),
-                            CustomTextField(
-                              label: 'Mật khẩu',
-                              hint: 'Nhập mật khẩu của bạn',
-                              icon: Icons.lock_outline,
-                              obscureText: true,
-                              controller: passwordController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Vui lòng nhập mật khẩu ';
-                                }
-
-                                return null; // Trả về null nếu không có lỗi
-                              },
-                            ),
-                            const SizedBox(height: 25),
-                            CustomTextField(
-                              label: 'Nhập lại mật khẩu',
-                              hint: '',
-                              icon: Icons.lock_outline,
-                              obscureText: true,
-                              controller: confirmPasswordController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Vui lòng nhập mật khẩu ';
-                                }
-                                if (value != passwordController.text) {
-                                  return 'Mật khẩu không khớp';
-                                }
-                                return null; // Trả về null nếu không có lỗi
-                              },
-                            ),
                             const SizedBox(height: 30),
+
+                            // send valid email Button
                             GradientButton(
-                              text: 'Đăng ký',
+                              text: 'Xác nhận',
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  registerPageBloc.add(SubmitRegister2Event(
+                                  validEmailBloc.add(ShowVerifyEmailEvent(
                                     email: emailController.text,
-                                    password: passwordController.text,
                                   ));
                                 }
                               },
                             ),
-                            const SizedBox(height: 24),
-                            AuthSwitchLink(
-                              text: 'Bạn đã có tài khoản? ',
-                              linkText: 'Đăng nhập',
-                              onTap: () {
-                                Get.toNamed(loginPageRoute);
-                              },
-                            ),
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ),

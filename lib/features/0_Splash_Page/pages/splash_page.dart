@@ -32,9 +32,9 @@ class _SplashPageState extends State<SplashPage> {
     // final authenticateService = AuthenticateService();
     if (!_isDisposed && mounted) {
       await Future.delayed(const Duration(milliseconds: 3000));
-      Get.offAllNamed(landingNavBottomWidgetRoute);
+      Get.offAllNamed(landingRoute);
     } else {
-      Get.offAllNamed(landingNavBottomWidgetRoute);
+      Get.offAllNamed(landingRoute);
     }
   }
 

@@ -1,5 +1,5 @@
 // PAGE //
-const String landingNavBottomWidgetRoute = "/netpool";
+const String landingRoute = "/netpool";
 
 const testRoute = "/test";
 
@@ -16,6 +16,9 @@ const String splashPageRoute = "/splash";
 const loginPageRoute = "/netpool/login";
 const register1PageRoute = "/netpool/register/1";
 const register2PageRoute = "/netpool/register/2";
+
+const String validEmailPageRoute = "/valid/email";
+const String sendValidCodePageRoute = "/send/valid";
 
 // 2: Home Page //
 const homePageRoute = "/netpool/homepage";
