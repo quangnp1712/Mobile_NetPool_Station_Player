@@ -58,8 +58,7 @@ class LoginPageBloc extends Bloc<LoginPageEvent, LoginPageState> {
             AuthenticationModelResponse.fromJson(responseBody);
         if (authenticationModelResponse.data != null) {
           if (authenticationModelResponse.data?.roleCode != null) {
-            if (authenticationModelResponse.data?.roleCode == "STATION_OWNER" ||
-                authenticationModelResponse.data?.roleCode == "STATION_ADMIN") {
+            if (authenticationModelResponse.data?.roleCode == "PLAYER") {
               AuthenticationPref.setRoleCode(
                   authenticationModelResponse.data?.roleCode ?? "");
 

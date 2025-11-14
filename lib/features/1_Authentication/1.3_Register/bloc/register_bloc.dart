@@ -31,12 +31,12 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     emit(Register_LoadingState(isLoading: true));
     try {
       String username = "${event.firstName} ${event.lastName}";
-      _masterRegisterModel = RegisterModel(
-          username: username,
-          phone: event.phone,
-          identification: event.identification);
+      RegisterSharedPref.setUserName(username);
+      RegisterSharedPref.setPhone(event.phone);
+      RegisterSharedPref.setIdentification(event.identification);
+
       emit(Register_LoadingState(isLoading: false));
-      emit(Register2SuccessState());
+      emit(Register1SuccessState());
     } catch (e) {
       emit(Register_LoadingState(isLoading: false));
       DebugLogger.printLog(e.toString());
@@ -51,10 +51,15 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
 
     emit(Register_LoadingState(isLoading: true));
     try {
+      String username = RegisterSharedPref.getUserName();
+      String phone = RegisterSharedPref.getPhone();
+      String identification = RegisterSharedPref.getIdentification();
       _masterRegisterModel = RegisterModel(
-        email: event.email,
-        password: event.password,
-      );
+          email: event.email,
+          password: event.password,
+          username: username,
+          phone: phone,
+          identification: identification);
 
       var results = await RegisterRepository().register(_masterRegisterModel);
       var responseMessage = results['message'];
@@ -64,7 +69,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       if (responseSuccess || responseStatus == 200) {
         RegisterModelResponse registerModelResponse =
             RegisterModelResponse.fromJson(responseBody);
-
+        RegisterSharedPref.clearAll();
         RegisterSharedPref.setEmail(event.email);
         emit(Register_LoadingState(isLoading: false));
         emit(Register2SuccessState());
@@ -72,6 +77,12 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         emit(ShowSnackBarActionState(
             message: "Đăng ký thành công", success: responseSuccess));
         return;
+      } else if (responseStatus == 409) {
+        emit(Register_LoadingState(isLoading: false));
+
+        emit(ShowSnackBarActionState(
+            message: "Thông tin đã tồn tại, vui lòng nhập thông tin khác",
+            success: responseSuccess));
       } else if (responseStatus == 404) {
         emit(Register_LoadingState(isLoading: false));
 

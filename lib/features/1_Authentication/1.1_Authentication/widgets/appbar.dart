@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_text_styles.dart';
 
@@ -34,6 +36,8 @@ class _AuthenticationAppBarState extends State<AuthenticationAppBar> {
           // Chỉ pop nếu có thể quay lại, tránh lỗi ở màn hình Đăng nhập
           if (Navigator.canPop(context)) {
             Navigator.pop(context);
+          } else {
+            Get.offNamed(landingRoute);
           }
         },
       ),

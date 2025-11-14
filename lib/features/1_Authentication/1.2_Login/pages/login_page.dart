@@ -180,27 +180,51 @@ class _LoginPageState extends State<LoginPage> {
                               },
                             ),
                             const SizedBox(height: 20),
-                            Align(
-                              alignment: Alignment.center,
-                              child: TextButton(
-                                onPressed: () {/* TODO: Xử lý quên mật khẩu */},
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                child: Text(
-                                  'Quên mật khẩu',
-                                  style: TextStyle(
-                                    color: kLinkForgot,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: kLinkForgot,
+                            Row(
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    /* TODO: Xử lý quên mật khẩu */
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    'Quên mật khẩu',
+                                    style: TextStyle(
+                                      color: kLinkForgot,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: kLinkForgot,
+                                    ),
                                   ),
                                 ),
-                              ),
+                                TextButton(
+                                  onPressed: () {
+                                    Get.toNamed(sendValidCodePageRoute);
+                                  },
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: Size.zero,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  child: Text(
+                                    'Xác thực email',
+                                    style: TextStyle(
+                                      color: kLinkForgot,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                      decorationColor: kLinkForgot,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 24),
                             AuthSwitchLink(

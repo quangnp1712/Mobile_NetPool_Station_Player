@@ -61,7 +61,7 @@ class _RegisterPage1State extends State<RegisterPage1> {
             listener: (context, state) {
               switch (state.runtimeType) {
                 case Register1SuccessState:
-                  Get.toNamed(register1PageRoute);
+                  Get.toNamed(register2PageRoute);
                   break;
                 case ShowSnackBarActionState:
                   final snackBarState = state as ShowSnackBarActionState;
@@ -104,7 +104,7 @@ class _RegisterPage1State extends State<RegisterPage1> {
                             const SizedBox(height: 30),
                             CustomTextField(
                               label: 'Họ',
-                              hint: '',
+                              hint: 'Nhập Họ của bạn',
                               icon: Icons.person_outline,
                               controller: firstNameController,
                               inputFormatters: [
@@ -121,7 +121,7 @@ class _RegisterPage1State extends State<RegisterPage1> {
                             const SizedBox(height: 25),
                             CustomTextField(
                               label: 'Tên',
-                              hint: '',
+                              hint: 'Nhập Tên của bạn',
                               icon: Icons.lock_outline,
                               controller: lastNameController,
                               inputFormatters: [
@@ -138,11 +138,13 @@ class _RegisterPage1State extends State<RegisterPage1> {
                             const SizedBox(height: 25),
                             CustomTextField(
                               label: 'Số định danh cá nhân (CMND/CCCD)',
-                              hint: '',
+                              hint: 'Nhập Số định danh cá nhân',
                               icon: Icons.lock_outline,
                               controller: identificationController,
+                              keyboardType: TextInputType.phone,
                               inputFormatters: [
                                 FilteringTextInputFormatter.singleLineFormatter,
+                                FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(
                                     12), // Đảm bảo chỉ nhập trên một dòng
                               ],
@@ -156,9 +158,10 @@ class _RegisterPage1State extends State<RegisterPage1> {
                             const SizedBox(height: 25),
                             CustomTextField(
                               label: 'Số điện thoại',
-                              hint: '',
+                              hint: 'Nhập Số điện thoại',
                               icon: Icons.lock_outline,
                               controller: phoneController,
+                              keyboardType: TextInputType.phone,
                               inputFormatters: [
                                 FilteringTextInputFormatter.singleLineFormatter,
                                 FilteringTextInputFormatter

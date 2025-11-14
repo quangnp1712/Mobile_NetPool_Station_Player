@@ -10,7 +10,7 @@ import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_pa
 import 'package:mobile_netpool_station_player/features/3_Station_Page/pages/station_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
 import 'package:mobile_netpool_station_player/features/5_Matching_Page/pages/matching_page.dart';
-import 'package:mobile_netpool_station_player/features/6_Menu_Page/pages/menu_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/pages/menu_page_ui.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 
 class LandingNavBottomWidget extends StatefulWidget {

@@ -14,7 +14,10 @@ import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/core/utils/shared_preferences_helper.dart';
 import 'package:mobile_netpool_station_player/features/0_Splash_Page/service/splash_service.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.2_Login/bloc/login_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/bloc/register_bloc.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/shared_preferences/register_shared_pref.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/bloc/valid_email_bloc.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/shared_preferences/verify_email_shared_preferences.dart';
 import 'package:mobile_netpool_station_player/features/Common/404/error.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
@@ -68,14 +71,9 @@ class _MyAppState extends State<MyApp> {
         return MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => LandingNavigationBottomBloc()),
-            // BlocProvider(create: (_) => AuthenticationBloc()),
-            // BlocProvider(create: (_) => HomePageBloc()),
-            // BlocProvider(create: (_) => MenuPageBloc()),
-            // BlocProvider(create: (_) => ProfilePageBloc()),
-            // BlocProvider(create: (_) => ChangePassPageBloc()),
-            // BlocProvider(create: (_) => ChangeEmailPageBloc()),
-            // BlocProvider(create: (_) => ChangeEmailPageBloc()),
-            // BlocProvider(create: (_) => ShelterPageBloc()),
+            BlocProvider(create: (_) => LoginPageBloc()),
+            BlocProvider(create: (_) => RegisterBloc()),
+            BlocProvider(create: (_) => ValidEmailBloc()),
           ],
           child: GetMaterialApp(
             localizationsDelegates: const [

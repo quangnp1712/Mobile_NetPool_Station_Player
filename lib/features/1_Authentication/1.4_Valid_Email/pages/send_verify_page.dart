@@ -99,7 +99,7 @@ class _SendValidPageState extends State<SendValidPage> {
                             const SizedBox(height: 30),
                             CustomTextField(
                               label: 'Email',
-                              hint: '',
+                              hint: 'Nhập email của bạn',
                               icon: Icons.email_outlined,
                               controller: emailController,
                               keyboardType: TextInputType.text,

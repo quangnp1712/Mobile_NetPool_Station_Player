@@ -102,7 +102,7 @@ class _RegisterPage2State extends State<RegisterPage2> {
                             const SizedBox(height: 30),
                             CustomTextField(
                               label: 'Email đăng nhập',
-                              hint: '',
+                              hint: 'Nhập Email của bạn',
                               icon: Icons.lock_outline,
                               controller: emailController,
                               keyboardType: TextInputType.text,
@@ -147,7 +147,7 @@ class _RegisterPage2State extends State<RegisterPage2> {
                             const SizedBox(height: 25),
                             CustomTextField(
                               label: 'Nhập lại mật khẩu',
-                              hint: '',
+                              hint: 'Nhập lại mật khẩu của bạn',
                               icon: Icons.lock_outline,
                               obscureText: true,
                               controller: confirmPasswordController,
