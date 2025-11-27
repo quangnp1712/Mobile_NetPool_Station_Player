@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/widgets/list_station.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/widgets/liststation_appbar.dart'; 
 
 class StationPage extends StatefulWidget {
   final Function callback;
@@ -12,6 +14,10 @@ class StationPage extends StatefulWidget {
 class _StationPageState extends State<StationPage> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+      backgroundColor: const Color(0xFF121212),
+      appBar: const ListStationAppbar(), // dùng AppBar riêng
+      body: const ListStation(), // gọi ListStation ở đây
+    );
   }
 }
