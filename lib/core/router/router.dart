@@ -11,6 +11,8 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Vali
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/send_verify_page.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/verify_email_page.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -19,6 +21,7 @@ class RouteGenerator {
   final LoginPageBloc loginBloc = LoginPageBloc();
   final RegisterBloc registerBloc = RegisterBloc();
   final ValidEmailBloc validEmailBloc = ValidEmailBloc();
+  final BookingPageBloc bookingPageBloc = BookingPageBloc();
 
   List<GetPage> routes() {
     return [
@@ -70,6 +73,15 @@ class RouteGenerator {
         page: () {
           callback(int index) {}
           return HomePage(callback);
+        },
+      ),
+
+      GetPage(
+        name: bookingPageRoute,
+        page: () {
+          callback(int index) {}
+          return BlocProvider<BookingPageBloc>.value(
+              value: bookingPageBloc, child: BookingPage(callback));
         },
       ),
     ];

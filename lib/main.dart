@@ -19,6 +19,7 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Regi
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/shared_preferences/register_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/bloc/valid_email_bloc.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/shared_preferences/verify_email_shared_preferences.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/404/error.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:sizer/sizer.dart';
@@ -74,6 +75,7 @@ class _MyAppState extends State<MyApp> {
             BlocProvider(create: (_) => LoginPageBloc()),
             BlocProvider(create: (_) => RegisterBloc()),
             BlocProvider(create: (_) => ValidEmailBloc()),
+            BlocProvider(create: (_) => BookingPageBloc()),
           ],
           child: GetMaterialApp(
             localizationsDelegates: const [
