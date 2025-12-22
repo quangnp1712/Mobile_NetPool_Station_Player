@@ -12,21 +12,26 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Auth
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/bloc/valid_email_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
-//! Send Valid !//
-class SendValidPage extends StatefulWidget {
-  const SendValidPage({super.key});
+//! Valid Email !//
+class ValidEmailPage extends StatefulWidget {
+  const ValidEmailPage({super.key});
 
   @override
-  State<SendValidPage> createState() => _SendValidPageState();
+  State<ValidEmailPage> createState() => _ValidEmailPageState();
 }
 
-class _SendValidPageState extends State<SendValidPage> {
+class _ValidEmailPageState extends State<ValidEmailPage> {
   final _formKey = GlobalKey<FormState>();
-  final FocusNode _formFocusNode = FocusNode();
 
-  final ValidEmailBloc validEmailBloc = ValidEmailBloc();
+  final ValidEmailBloc validEmailPageBloc = ValidEmailBloc();
 
+  TextEditingController codeController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  @override
+  void initState() {
+    validEmailPageBloc.add(ValidEmailInitialEvent());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +58,7 @@ class _SendValidPageState extends State<SendValidPage> {
           //$ ---- $//
           //$ Bloc
           child: BlocConsumer<ValidEmailBloc, ValidEmailState>(
-            bloc: validEmailBloc,
+            bloc: validEmailPageBloc,
             listenWhen: (previous, current) => current is ValidEmailActionState,
             buildWhen: (previous, current) => current is! ValidEmailActionState,
             listener: (context, state) {
@@ -65,6 +70,9 @@ class _SendValidPageState extends State<SendValidPage> {
               }
             },
             builder: (context, state) {
+              if (state is ValidEmailInitial) {
+                emailController.text = state.email ?? "";
+              }
               return SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 30.0, vertical: 20.0),
@@ -89,7 +97,7 @@ class _SendValidPageState extends State<SendValidPage> {
                             ),
                             const SizedBox(height: 50),
                             const Text(
-                              'Đăng ký',
+                              'Xác thực Email',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 28,
@@ -99,7 +107,7 @@ class _SendValidPageState extends State<SendValidPage> {
                             const SizedBox(height: 30),
                             CustomTextField(
                               label: 'Email',
-                              hint: 'Nhập email của bạn',
+                              hint: 'Nhập Email',
                               icon: Icons.email_outlined,
                               controller: emailController,
                               keyboardType: TextInputType.text,
@@ -122,6 +130,26 @@ class _SendValidPageState extends State<SendValidPage> {
                                 return null;
                               },
                             ),
+                            const SizedBox(height: 25),
+                            CustomTextField(
+                              label: 'Mã OTP',
+                              hint: 'Nhập Mã OTP',
+                              icon: Icons.lock_outline,
+                              controller: codeController,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.singleLineFormatter,
+                                FilteringTextInputFormatter
+                                    .digitsOnly, // Chỉ cho phép nhập số
+                                LengthLimitingTextInputFormatter(6),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Vui lòng nhập Mã OTP ';
+                                }
+
+                                return null; // Trả về null nếu không có lỗi
+                              },
+                            ),
                             const SizedBox(height: 30),
 
                             // send valid email Button
@@ -129,8 +157,8 @@ class _SendValidPageState extends State<SendValidPage> {
                               text: 'Xác nhận',
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  validEmailBloc.add(ShowVerifyEmailEvent(
-                                    email: emailController.text,
+                                  validEmailPageBloc.add(SubmitValidEmailEvent(
+                                    verificationCode: codeController.text,
                                   ));
                                 }
                               },

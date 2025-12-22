@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 30),
                             CustomTextField(
                               label: 'Email',
-                              hint: '',
+                              hint: 'Nhập Email',
                               icon: Icons.person_outline,
                               controller: emailController,
                               keyboardType: TextInputType.emailAddress,
@@ -152,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 25),
                             CustomTextField(
                               label: 'Mật khẩu',
-                              hint: '',
+                              hint: 'Nhập Mật khẩu',
                               icon: Icons.lock_outline,
                               obscureText: true,
                               controller: passwordController,
@@ -182,27 +182,27 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                TextButton(
-                                  onPressed: () {
-                                    /* TODO: Xử lý quên mật khẩu */
-                                  },
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: Text(
-                                    'Quên mật khẩu',
-                                    style: TextStyle(
-                                      color: kLinkForgot,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: kLinkForgot,
-                                    ),
-                                  ),
-                                ),
+                                // TextButton(
+                                //   onPressed: () {
+                                //     /* TODO: Xử lý quên mật khẩu */
+                                //   },
+                                //   style: TextButton.styleFrom(
+                                //     padding: EdgeInsets.zero,
+                                //     minimumSize: Size.zero,
+                                //     tapTargetSize:
+                                //         MaterialTapTargetSize.shrinkWrap,
+                                //   ),
+                                //   child: Text(
+                                //     'Quên mật khẩu',
+                                //     style: TextStyle(
+                                //       color: kLinkForgot,
+                                //       fontSize: 14,
+                                //       fontWeight: FontWeight.w500,
+                                //       decoration: TextDecoration.underline,
+                                //       decorationColor: kLinkForgot,
+                                //     ),
+                                //   ),
+                                // ),
                                 TextButton(
                                   onPressed: () {
                                     Get.toNamed(sendValidCodePageRoute);

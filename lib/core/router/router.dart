@@ -8,8 +8,8 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Regi
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_register_1.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.2_Register_2.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/bloc/valid_email_bloc.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/send_verify_page.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/verify_email_page.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/1_send_verify_page.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/2_verify_email_page.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/bloc/station_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/pages/station_page.dart';

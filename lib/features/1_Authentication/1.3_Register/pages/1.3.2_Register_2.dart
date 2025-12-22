@@ -21,6 +21,7 @@ class RegisterPage2 extends StatefulWidget {
 
 class _RegisterPage2State extends State<RegisterPage2> {
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   final RegisterBloc registerPageBloc = RegisterBloc();
 
@@ -68,129 +69,157 @@ class _RegisterPage2State extends State<RegisterPage2> {
               }
             },
             builder: (context, state) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 30.0, vertical: 20.0),
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Box phát sáng bọc toàn bộ nội dung
-                      FormContainer(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Center(
-                              child: Image.asset(
-                                'assets/images/logo_no_bg.png',
-                                // Bạn có thể điều chỉnh chiều rộng nếu cần
-                                width: screenSize.width *
-                                    0.6, // Rộng bằng 70% màn hình
-                              ),
-                            ),
-                            const SizedBox(height: 50),
-                            const Text(
-                              'Đăng ký',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            CustomTextField(
-                              label: 'Email đăng nhập',
-                              hint: 'Nhập Email của bạn',
-                              icon: Icons.lock_outline,
-                              controller: emailController,
-                              keyboardType: TextInputType.text,
-                              inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+              if (state is Register_LoadingState) {
+                isLoading = state.isLoading;
+              }
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30.0, vertical: 20.0),
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Box phát sáng bọc toàn bộ nội dung
+                          FormContainer(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Center(
+                                  child: Image.asset(
+                                    'assets/images/logo_no_bg.png',
+                                    // Bạn có thể điều chỉnh chiều rộng nếu cần
+                                    width: screenSize.width *
+                                        0.6, // Rộng bằng 70% màn hình
+                                  ),
+                                ),
+                                const SizedBox(height: 50),
+                                const Text(
+                                  'Đăng ký',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 30),
+                                CustomTextField(
+                                  label: 'Email đăng nhập',
+                                  hint: 'Nhập Email của bạn',
+                                  icon: Icons.lock_outline,
+                                  controller: emailController,
+                                  keyboardType: TextInputType.text,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
 
-                                FilteringTextInputFormatter.deny(
-                                    RegExp(r'[^a-zA-Z0-9@._-]')),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Vui lòng nhập email";
-                                }
-                                final emailRegex = RegExp(
-                                    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
-                                if (!emailRegex.hasMatch(value)) {
-                                  return "Email không hợp lệ";
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 25),
-                            CustomTextField(
-                              label: 'Mật khẩu',
-                              hint: 'Nhập mật khẩu của bạn',
-                              icon: Icons.lock_outline,
-                              obscureText: true,
-                              controller: passwordController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Vui lòng nhập mật khẩu ';
-                                }
+                                    FilteringTextInputFormatter.deny(
+                                        RegExp(r'[^a-zA-Z0-9@._-]')),
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Vui lòng nhập email";
+                                    }
+                                    final emailRegex = RegExp(
+                                        r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$');
+                                    if (!emailRegex.hasMatch(value)) {
+                                      return "Email không hợp lệ";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 25),
+                                CustomTextField(
+                                  label: 'Mật khẩu',
+                                  hint: 'Nhập mật khẩu của bạn',
+                                  icon: Icons.lock_outline,
+                                  obscureText: true,
+                                  controller: passwordController,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập mật khẩu ';
+                                    }
 
-                                return null; // Trả về null nếu không có lỗi
-                              },
-                            ),
-                            const SizedBox(height: 25),
-                            CustomTextField(
-                              label: 'Nhập lại mật khẩu',
-                              hint: 'Nhập lại mật khẩu của bạn',
-                              icon: Icons.lock_outline,
-                              obscureText: true,
-                              controller: confirmPasswordController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                    return null; // Trả về null nếu không có lỗi
+                                  },
+                                ),
+                                const SizedBox(height: 25),
+                                CustomTextField(
+                                  label: 'Nhập lại mật khẩu',
+                                  hint: 'Nhập lại mật khẩu của bạn',
+                                  icon: Icons.lock_outline,
+                                  obscureText: true,
+                                  controller: confirmPasswordController,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập mật khẩu ';
+                                    }
+                                    if (value != passwordController.text) {
+                                      return 'Mật khẩu không khớp';
+                                    }
+                                    return null; // Trả về null nếu không có lỗi
+                                  },
+                                ),
+                                const SizedBox(height: 30),
+                                GradientButton(
+                                  text: 'Đăng ký',
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      registerPageBloc.add(SubmitRegister2Event(
+                                        email: emailController.text,
+                                        password: passwordController.text,
+                                      ));
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 24),
+                                AuthSwitchLink(
+                                  text: 'Bạn đã có tài khoản? ',
+                                  linkText: 'Đăng nhập',
+                                  onTap: () {
+                                    Get.toNamed(loginPageRoute);
+                                  },
+                                ),
                               ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Vui lòng nhập mật khẩu ';
-                                }
-                                if (value != passwordController.text) {
-                                  return 'Mật khẩu không khớp';
-                                }
-                                return null; // Trả về null nếu không có lỗi
-                              },
                             ),
-                            const SizedBox(height: 30),
-                            GradientButton(
-                              text: 'Đăng ký',
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  registerPageBloc.add(SubmitRegister2Event(
-                                    email: emailController.text,
-                                    password: passwordController.text,
-                                  ));
-                                }
-                              },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // --- WIDGET LOADING TRONG STACK ---
+                  if (isLoading)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.containerBackground.withOpacity(
+                            0.8,
+                          ), // Màu nền mờ
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primaryGlow,
                             ),
-                            const SizedBox(height: 24),
-                            AuthSwitchLink(
-                              text: 'Bạn đã có tài khoản? ',
-                              linkText: 'Đăng nhập',
-                              onTap: () {
-                                Get.toNamed(loginPageRoute);
-                              },
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  // ------------------------------------
+                ],
               );
             },
           ),
