@@ -121,8 +121,8 @@ class BookingPageState extends Equatable {
     List<PlatformSpaceModel>? platformSpaces,
   }) {
     return BookingPageState(
-      blocState: blocState ?? this.blocState,
-      status: status ?? this.status,
+      blocState: blocState ?? BookingBlocState.initial,
+      status: status ?? BookingStatus.initial,
       message: message ?? this.message,
       isSelectingStation: isSelectingStation ?? this.isSelectingStation,
       filteredStations: filteredStations ?? this.filteredStations,

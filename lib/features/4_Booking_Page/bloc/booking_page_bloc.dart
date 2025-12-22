@@ -57,7 +57,32 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
   Future<void> _onLoadBookingData(
       LoadBookingDataEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(status: BookingStatus.loading));
-    add(LoadProvincesEvent()); // Tải danh sách TP
+
+    //! call api provinces
+    List<ProvinceModel> provincesList = [];
+    try {
+      var results = await CityRepository().getProvinces();
+      var responseMessage = results['message'];
+      var responseStatus = results['status'];
+      var responseSuccess = results['success'];
+      var responseBody = results['body'];
+      if (responseSuccess || responseStatus == 200) {
+        provincesList = (responseBody as List)
+            .map((e) => ProvinceModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        provincesList.map((name) => Utf8Encoding().decode(name as String));
+      } else {
+        emit(state.copyWith(
+          status: BookingStatus.initial,
+        ));
+        DebugLogger.printLog("Lỗi tải Tỉnh/TP");
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        status: BookingStatus.initial,
+      ));
+      DebugLogger.printLog("Lỗi tải Tỉnh/TP: $e");
+    }
 
     //! call api allStations
     //add(FetchStations());
@@ -163,6 +188,7 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
         totalItems: meta?.total ?? 0,
         hasReachedMaxStations: allStations.length >= (meta?.total as int),
         platformSpaces: platformSpaces,
+        provinces: provincesList,
       ));
     } catch (e) {
       DebugLogger.printLog(e.toString());

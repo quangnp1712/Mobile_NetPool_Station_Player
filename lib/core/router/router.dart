@@ -11,6 +11,8 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Vali
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/send_verify_page.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/verify_email_page.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/bloc/station_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/pages/station_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
@@ -22,23 +24,24 @@ class RouteGenerator {
   final RegisterBloc registerBloc = RegisterBloc();
   final ValidEmailBloc validEmailBloc = ValidEmailBloc();
   final BookingPageBloc bookingPageBloc = BookingPageBloc();
+  final StationPageBloc stationPageBloc = StationPageBloc();
 
   List<GetPage> routes() {
     return [
-      // PAGE //
+      //! PAGE //
       GetPage(
         name: landingRoute,
         page: () => BlocProvider<LandingNavigationBottomBloc>.value(
             value: landingBloc, child: const LandingNavBottomWidget()),
       ),
 
-      // 0: Splash Page //
+      //! 0: Splash Page //
       GetPage(
         name: splashPageRoute,
         page: () => const SplashPage(),
       ),
 
-      // 1: Authentication Page //
+      //! 1: Authentication Page //
 
       GetPage(
         name: loginPageRoute,
@@ -67,7 +70,7 @@ class RouteGenerator {
             value: validEmailBloc, child: const SendValidPage()),
       ),
 
-      // 2: Home Page //
+      //! 2: Home Page //
       GetPage(
         name: homePageRoute,
         page: () {
@@ -76,6 +79,17 @@ class RouteGenerator {
         },
       ),
 
+      //! 3: Station Page //
+      GetPage(
+        name: stationPageRoute,
+        page: () {
+          callback(int index) {}
+          return BlocProvider<StationPageBloc>.value(
+              value: stationPageBloc, child: StationPage(callback));
+        },
+      ),
+
+      //! 4: Booking Page //
       GetPage(
         name: bookingPageRoute,
         page: () {
