@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import 'dart:convert';
 
-import 'package:mobile_netpool_station_player/features/3_Station_Page/models/2_space/space_model.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/models/2_space/space_model.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 

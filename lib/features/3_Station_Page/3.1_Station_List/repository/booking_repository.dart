@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:mobile_netpool_station_player/core/network/exceptions/app_exceptions.dart';
 import 'package:mobile_netpool_station_player/core/network/exceptions/exception_handlers.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/shared_preferences/auth_shared_preferences.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/api/station_api.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/api/station_api.dart';
 
 abstract class IStationRepository {
   Future<Map<String, dynamic>> listStation(

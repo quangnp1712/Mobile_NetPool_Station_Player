@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/models/2_space/space_model.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/models/2_space/space_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
 class SpaceListModelResponse extends BaseResponse {

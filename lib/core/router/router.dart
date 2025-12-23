@@ -11,10 +11,12 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Vali
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/1_send_verify_page.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/2_verify_email_page.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/bloc/station_page_bloc.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/pages/station_page.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/bloc/station_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/pages/station_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching_List/pages/matching_page.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.2_Matching_Detail/pages/matching_detail.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -97,6 +99,19 @@ class RouteGenerator {
           return BlocProvider<BookingPageBloc>.value(
               value: bookingPageBloc, child: BookingPage(callback));
         },
+      ),
+
+      //! 4: Matching Page //
+      GetPage(
+        name: matchingListPageRoute,
+        page: () {
+          callback(int index) {}
+          return MatchingPage(callback);
+        },
+      ),
+      GetPage(
+        name: matchingDetailPageRoute,
+        page: () => const MatchingDetailPage(),
       ),
     ];
   }

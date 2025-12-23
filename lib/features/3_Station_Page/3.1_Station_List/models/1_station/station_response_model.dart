@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/models/1_station/station_model.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/models/1_station/station_model.dart';
 
 class StationDetailModelResponse extends BaseResponse {
   List<StationDetailModel>? data;

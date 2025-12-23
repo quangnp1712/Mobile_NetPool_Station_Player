@@ -45,7 +45,7 @@ class AppColors {
   static const Color textHint = Color(0xFF8A8A8E);
 
   static const Color border = Color(0xFF1E293B); // Slate 800
-  static const Color textMain = Color(0xFFE2E8F0); // Slate 200
+  static const Color textMain = Colors.white; // Slate 200
   static const Color primaryBlue = Color(0xFF2563EB); // Blue 600
 
   static const Color statusActiveBg = Color(0xFF1B5E20); // Green 900
@@ -55,4 +55,15 @@ class AppColors {
 
   static const Color statusUsing = Color(0xFFDC2626); // Red for "Using"
   static const Color statusFree = Color(0xFF10B981); // Green for "Free"
+
+  static const Color background = Color(0xFF09090B); // Very dark almost black
+  static const Color cardBg = Color(0xFF18181B); // Dark grey
+  static const Color primaryNeon = Color(0xFF00F0FF); // Cyan Neon
+  static const Color secondaryNeon = Color(0xFF7C3AED); // Violet
+  static const Color textSub = Color(0xFFA1A1AA);
+  static const Color inputBg = Color(0xFF27272A);
+
+  // Gradient Header
+  static const Color headerStart = Color(0xFF2B0C4E);
+  static const Color headerEnd = Color(0xFF5A1CCB);
 }

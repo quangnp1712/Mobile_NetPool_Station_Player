@@ -3,9 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/bloc/station_page_bloc.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/models/1_station/station_model.dart';
-import 'package:mobile_netpool_station_player/features/3_Station_Page/widgets/helper_widget.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/bloc/station_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/models/1_station/station_model.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/widgets/helper_widget.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
@@ -138,6 +138,7 @@ class _StationPageState extends State<StationPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Row 1: Title + Near Me Button
               const Text("Chọn Station",
                   style: TextStyle(
                       fontSize: 20,
@@ -155,14 +156,17 @@ class _StationPageState extends State<StationPage> {
                   child: Row(
                     children: [
                       Icon(Icons.near_me,
-                          color: state.isNearMe ? kPrimaryPurple : kNeonCyan,
+                          color: state.isNearMe
+                              ? AppColors.primaryNeon
+                              : Colors.white70,
                           size: 14),
                       const SizedBox(width: 4),
                       Text(
                         "Gần tôi",
                         style: TextStyle(
-                            color:
-                                state.isNearMe ? kPrimaryPurple : Colors.white,
+                            color: state.isNearMe
+                                ? AppColors.primaryNeon
+                                : Colors.white70,
                             fontSize: 12,
                             fontWeight: FontWeight.bold),
                       ),
@@ -175,6 +179,7 @@ class _StationPageState extends State<StationPage> {
 
           const SizedBox(height: 12),
 
+          // Row 2: Search Bar
           Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -213,6 +218,7 @@ class _StationPageState extends State<StationPage> {
             ),
           ),
           const SizedBox(height: 10),
+          // Row 3: Dropdowns (Province/District) + Refresh
 
           Row(
             children: [
@@ -250,6 +256,8 @@ class _StationPageState extends State<StationPage> {
                 ),
               ),
               const SizedBox(width: 8),
+
+              // District Dropdown
               Expanded(
                 child: Container(
                   height: 38,
@@ -284,6 +292,8 @@ class _StationPageState extends State<StationPage> {
                 ),
               ),
               const SizedBox(width: 8),
+
+              // Refresh Button
               Container(
                 height: 38,
                 width: 38,
@@ -320,13 +330,14 @@ class _StationPageState extends State<StationPage> {
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.white10,
+                      color:
+                          isSelected ? AppColors.primaryNeon : Colors.white10,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Text(
                       tag,
                       style: TextStyle(
-                          color: isSelected ? kPrimaryPurple : Colors.white70,
+                          color: isSelected ? Colors.black : Colors.white70,
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.normal,
                           fontSize: 11),
