@@ -12,6 +12,8 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Auth
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.2_Login/bloc/login_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_register_1.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
+import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class LoginPage extends StatefulWidget {
@@ -71,7 +73,12 @@ class _LoginPageState extends State<LoginPage> {
             listener: (context, state) {
               switch (state.runtimeType) {
                 case const (LoginSuccessState):
-                  Get.offAllNamed(landingRoute);
+                  if (MenuSharedPref.getIsMenuRoute()) {
+                    MenuSharedPref.clearIsMenuRoute();
+                    Get.offAll(LandingNavBottomWidget(index: 4));
+                  } else {
+                    Get.offAllNamed(landingRoute);
+                  }
                   break;
 
                 case const (ShowSnackBarActionState):

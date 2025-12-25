@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_text_styles.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
+import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
 class AuthenticationAppBar extends StatefulWidget
     implements PreferredSizeWidget {
@@ -34,7 +36,10 @@ class _AuthenticationAppBarState extends State<AuthenticationAppBar> {
         ),
         onPressed: () {
           // Chỉ pop nếu có thể quay lại, tránh lỗi ở màn hình Đăng nhập
-          if (Navigator.canPop(context)) {
+          if (MenuSharedPref.getIsMenuRoute()) {
+            MenuSharedPref.clearIsMenuRoute();
+            Get.offAll(LandingNavBottomWidget(index: 0));
+          } else if (Navigator.canPop(context)) {
             Navigator.pop(context);
           } else {
             Get.offNamed(landingRoute);

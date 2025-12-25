@@ -1,0 +1,11 @@
+import 'package:mobile_netpool_station_player/core/utils/shared_preferences_helper.dart';
+
+class ProfileSharedPref {
+  static Future<void> setPassword(String password) async {
+    await SharedPreferencesHelper.preferences.setString("password", password);
+  }
+
+  static String getPassword() {
+    return SharedPreferencesHelper.preferences.getString("password") ?? "";
+  }
+}

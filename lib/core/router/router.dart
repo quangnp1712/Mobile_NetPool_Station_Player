@@ -17,6 +17,10 @@ import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booki
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
 import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching_List/pages/matching_page.dart';
 import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.2_Matching_Detail/pages/matching_detail.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/pages/menu_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/pages/profile_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -27,6 +31,8 @@ class RouteGenerator {
   final ValidEmailBloc validEmailBloc = ValidEmailBloc();
   final BookingPageBloc bookingPageBloc = BookingPageBloc();
   final StationPageBloc stationPageBloc = StationPageBloc();
+  final ProfilePageBloc profilePageBloc = ProfilePageBloc();
+  final MenuPageBloc menuPageBloc = MenuPageBloc();
 
   List<GetPage> routes() {
     return [
@@ -112,6 +118,22 @@ class RouteGenerator {
       GetPage(
         name: matchingDetailPageRoute,
         page: () => const MatchingDetailPage(),
+      ),
+
+      //! 5: Menu Page //
+      GetPage(
+        name: menuPageRoute,
+        page: () {
+          callback(int index) {}
+          return BlocProvider<MenuPageBloc>.value(
+              value: menuPageBloc, child: MenuPage(callback));
+        },
+      ),
+
+      GetPage(
+        name: profilePageRoute,
+        page: () => BlocProvider<ProfilePageBloc>.value(
+            value: profilePageBloc, child: const ProfilePage()),
       ),
     ];
   }

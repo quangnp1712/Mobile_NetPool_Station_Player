@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 // Lưu ý: Các import bên dưới là giả định dựa trên cấu trúc dự án của bạn.
 // Hãy đảm bảo đường dẫn import chính xác trong dự án thực tế.
@@ -548,8 +550,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               // Center giúp căn giữa button theo chiều dọc trong AppBar
               child: ElevatedButton(
                 onPressed: () {
-                  debugPrint("Navigating to Login...");
-                  // Get.toNamed(loginPageRoute);
+                  Get.toNamed(loginPageRoute);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF8A2BE2),
