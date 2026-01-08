@@ -12,6 +12,8 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Auth
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.2_Login/bloc/login_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_register_1.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
+import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class LoginPage extends StatefulWidget {
@@ -71,7 +73,12 @@ class _LoginPageState extends State<LoginPage> {
             listener: (context, state) {
               switch (state.runtimeType) {
                 case const (LoginSuccessState):
-                  Get.offAllNamed(landingRoute);
+                  if (MenuSharedPref.getIsMenuRoute()) {
+                    MenuSharedPref.clearIsMenuRoute();
+                    Get.offAll(LandingNavBottomWidget(index: 4));
+                  } else {
+                    Get.offAllNamed(landingRoute);
+                  }
                   break;
 
                 case const (ShowSnackBarActionState):
@@ -126,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 30),
                             CustomTextField(
                               label: 'Email',
-                              hint: '',
+                              hint: 'Nhập Email',
                               icon: Icons.person_outline,
                               controller: emailController,
                               keyboardType: TextInputType.emailAddress,
@@ -152,7 +159,7 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 25),
                             CustomTextField(
                               label: 'Mật khẩu',
-                              hint: '',
+                              hint: 'Nhập Mật khẩu',
                               icon: Icons.lock_outline,
                               obscureText: true,
                               controller: passwordController,
@@ -182,27 +189,27 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 20),
                             Row(
                               children: [
-                                TextButton(
-                                  onPressed: () {
-                                    /* TODO: Xử lý quên mật khẩu */
-                                  },
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: Text(
-                                    'Quên mật khẩu',
-                                    style: TextStyle(
-                                      color: kLinkForgot,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: kLinkForgot,
-                                    ),
-                                  ),
-                                ),
+                                // TextButton(
+                                //   onPressed: () {
+                                //     /* TODO: Xử lý quên mật khẩu */
+                                //   },
+                                //   style: TextButton.styleFrom(
+                                //     padding: EdgeInsets.zero,
+                                //     minimumSize: Size.zero,
+                                //     tapTargetSize:
+                                //         MaterialTapTargetSize.shrinkWrap,
+                                //   ),
+                                //   child: Text(
+                                //     'Quên mật khẩu',
+                                //     style: TextStyle(
+                                //       color: kLinkForgot,
+                                //       fontSize: 14,
+                                //       fontWeight: FontWeight.w500,
+                                //       decoration: TextDecoration.underline,
+                                //       decorationColor: kLinkForgot,
+                                //     ),
+                                //   ),
+                                // ),
                                 TextButton(
                                   onPressed: () {
                                     Get.toNamed(sendValidCodePageRoute);

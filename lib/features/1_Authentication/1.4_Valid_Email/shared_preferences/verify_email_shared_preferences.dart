@@ -2,15 +2,15 @@ import 'package:mobile_netpool_station_player/core/utils/shared_preferences_help
 
 class VerifyEmailPref {
   static Future<void> setEmail(String email) async {
-    await SharedPreferencesHelper.preferences.setString("email", email);
+    await SharedPreferencesHelper.preferences.setString("valid_email", email);
   }
 
   static String getEmail() {
-    return SharedPreferencesHelper.preferences.getString("email") ?? "";
+    return SharedPreferencesHelper.preferences.getString("valid_email") ?? "";
   }
 
   static Future<void> clearEmail() async {
     // Dùng remove() để xóa một key
-    await SharedPreferencesHelper.preferences.remove("email");
+    await SharedPreferencesHelper.preferences.remove("valid_email");
   }
 }

@@ -8,9 +8,19 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Regi
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_register_1.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.2_Register_2.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/bloc/valid_email_bloc.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/send_verify_page.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/verify_email_page.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/1_send_verify_page.dart';
+import 'package:mobile_netpool_station_player/features/1_Authentication/1.4_Valid_Email/pages/2_verify_email_page.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/bloc/station_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/pages/station_page.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching_List/pages/matching_page.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.2_Matching_Detail/pages/matching_detail.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/pages/menu_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/pages/profile_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -19,23 +29,27 @@ class RouteGenerator {
   final LoginPageBloc loginBloc = LoginPageBloc();
   final RegisterBloc registerBloc = RegisterBloc();
   final ValidEmailBloc validEmailBloc = ValidEmailBloc();
+  final BookingPageBloc bookingPageBloc = BookingPageBloc();
+  final StationPageBloc stationPageBloc = StationPageBloc();
+  final ProfilePageBloc profilePageBloc = ProfilePageBloc();
+  final MenuPageBloc menuPageBloc = MenuPageBloc();
 
   List<GetPage> routes() {
     return [
-      // PAGE //
+      //! PAGE //
       GetPage(
         name: landingRoute,
         page: () => BlocProvider<LandingNavigationBottomBloc>.value(
             value: landingBloc, child: const LandingNavBottomWidget()),
       ),
 
-      // 0: Splash Page //
+      //! 0: Splash Page //
       GetPage(
         name: splashPageRoute,
         page: () => const SplashPage(),
       ),
 
-      // 1: Authentication Page //
+      //! 1: Authentication Page //
 
       GetPage(
         name: loginPageRoute,
@@ -64,13 +78,62 @@ class RouteGenerator {
             value: validEmailBloc, child: const SendValidPage()),
       ),
 
-      // 2: Home Page //
+      //! 2: Home Page //
       GetPage(
         name: homePageRoute,
         page: () {
           callback(int index) {}
           return HomePage(callback);
         },
+      ),
+
+      //! 3: Station Page //
+      GetPage(
+        name: stationPageRoute,
+        page: () {
+          callback(int index) {}
+          return BlocProvider<StationPageBloc>.value(
+              value: stationPageBloc, child: StationPage(callback));
+        },
+      ),
+
+      //! 4: Booking Page //
+      GetPage(
+        name: bookingPageRoute,
+        page: () {
+          callback(int index) {}
+          return BlocProvider<BookingPageBloc>.value(
+              value: bookingPageBloc, child: BookingPage(callback));
+        },
+      ),
+
+      //! 4: Matching Page //
+      GetPage(
+        name: matchingListPageRoute,
+        page: () {
+          callback(int index) {}
+          return MatchingPage(callback);
+        },
+      ),
+      GetPage(
+        name: matchingDetailPageRoute,
+        page: () => const MatchingDetailPage(),
+      ),
+
+      //! 5: Menu Page //
+      GetPage(
+        name: menuPageRoute,
+        page: () {
+          callback(int index) {}
+          return BlocProvider<MenuPageBloc>.value(
+              value: menuPageBloc, child: MenuPage(callback));
+        },
+      ),
+
+      GetPage(
+        name: profilePageRoute,
+        page: () => BlocProvider<ProfilePageBloc>.value(
+            value: profilePageBloc, child: const ProfilePage()),
       ),
     ];
   }

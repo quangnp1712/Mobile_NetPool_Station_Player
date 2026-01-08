@@ -30,10 +30,12 @@ const stationPageRoute = "/netpool/station";
 const bookingPageRoute = "/netpool/booking";
 
 // 5: Match Page //
-const matchingPageRoute = "/netpool/matching";
+const matchingListPageRoute = "/netpool/matching";
+const matchingDetailPageRoute = "/netpool/matching/detail";
 
 // 6: Menu Page //
 const menuPageRoute = "/netpool/menu";
+const profilePageRoute = "/netpool/menu/profile";
 
 // ĐĂNG XUẤT //
 const logoutName = "Đăng xuất";

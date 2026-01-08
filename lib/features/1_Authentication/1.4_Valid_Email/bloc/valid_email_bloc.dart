@@ -27,6 +27,7 @@ class ValidEmailBloc extends Bloc<ValidEmailEvent, ValidEmailState> {
   FutureOr<void> _validEmailInitialEvent(
       ValidEmailInitialEvent event, Emitter<ValidEmailState> emit) {
     emit(ValidEmail_ChangeState());
+    DebugLogger.printLog("email: ${RegisterSharedPref.getEmail().toString()}");
     if (RegisterSharedPref.getEmail().toString() != "") {
       _email = RegisterSharedPref.getEmail().toString();
     } else if (VerifyEmailPref.getEmail().toString() != "") {

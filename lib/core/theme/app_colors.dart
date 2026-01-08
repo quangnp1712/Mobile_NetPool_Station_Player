@@ -13,6 +13,14 @@ const Color kUnderlineColor = Color(0xFFD9D9D9);
 const Color kLinkForgot = Color(0xFF00F0FF);
 const Color kLinkActive = Color(0xFFCB30E0);
 const Color kBoxBackground = Color(0xFF323236);
+const Color kBgColor = Color(0xFF121212);
+const Color kCardColor = Color(0xFF1E1E1E);
+const Color kPrimaryPurple = Color(0xFF5A1CCB);
+const Color kNeonCyan = Color(0xFF00E5FF);
+const Color kTextWhite = Colors.white;
+const Color kTextGrey = Colors.white54;
+const Color kBusyColor = Colors.redAccent;
+const Color kGreenColor = Color(0xFF00E676);
 
 class AppColors {
   static const bgDark = Color(0xFF3B1F5A);
@@ -35,4 +43,27 @@ class AppColors {
   static const Color textWhite = Colors.white;
   static const Color textBlack = Colors.black;
   static const Color textHint = Color(0xFF8A8A8E);
+
+  static const Color border = Color(0xFF1E293B); // Slate 800
+  static const Color textMain = Colors.white; // Slate 200
+  static const Color primaryBlue = Color(0xFF2563EB); // Blue 600
+
+  static const Color statusActiveBg = Color(0xFF1B5E20); // Green 900
+  static const Color statusActiveText = Color(0xFF4ADE80); // Green 400
+  static const Color statusInactiveBg = Color(0xFF424242);
+  static const Color statusInactiveText = Color(0xFFBDBDBD);
+
+  static const Color statusUsing = Color(0xFFDC2626); // Red for "Using"
+  static const Color statusFree = Color(0xFF10B981); // Green for "Free"
+
+  static const Color background = Color(0xFF09090B); // Very dark almost black
+  static const Color cardBg = Color(0xFF18181B); // Dark grey
+  static const Color primaryNeon = Color(0xFF00F0FF); // Cyan Neon
+  static const Color secondaryNeon = Color(0xFF7C3AED); // Violet
+  static const Color textSub = Color(0xFFA1A1AA);
+  static const Color inputBg = Color(0xFF27272A);
+
+  // Gradient Header
+  static const Color headerStart = Color(0xFF2B0C4E);
+  static const Color headerEnd = Color(0xFF5A1CCB);
 }

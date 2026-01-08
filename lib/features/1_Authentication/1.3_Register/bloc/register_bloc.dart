@@ -71,6 +71,9 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
             RegisterModelResponse.fromJson(responseBody);
         RegisterSharedPref.clearAll();
         RegisterSharedPref.setEmail(event.email);
+        DebugLogger.printLog(
+            "Register - email: ${RegisterSharedPref.getEmail().toString()}");
+
         emit(Register_LoadingState(isLoading: false));
         emit(Register2SuccessState());
 
