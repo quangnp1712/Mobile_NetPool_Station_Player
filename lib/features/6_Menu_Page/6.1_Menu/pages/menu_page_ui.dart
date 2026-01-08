@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/widget/logout_button.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/pages/profile_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.3_Wallet/pages/wallet_page.dart';
 import '../widget/appbar.dart';
 import '../widget/section_avatar.dart';
 import '../widget/option_card.dart';
@@ -46,12 +47,18 @@ class _MenuPageState extends State<MenuPage> {
             ),
 
             MenuOptionCard(
-              icon: Icons.account_balance_wallet_outlined,
-              title: 'Ví Tiền',
-              onTap: () {
-                // TODO: điều hướng UI
-              },
-            ),
+  icon: Icons.account_balance_wallet_outlined,
+  title: 'Ví Tiền',
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const WalletPage(),
+      ),
+    );
+  },
+),
+
             MenuOptionCard(
               icon: Icons.settings_outlined,
               title: 'Cài đặt',
