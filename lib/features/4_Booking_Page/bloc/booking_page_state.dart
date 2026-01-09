@@ -48,7 +48,7 @@ class BookingPageState extends Equatable {
     this.blocState = BookingBlocState.initial,
     this.status = BookingStatus.initial,
     this.message = '',
-    this.isSelectingStation = true,
+    this.isSelectingStation = false,
     this.filteredStations = const [],
     this.hasReachedMaxStations = false,
     this.currentPage = 0,

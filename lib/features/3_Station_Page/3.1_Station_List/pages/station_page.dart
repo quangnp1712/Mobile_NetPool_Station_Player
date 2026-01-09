@@ -73,8 +73,38 @@ class _StationPageState extends State<StationPage> {
               Expanded(
                 child: Builder(builder: (context) {
                   if (state.status == StationStatus.loading) {
-                    return const Center(
-                        child: CircularProgressIndicator(color: kNeonCyan));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Căn giữa nội dung theo chiều dọc
+                        children: [
+                          const CircularProgressIndicator(color: kNeonCyan),
+
+                          // Chỉ hiển thị text khi có nội dung message (sau 5s delay)
+                          if (state.message.isNotEmpty) ...[
+                            const SizedBox(
+                                height:
+                                    16), // Khoảng cách giữa vòng xoay và chữ
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal:
+                                      32.0), // Padding 2 bên để chữ không sát lề
+                              child: Text(
+                                state.message,
+                                textAlign:
+                                    TextAlign.center, // Căn giữa dòng chữ
+                                style: const TextStyle(
+                                  color: Colors
+                                      .grey, // Màu chữ (bạn có thể đổi thành kNeonCyan hoặc trắng)
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
                   }
 
                   if (state.stations.isEmpty) {

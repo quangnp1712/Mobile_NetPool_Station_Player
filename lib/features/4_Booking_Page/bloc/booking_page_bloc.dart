@@ -56,236 +56,253 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
 
   Future<void> _onLoadBookingData(
       LoadBookingDataEvent event, Emitter<BookingPageState> emit) async {
-    emit(state.copyWith(status: BookingStatus.loading));
+    // 1. Reset state về loading & clear message cũ
+    emit(state.copyWith(status: BookingStatus.loading, message: ""));
 
-    //! call api provinces
-    List<ProvinceModel> provincesList = [];
+    final stopwatch = Stopwatch()..start();
+
+    // Cờ kiểm soát việc hiển thị thông báo chờ
+    bool isTaskFinished = false;
+
     try {
-      var results = await CityRepository().getProvinces();
-      var responseMessage = results['message'];
-      var responseStatus = results['status'];
-      var responseSuccess = results['success'];
-      var responseBody = results['body'];
-      if (responseSuccess || responseStatus == 200) {
-        provincesList = (responseBody as List)
-            .map((e) => ProvinceModel.fromJson(e as Map<String, dynamic>))
-            .toList();
-        provincesList.map((name) => Utf8Encoding().decode(name as String));
-      } else {
-        emit(state.copyWith(
-          status: BookingStatus.initial,
-        ));
-        DebugLogger.printLog("Lỗi tải Tỉnh/TP");
-      }
-    } catch (e) {
-      emit(state.copyWith(
-        status: BookingStatus.initial,
-      ));
-      DebugLogger.printLog("Lỗi tải Tỉnh/TP: $e");
-    }
+      //! --- CƠ CHẾ TIMEOUT WARNING (5 giây) ---
+      Future.delayed(const Duration(seconds: 5)).then((_) {
+        if (!isTaskFinished && !emit.isDone) {
+          emit(state.copyWith(
+            status: BookingStatus.loading, // Vẫn giữ loading
+            message: "Dữ liệu đang được xử lý, vui lòng đợi thêm chút nữa...",
+          ));
+        }
+      });
 
-    //! call api allStations
-    //add(FetchStations());
-    try {
-      int current = 0; // Chuyển 1->0, 2->1...
+      // ---------------------------------------------------------
+      // BƯỚC 1: GỌI SONG SONG 3 API ĐỘC LẬP (Provinces, Stations, Platforms)
+      // ---------------------------------------------------------
 
+      // Setup params cho API Station
+      String current = "0";
       String search = "";
-
       String province = "";
-
       String commune = "";
-
       String district = "";
-
       String statusCode = "ACTIVE";
-
       String pageSize = "10";
 
-      var results = await BookingRepository().listStation(search, province,
-          commune, district, statusCode, current.toString(), pageSize);
+      final results = await Future.wait([
+        CityRepository().getProvinces(), // Index 0
+        BookingRepository().listStation(search, province, commune, district,
+            statusCode, current, pageSize), // Index 1
+        BookingRepository().getPlatformSpace(), // Index 2
+      ]);
 
-      var responseMessage = results['message'];
-      var responseStatus = results['status'];
-      var responseSuccess = results['success'];
-      var responseBody = results['body'];
-      List<StationDetailModel> allStations = [];
-      StationListMetaModel? meta;
-      if (responseSuccess) {
-        StationDetailModelResponse stationDetailModelResponse =
-            StationDetailModelResponse.fromJson(responseBody);
-        meta = stationDetailModelResponse.meta;
-        if (stationDetailModelResponse.data != null) {
-          if (stationDetailModelResponse.data!.isNotEmpty) {
-            allStations = stationDetailModelResponse.data!;
-          }
-        }
-      }
-      //! 2. API PLATFORM SPACE
-      List<PlatformSpaceModel> platformSpaces = [];
-      var resultsPlatformSpaces = await BookingRepository().getPlatformSpace();
-      var responseMessagePlatformSpaces = resultsPlatformSpaces['message'];
-      var responseStatusPlatformSpaces = resultsPlatformSpaces['status'];
-      var responseSuccessPlatformSpaces = resultsPlatformSpaces['success'];
-      var responseBodyPlatformSpaces = resultsPlatformSpaces['body'];
+      //! Xử lý kết quả Provinces
+      final provincesList = _parseListResponse<ProvinceModel>(
+              results[0], (json) => ProvinceModel.fromJson(json)) ??
+          [];
 
-      if (responseSuccessPlatformSpaces ||
-          responseStatusPlatformSpaces == 200) {
-        SpaceListModelResponse resultsBodyPlatformSpaces =
-            SpaceListModelResponse.fromJson(responseBodyPlatformSpaces);
+      //! Xử lý kết quả Stations
+      final stationResponse = _parseResponse<StationDetailModelResponse>(
+          results[1], (json) => StationDetailModelResponse.fromJson(json));
+      final allStations = stationResponse?.data ?? [];
+      final meta = stationResponse?.meta;
 
-        if (resultsBodyPlatformSpaces.data != null) {
-          try {
-            platformSpaces = resultsBodyPlatformSpaces.data!;
-          } catch (e) {
-            platformSpaces = [];
-          }
-        }
-      }
+      //! Xử lý kết quả Platform Space & Tạo Map Lookup
+      final platformSpaces = _parseListResponse<PlatformSpaceModel>(results[2],
+              (json) => SpaceListModelResponse.fromJson(json).data ?? [],
+              isWrapper: true) ??
+          [];
 
-      //! 3. API STATION SPACE
+      // Tạo Map 1 lần duy nhất để tra cứu O(1)
+      final platformMap = {for (var p in platformSpaces) p.spaceId: p};
+
+      // ---------------------------------------------------------
+      // BƯỚC 2: GỌI SONG SONG API STATION SPACE (Batch Request)
+      // ---------------------------------------------------------
       if (allStations.isNotEmpty) {
-        for (var station in allStations) {
-          List<StationSpaceModel> spaces = [];
-          var resultsSpace = await BookingRepository()
-              .getStationSpace(station.stationId.toString());
-          var responseMessageSpace = resultsSpace['message'];
-          var responseStatusSpace = resultsSpace['status'];
-          var responseSuccessSpace = resultsSpace['success'];
-          var responseBodySpace = resultsSpace['body'];
-          if (responseSuccessSpace || responseStatusSpace == 200) {
-            StationSpaceListModelResponse resultsBodySpace =
-                StationSpaceListModelResponse.fromJson(responseBodySpace);
-            if (resultsBodySpace.data != null) {
-              try {
-                spaces = resultsBodySpace.data!;
-                if (platformSpaces.isNotEmpty && spaces.isNotEmpty) {
-                  final platformMap = {
-                    for (var p in platformSpaces) p.spaceId: p
-                  };
+        // Tạo danh sách Futures
+        final spaceFutures = allStations
+            .map((station) => BookingRepository()
+                .getStationSpace(station.stationId.toString()))
+            .toList();
 
-                  for (var space in spaces) {
-                    // Tìm kiếm trong Map cực nhanh
-                    final platform = platformMap[space.spaceId];
+        // Chờ tất cả trả về
+        final spaceResults = await Future.wait(spaceFutures);
 
-                    if (platform != null) {
-                      space.space = platform;
-                    }
-                  }
-                  station.space = spaces;
-                }
-              } catch (e) {
-                spaces = [];
-              }
+        // Mapping dữ liệu
+        for (int i = 0; i < allStations.length; i++) {
+          final station = allStations[i];
+          final result = spaceResults[i];
+
+          final spaces = _parseListResponse<StationSpaceModel>(
+                  result,
+                  (json) =>
+                      StationSpaceListModelResponse.fromJson(json).data ?? [],
+                  isWrapper: true) ??
+              [];
+
+          // Gắn Platform info vào Space
+          if (spaces.isNotEmpty && platformMap.isNotEmpty) {
+            for (var space in spaces) {
+              space.space = platformMap[space.spaceId];
             }
           }
+          station.space = spaces;
         }
       }
 
+      // Đánh dấu hoàn tất để không hiện thông báo chờ nữa
+      isTaskFinished = true;
+      stopwatch.stop();
+      DebugLogger.printLog(
+          "🚀 Load Booking Data hoàn tất: ${stopwatch.elapsedMilliseconds}ms");
+
+      //! Emit Success
       emit(state.copyWith(
         status: BookingStatus.success,
         filteredStations: allStations,
         currentPage: 0,
         totalItems: meta?.total ?? 0,
-        hasReachedMaxStations: allStations.length >= (meta?.total as int),
+        hasReachedMaxStations: allStations.length >= (meta?.total ?? 0),
         platformSpaces: platformSpaces,
         provinces: provincesList,
+        message: "", // Xóa thông báo chờ
       ));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      isTaskFinished = true;
+      DebugLogger.printLog("Lỗi Load Booking Data: $e \n $stackTrace");
       emit(state.copyWith(
         status: BookingStatus.failure,
+        message: "Lỗi tải dữ liệu, vui lòng thử lại!",
       ));
-      DebugLogger.printLog(e.toString());
     }
+  }
+
+  T? _parseResponse<T>(
+      dynamic result, T Function(Map<String, dynamic>) fromJson) {
+    if (result['success'] == true || result['status'] == 200) {
+      if (result['body'] != null) return fromJson(result['body']);
+    }
+    return null;
+  }
+
+  List<T>? _parseListResponse<T>(
+      dynamic result, dynamic Function(dynamic) parser,
+      {bool isWrapper = false}) {
+    if (result['success'] == true || result['status'] == 200) {
+      final body = result['body'];
+      if (body != null) {
+        try {
+          if (isWrapper) {
+            return parser(body) as List<T>;
+          } else {
+            return (body as List).map((e) => parser(e) as T).toList();
+          }
+        } catch (e) {
+          return [];
+        }
+      }
+    }
+    return [];
   }
 
 // CORE: Handler chính để lấy danh sách station
   Future<void> _onFetchStations(
       FetchStationsEvent event, Emitter<BookingPageState> emit) async {
-    emit(state.copyWith(status: BookingStatus.loading));
+    // 1. Reset loading & clear message
+    emit(state.copyWith(status: BookingStatus.loading, message: ""));
+
+    final stopwatch = Stopwatch()..start();
+    bool isTaskFinished = false;
+
     try {
-      int current = state.currentPage;
-
-      String search = state.searchQuery;
-
-      String province = state.selectedProvince?.name.toString() ?? "";
-
-      String commune = "";
-
-      String district = state.selectedDistrict?.name.toString() ?? "";
-
-      String statusCode = "ACTIVE";
-
-      String pageSize = "10";
-
-      var results = await BookingRepository().listStation(search, province,
-          commune, district, statusCode, current.toString(), pageSize);
-
-      var responseMessage = results['message'];
-      var responseStatus = results['status'];
-      var responseSuccess = results['success'];
-      var responseBody = results['body'];
-      List<StationDetailModel> allStations = [];
-      StationListMetaModel? meta;
-      if (responseSuccess) {
-        StationDetailModelResponse stationDetailModelResponse =
-            StationDetailModelResponse.fromJson(responseBody);
-        meta = stationDetailModelResponse.meta;
-        if (stationDetailModelResponse.data != null) {
-          if (stationDetailModelResponse.data!.isNotEmpty) {
-            allStations = stationDetailModelResponse.data!;
-          }
+      //! --- CƠ CHẾ THÔNG BÁO CHỜ (5s) ---
+      Future.delayed(const Duration(seconds: 5)).then((_) {
+        if (!isTaskFinished && !emit.isDone) {
+          emit(state.copyWith(
+            status: BookingStatus.loading,
+            message: "Đang tìm kiếm dữ liệu, vui lòng đợi trong giây lát...",
+          ));
         }
-      }
-      //! 2. API STATION SPACE
+      });
+
+      //! 2. Chuẩn bị Params
+      // Extract biến ra cho gọn code
+      final search = state.searchQuery;
+      final province = state.selectedProvince?.name.toString() ?? "";
+      final district = state.selectedDistrict?.name.toString() ?? "";
+      final current = state.currentPage.toString();
+      const pageSize = "10";
+      const statusCode = "ACTIVE";
+
+      //! 3. Call API List Station
+      final results = await BookingRepository().listStation(
+          search, province, "", district, statusCode, current, pageSize);
+
+      // Parse Response dùng Helper function
+      final stationResponse = _parseResponse<StationDetailModelResponse>(
+          results, (json) => StationDetailModelResponse.fromJson(json));
+
+      final allStations = stationResponse?.data ?? [];
+      final meta = stationResponse?.meta;
+
+      //! 4. TỐI ƯU: Batch Loading Station Space
       if (allStations.isNotEmpty) {
-        for (var station in allStations) {
-          List<StationSpaceModel> spaces = [];
-          var resultsSpace = await BookingRepository()
-              .getStationSpace(station.stationId.toString());
-          var responseMessageSpace = resultsSpace['message'];
-          var responseStatusSpace = resultsSpace['status'];
-          var responseSuccessSpace = resultsSpace['success'];
-          var responseBodySpace = resultsSpace['body'];
-          if (responseSuccessSpace || responseStatusSpace == 200) {
-            StationSpaceListModelResponse resultsBodySpace =
-                StationSpaceListModelResponse.fromJson(responseBodySpace);
-            if (resultsBodySpace.data != null) {
-              try {
-                spaces = resultsBodySpace.data!;
-                if (state.platformSpaces.isNotEmpty && spaces.isNotEmpty) {
-                  final platformMap = {
-                    for (var p in state.platformSpaces) p.spaceId: p
-                  };
+        // a. Tạo Map Platform từ State (O(1) lookup) - Chỉ tạo 1 lần
+        final platformMap = state.platformSpaces.isNotEmpty
+            ? {for (var p in state.platformSpaces) p.spaceId: p}
+            : <int?, PlatformSpaceModel>{};
 
-                  for (var space in spaces) {
-                    // Tìm kiếm trong Map cực nhanh
-                    final platform = platformMap[space.spaceId];
+        // b. Gọi API song song (Parallel Requests)
+        final spaceFutures = allStations
+            .map((station) => BookingRepository()
+                .getStationSpace(station.stationId.toString()))
+            .toList();
 
-                    if (platform != null) {
-                      space.space = platform;
-                    }
-                  }
-                  station.space = spaces;
-                }
-              } catch (e) {
-                spaces = [];
-              }
+        final spaceResults = await Future.wait(spaceFutures);
+
+        // c. Map kết quả vào Station
+        for (int i = 0; i < allStations.length; i++) {
+          final station = allStations[i];
+          final result = spaceResults[i];
+
+          // Parse kết quả Space
+          final spaces = _parseListResponse<StationSpaceModel>(
+                  result,
+                  (json) =>
+                      StationSpaceListModelResponse.fromJson(json).data ?? [],
+                  isWrapper: true) ??
+              [];
+
+          // Gán Platform info vào Space (dùng Map lookup)
+          if (spaces.isNotEmpty && platformMap.isNotEmpty) {
+            for (var space in spaces) {
+              space.space = platformMap[space.spaceId];
             }
           }
+          station.space = spaces;
         }
       }
 
+      // Đánh dấu hoàn tất
+      isTaskFinished = true;
+      stopwatch.stop();
+      DebugLogger.printLog(
+          "🚀 Fetch Stations hoàn tất: ${stopwatch.elapsedMilliseconds}ms | Items: ${allStations.length}");
+
+      //! 5. Emit Success
       emit(state.copyWith(
         status: BookingStatus.success,
         filteredStations: allStations,
         totalItems: meta?.total ?? 0,
+        message: "", // Xóa thông báo chờ
       ));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      isTaskFinished = true;
+      DebugLogger.printLog("Lỗi Fetch Stations: $e \n $stackTrace");
       emit(state.copyWith(
         status: BookingStatus.failure,
+        message: "Lỗi tải dữ liệu, vui lòng thử lại!",
       ));
-
-      DebugLogger.printLog(e.toString());
     }
   }
 

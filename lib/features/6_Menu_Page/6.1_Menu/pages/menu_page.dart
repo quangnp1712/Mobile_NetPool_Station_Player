@@ -31,10 +31,10 @@ class _MenuPageState extends State<MenuPage> {
       bloc: bloc,
       listener: (context, state) {
         // Xử lý chuyển hướng khi chưa đăng nhập hoặc hết hạn token
-        // if (state.status == MenuStatus.unauthenticated) {
-        //   MenuSharedPref.setIsMenuRoute(true);
-        //   Get.toNamed(loginPageRoute);
-        // }
+        if (state.status == MenuStatus.unauthenticated) {
+          MenuSharedPref.setIsMenuRoute(true);
+          Get.toNamed(loginPageRoute);
+        }
 
         if (state.status == MenuStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(

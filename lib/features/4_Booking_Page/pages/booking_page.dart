@@ -61,9 +61,9 @@ class _BookingPageState extends State<BookingPage> {
 
   Widget _bookingPageBodyWidget(BookingPageState state) {
     // 1. Màn hình chọn Station
-    // if (state.isSelectingStation || state.selectedStation == null) {
-    //   return _buildStationSelectionScreen(context, state);
-    // }
+    if (state.isSelectingStation) {
+      return _buildStationSelectionScreen(context, state);
+    }
 
     // 2. Màn hình Booking chính
     return Column(
@@ -134,12 +134,38 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ),
 
-              // Layer 2: Loading Indicator (Overlay)
+              // --- Layer 2: Loading Overlay ---
               if (state.status == BookingStatus.loading)
-                Container(
-                  color: kBgColor.withOpacity(0.5), // Làm tối nền một chút
-                  child: const Center(
-                    child: CircularProgressIndicator(color: kNeonCyan),
+                Positioned.fill(
+                  // Container này phủ kín màn hình
+                  child: Container(
+                    color: Colors.black
+                        .withOpacity(0.5), // Mấu chốt: Màu đen độ mờ 50%
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(color: kNeonCyan),
+                          if (state.message.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 32.0),
+                              child: Text(
+                                state.message,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors
+                                      .white, // Nên để màu trắng cho nổi trên nền đen
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
             ],
