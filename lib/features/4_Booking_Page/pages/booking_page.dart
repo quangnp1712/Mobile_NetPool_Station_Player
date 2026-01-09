@@ -7,6 +7,7 @@ import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1_s
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_resource/resoucre_spec_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/widget/helper_widget.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
+import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class BookingPage extends StatefulWidget {
   final Function callback;
@@ -41,8 +42,7 @@ class _BookingPageState extends State<BookingPage> {
       listener: (context, state) {
         // Lắng nghe lỗi vị trí
         if (state.blocState == BookingBlocState.locationErrorState) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(state.message)));
+          ShowSnackBar(state.message, false);
         }
         // Lắng nghe sự kiện Reset để xóa text tìm kiếm
         if (state.blocState == BookingBlocState.filterResetState) {
@@ -61,9 +61,9 @@ class _BookingPageState extends State<BookingPage> {
 
   Widget _bookingPageBodyWidget(BookingPageState state) {
     // 1. Màn hình chọn Station
-    if (state.isSelectingStation || state.selectedStation == null) {
-      return _buildStationSelectionScreen(context, state);
-    }
+    // if (state.isSelectingStation || state.selectedStation == null) {
+    //   return _buildStationSelectionScreen(context, state);
+    // }
 
     // 2. Màn hình Booking chính
     return Column(

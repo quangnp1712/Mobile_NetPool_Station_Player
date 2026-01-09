@@ -191,6 +191,9 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
         provinces: provincesList,
       ));
     } catch (e) {
+      emit(state.copyWith(
+        status: BookingStatus.failure,
+      ));
       DebugLogger.printLog(e.toString());
     }
   }
@@ -278,6 +281,10 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
         totalItems: meta?.total ?? 0,
       ));
     } catch (e) {
+      emit(state.copyWith(
+        status: BookingStatus.failure,
+      ));
+
       DebugLogger.printLog(e.toString());
     }
   }
@@ -409,32 +416,39 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       FindNearestStationEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(
         status: BookingStatus.loading, blocState: BookingBlocState.initial));
-    final position = await _locationService.getUserCurrentLocation();
-    if (position != null) {
-      final List<StationDetailModel> updatedStations =
-          _allMockStations.map((s) {
-        double newDist = (Random().nextInt(50) / 10) + 0.1;
-        return StationDetailModel(
-          stationId: s.stationId,
-          stationName: s.stationName,
-          address: s.address,
-          rating: s.rating,
-          stationCode: s.stationCode,
-          distance: newDist,
-        );
-      }).toList();
-      updatedStations.sort((a, b) => a.distance!.compareTo(b.distance!));
+    try {
+      final position = await _locationService.getUserCurrentLocation();
+      if (position != null) {
+        final List<StationDetailModel> updatedStations =
+            _allMockStations.map((s) {
+          double newDist = (Random().nextInt(50) / 10) + 0.1;
+          return StationDetailModel(
+            stationId: s.stationId,
+            stationName: s.stationName,
+            address: s.address,
+            rating: s.rating,
+            stationCode: s.stationCode,
+            distance: newDist,
+          );
+        }).toList();
+        updatedStations.sort((a, b) => a.distance!.compareTo(b.distance!));
 
-      final pagedData = updatedStations.take(state.pageSize).toList();
+        final pagedData = updatedStations.take(state.pageSize).toList();
 
-      emit(state.copyWith(
-        status: BookingStatus.success,
-        filteredStations: pagedData,
-        currentPage: 0,
-        totalItems: updatedStations.length,
-        message: "Đã tìm thấy các trạm gần bạn",
-      ));
-    } else {
+        emit(state.copyWith(
+          status: BookingStatus.success,
+          filteredStations: pagedData,
+          currentPage: 0,
+          totalItems: updatedStations.length,
+          message: "Đã tìm thấy các trạm gần bạn",
+        ));
+      } else {
+        emit(state.copyWith(
+            status: BookingStatus.failure,
+            message: "Không thể lấy vị trí.",
+            blocState: BookingBlocState.locationErrorState));
+      }
+    } catch (e) {
       emit(state.copyWith(
           status: BookingStatus.failure,
           message: "Không thể lấy vị trí.",

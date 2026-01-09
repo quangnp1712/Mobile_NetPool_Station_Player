@@ -21,6 +21,7 @@ import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/pages/menu_page.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/pages/profile_page.dart';
+import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.3_Wallet/pages/wallet_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -130,10 +131,17 @@ class RouteGenerator {
         },
       ),
 
+      //$ 5.1: Profile Page //
       GetPage(
         name: profilePageRoute,
         page: () => BlocProvider<ProfilePageBloc>.value(
             value: profilePageBloc, child: const ProfilePage()),
+      ),
+
+      //$ 5.2: Wallet Page //
+      GetPage(
+        name: walletPageRoute,
+        page: () => const WalletPage(),
       ),
     ];
   }

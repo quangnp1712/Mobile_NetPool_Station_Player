@@ -31,10 +31,10 @@ class _MenuPageState extends State<MenuPage> {
       bloc: bloc,
       listener: (context, state) {
         // Xử lý chuyển hướng khi chưa đăng nhập hoặc hết hạn token
-        if (state.status == MenuStatus.unauthenticated) {
-          MenuSharedPref.setIsMenuRoute(true);
-          Get.toNamed(loginPageRoute);
-        }
+        // if (state.status == MenuStatus.unauthenticated) {
+        //   MenuSharedPref.setIsMenuRoute(true);
+        //   Get.toNamed(loginPageRoute);
+        // }
 
         if (state.status == MenuStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -114,7 +114,7 @@ class _MenuPageState extends State<MenuPage> {
                     title: 'Ví NetPool',
                     subtitle: 'Số dư: 50.000 đ',
                     onTap: () {
-                      // TODO: điều hướng UI
+                      Get.toNamed(walletPageRoute);
                     },
                   ),
 

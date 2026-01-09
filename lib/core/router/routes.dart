@@ -36,6 +36,7 @@ const matchingDetailPageRoute = "/netpool/matching/detail";
 // 6: Menu Page //
 const menuPageRoute = "/netpool/menu";
 const profilePageRoute = "/netpool/menu/profile";
+const walletPageRoute = "/netpool/menu/wallet";
 
 // ĐĂNG XUẤT //
 const logoutName = "Đăng xuất";

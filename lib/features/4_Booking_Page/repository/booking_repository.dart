@@ -60,7 +60,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Accept': '*/*',
           'Authorization': 'Bearer $jwtToken',
         },
-      ).timeout(const Duration(seconds: 180));
+      ).timeout(const Duration(seconds: 30));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);
@@ -83,7 +83,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Accept': '*/*',
           'Authorization': 'Bearer $jwtToken',
         },
-      ).timeout(const Duration(seconds: 180));
+      ).timeout(const Duration(seconds: 30));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);
@@ -106,7 +106,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Accept': '*/*',
           'Authorization': 'Bearer $jwtToken',
         },
-      ).timeout(const Duration(seconds: 180));
+      ).timeout(const Duration(seconds: 30));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);
@@ -137,7 +137,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Accept': '*/*',
           'Authorization': 'Bearer $jwtToken',
         },
-      ).timeout(const Duration(seconds: 180));
+      ).timeout(const Duration(seconds: 30));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);
@@ -167,7 +167,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Accept': '*/*',
           'Authorization': 'Bearer $jwtToken',
         },
-      ).timeout(const Duration(seconds: 180));
+      ).timeout(const Duration(seconds: 30));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);
