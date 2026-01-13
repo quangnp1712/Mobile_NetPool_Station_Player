@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_area/area_list_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/schedule_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
-class AreaListModelResponse extends BaseResponse {
-  List<AreaModel>? data;
+class ScheduleListModelResponse extends BaseResponse {
+  List<ScheduleModel>? data;
   MetaModel? meta;
 
-  AreaListModelResponse({
+  ScheduleListModelResponse({
     this.data,
     this.meta,
     status,
@@ -19,12 +19,12 @@ class AreaListModelResponse extends BaseResponse {
     message,
   });
 
-  factory AreaListModelResponse.fromMap(Map<String, dynamic> map) {
-    return AreaListModelResponse(
+  factory ScheduleListModelResponse.fromMap(Map<String, dynamic> map) {
+    return ScheduleListModelResponse(
       data: map['data'] != null
-          ? List<AreaModel>.from(
+          ? List<ScheduleModel>.from(
               (map['data'] as List).map(
-                (x) => AreaModel.fromMap(x as Map<String, dynamic>),
+                (x) => ScheduleModel.fromMap(x as Map<String, dynamic>),
               ),
             )
           : null,
@@ -40,6 +40,6 @@ class AreaListModelResponse extends BaseResponse {
     );
   }
 
-  factory AreaListModelResponse.fromJson(Map<String, dynamic> source) =>
-      AreaListModelResponse.fromMap(source);
+  factory ScheduleListModelResponse.fromJson(Map<String, dynamic> source) =>
+      ScheduleListModelResponse.fromMap(source);
 }

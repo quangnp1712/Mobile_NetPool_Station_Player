@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/data/mock_data.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1_station/station_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/shared_preferences/booking_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/widget/helper_widget.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
@@ -22,16 +28,39 @@ class _BookingPageState extends State<BookingPage> {
   final TextEditingController _searchController = TextEditingController();
 
   BookingPageBloc bloc = BookingPageBloc();
+  Timer? _loadingTimer;
   @override
   void initState() {
     super.initState();
-    bloc.add(LoadBookingDataEvent());
+    bloc.add(BookingInitEvent());
+  }
+
+  void _startLoadingTimer() {
+    _loadingTimer?.cancel(); // Hủy timer cũ nếu có
+    _loadingTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Hệ thống đang tải, vui lòng chờ..."),
+            duration: Duration(seconds: 3),
+            backgroundColor: kPrimaryPurple,
+          ),
+        );
+      }
+    });
+  }
+
+  // Hàm hủy đếm ngược
+  void _cancelLoadingTimer() {
+    if (_loadingTimer != null && _loadingTimer!.isActive) {
+      _loadingTimer!.cancel();
+    }
   }
 
   @override
   void dispose() {
     _searchController.dispose();
-
+    _loadingTimer?.cancel();
     super.dispose();
   }
 
@@ -40,6 +69,10 @@ class _BookingPageState extends State<BookingPage> {
     return BlocConsumer<BookingPageBloc, BookingPageState>(
       bloc: bloc,
       listener: (context, state) {
+        if (state.blocState == BookingBlocState.unauthenticated) {
+          BookingSharedPref.setIsBookingRoute(true);
+          Get.toNamed(loginPageRoute);
+        }
         // Lắng nghe lỗi vị trí
         if (state.blocState == BookingBlocState.locationErrorState) {
           ShowSnackBar(state.message, false);
@@ -47,6 +80,11 @@ class _BookingPageState extends State<BookingPage> {
         // Lắng nghe sự kiện Reset để xóa text tìm kiếm
         if (state.blocState == BookingBlocState.filterResetState) {
           _searchController.clear();
+        }
+        if (state.status == BookingStatus.loading) {
+          _startLoadingTimer();
+        } else {
+          _cancelLoadingTimer();
         }
       },
       builder: (context, state) {
@@ -60,111 +98,96 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _bookingPageBodyWidget(BookingPageState state) {
-    // 1. Màn hình chọn Station
     if (state.isSelectingStation) {
       return _buildStationSelectionScreen(context, state);
     }
-
-    // 2. Màn hình Booking chính
     return Column(
       children: [
-        _buildHeader(context, state),
         Expanded(
           child: Stack(
             children: [
-              // Layer 1: Nội dung chính
               SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 120),
+                padding: const EdgeInsets.only(bottom: 180),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    _buildHeader(context, state),
+
                     const SizedBox(height: 16),
-                    _buildContextSelector(context, state),
-                    const SizedBox(height: 16),
+                    // --- BƯỚC 2: CHỌN NGÀY ---
                     _buildSectionTitle(Icons.calendar_today, "Chọn ngày"),
                     _buildDateTimeline(context, state),
+
                     const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildSectionTitle(Icons.access_time, "Giờ chơi",
-                              noPadding: true),
-                          _buildDurationControl(context, state),
-                        ],
+
+                    // --- LOGIC ẨN CÁC BƯỚC SAU NẾU KHÔNG CÓ LỊCH ---
+                    if (state.schedules.isNotEmpty) ...[
+                      // 1. Context Selector
+                      _buildContextSelector(context, state),
+                      const SizedBox(height: 16),
+
+                      // 2. Machine Map Title
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildSectionTitle(Icons.grid_view, "Sơ đồ máy",
+                                noPadding: true),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                  color: kNeonCyan.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12)),
+                              child: Row(
+                                children: const [
+                                  Icon(Icons.group, color: kNeonCyan, size: 12),
+                                  SizedBox(width: 4),
+                                  Text("Máy liền kề",
+                                      style: TextStyle(
+                                          color: kNeonCyan,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildTimeList(context, state),
-                    const SizedBox(height: 24),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildSectionTitle(Icons.grid_view, "Sơ đồ máy",
-                              noPadding: true),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                                color: kNeonCyan.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12)),
-                            child: Row(
-                              children: const [
-                                Icon(Icons.group, color: kNeonCyan, size: 12),
-                                SizedBox(width: 4),
-                                Text("Máy liền kề",
-                                    style: TextStyle(
-                                        color: kNeonCyan,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          )
-                        ],
+                      const SizedBox(height: 12),
+
+                      // 3. Auto Pick & Resources
+                      _buildAutoPickButton(context, state),
+                      const SizedBox(height: 16),
+                      _buildResourceRows(context, state),
+
+                      const SizedBox(height: 24),
+
+                      // 4. CHỌN GIỜ (Moved to end)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildSectionTitle(Icons.access_time, "Giờ chơi",
+                                noPadding: true),
+                            _buildDurationControl(context, state),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _buildAutoPickButton(context, state),
-                    const SizedBox(height: 16),
-                    _buildResourceRows(context, state),
+                      const SizedBox(height: 12),
+                      _buildTimeList(context, state),
+                    ]
                   ],
                 ),
               ),
-
-              // --- Layer 2: Loading Overlay ---
               if (state.status == BookingStatus.loading)
                 Positioned.fill(
-                  // Container này phủ kín màn hình
                   child: Container(
-                    color: Colors.black
-                        .withOpacity(0.5), // Mấu chốt: Màu đen độ mờ 50%
+                    color: Colors.black54,
                     child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const CircularProgressIndicator(color: kNeonCyan),
-                          if (state.message.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 32.0),
-                              child: Text(
-                                state.message,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors
-                                      .white, // Nên để màu trắng cho nổi trên nền đen
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+                      child: CircularProgressIndicator(color: kNeonCyan),
                     ),
                   ),
                 ),
@@ -188,194 +211,40 @@ class _BookingPageState extends State<BookingPage> {
       backgroundColor: kBgColor,
       body: Column(
         children: [
-          Container(
-            padding:
-                const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 20),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF2B0C4E), Color(0xFF5A1CCB)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Chọn Station",
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                const SizedBox(height: 12),
-
-                // Location Button
-                InkWell(
-                  onTap: () => bloc.add(FindNearestStationEvent()),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                            color: Colors.white24, shape: BoxShape.circle),
-                        child: const Icon(Icons.near_me,
-                            color: kNeonCyan, size: 16),
-                      ),
-                      const SizedBox(width: 8),
-                      const Text("Tìm trạm gần đây (Vị trí hiện tại)",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              decoration: TextDecoration.underline)),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                // Search Box
-                Container(
-                  height: 45,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search, color: Colors.white54, size: 20),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController, // Gán controller
-                          onChanged: (value) =>
-                              bloc.add(SearchStationEvent(value)),
-                          style: const TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                              hintText: "Tìm theo tên, địa chỉ...",
-                              hintStyle: TextStyle(
-                                  color: Colors.white38, fontSize: 14),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.only(bottom: 4)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Location Filters & Reset Button
-                Row(
-                  children: [
-                    // City Filter
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<ProvinceModel>(
-                            value: state.selectedProvince,
-                            hint: const Text("Tỉnh/TP",
-                                style: TextStyle(
-                                    color: Colors.white54, fontSize: 13)),
-                            dropdownColor: kCardColor,
-                            icon: const Icon(Icons.keyboard_arrow_down,
-                                color: Colors.white54),
-                            isExpanded: true,
-                            items: state.provinces
-                                .map((e) => DropdownMenuItem(
-                                      value: e,
-                                      child: Text(e.name,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 13)),
-                                    ))
-                                .toList(),
-                            onChanged: (val) {
-                              if (val != null)
-                                bloc.add(SelectProvinceEvent(val));
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // District Filter
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<DistrictModel>(
-                            value: state.selectedDistrict,
-                            hint: const Text("Quận/Huyện",
-                                style: TextStyle(
-                                    color: Colors.white54, fontSize: 13)),
-                            dropdownColor: kCardColor,
-                            icon: const Icon(Icons.keyboard_arrow_down,
-                                color: Colors.white54),
-                            isExpanded: true,
-                            items: state.districts
-                                .map((e) => DropdownMenuItem(
-                                      value: e,
-                                      child: Text(e.name,
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 13)),
-                                    ))
-                                .toList(),
-                            onChanged: (val) {
-                              if (val != null)
-                                bloc.add(SelectDistrictEvent(val));
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // RESET BUTTON
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.refresh, color: kNeonCyan),
-                        tooltip: "Làm mới bộ lọc",
-                        onPressed: () {
-                          bloc.add(ResetFilterEvent());
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
           Expanded(
             child: Stack(
               children: [
-                if (state.filteredStations.isEmpty &&
-                    state.status != BookingStatus.loading)
-                  const Center(
-                      child: Text("Không tìm thấy trạm nào",
-                          style: TextStyle(color: Colors.white54))),
-                ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: state.filteredStations.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final s = state.filteredStations[index];
-                    return _buildStationCard(context, s);
-                  },
+                CustomScrollView(
+                  slivers: [
+                    SliverToBoxAdapter(
+                      child: _buildStationSelectionHeader(context, state),
+                    ),
+                    if (state.filteredStations.isEmpty &&
+                        state.status != BookingStatus.loading)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 40),
+                          child: Center(
+                              child: Text("Không tìm thấy trạm nào",
+                                  style: TextStyle(color: Colors.white54))),
+                        ),
+                      ),
+                    SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final s = state.filteredStations[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: _buildStationCard(context, s),
+                            );
+                          },
+                          childCount: state.filteredStations.length,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 if (state.status == BookingStatus.loading)
                   Container(
@@ -387,8 +256,210 @@ class _BookingPageState extends State<BookingPage> {
             ),
           ),
 
-          // Pagination Bar
+          // Pagination Bar - Fixed at bottom
           _buildPaginationBar(context, state),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStationSelectionHeader(
+      BuildContext context, BookingPageState state) {
+    return Container(
+      padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF2B0C4E), Color(0xFF5A1CCB)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Chọn Station",
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
+
+          // --- PHẦN THÊM MỚI: HINT TEXT ---
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.amber.withOpacity(0.15), // Nền mờ màu cam
+              borderRadius: BorderRadius.circular(8),
+              border:
+                  Border.all(color: Colors.amber.withOpacity(0.5)), // Viền cam
+            ),
+            child: Row(
+              children: const [
+                Icon(Icons.info_outline, color: Colors.amberAccent, size: 16),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    "Vui lòng chọn trạm trước khi đặt lịch",
+                    style: TextStyle(
+                      color: Colors.amberAccent, // Chữ màu cam sáng
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // --- KẾT THÚC PHẦN THÊM MỚI ---
+
+          const SizedBox(height: 12),
+
+          // Location Button
+          InkWell(
+            onTap: () => bloc.add(FindNearestStationEvent()),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                      color: Colors.white24, shape: BoxShape.circle),
+                  child: const Icon(Icons.near_me, color: kNeonCyan, size: 16),
+                ),
+                const SizedBox(width: 8),
+                const Text("Tìm trạm gần đây (Vị trí hiện tại)",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        decoration: TextDecoration.underline)),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Search Box
+          Container(
+            height: 45,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.search, color: Colors.white54, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) => bloc.add(SearchStationEvent(value)),
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                        hintText: "Tìm theo tên, địa chỉ...",
+                        hintStyle:
+                            TextStyle(color: Colors.white38, fontSize: 14),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.only(bottom: 4)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Location Filters & Reset Button
+          Row(
+            children: [
+              // City Filter
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<ProvinceModel>(
+                      value: state.selectedProvince,
+                      hint: const Text("Tỉnh/TP",
+                          style:
+                              TextStyle(color: Colors.white54, fontSize: 13)),
+                      dropdownColor: kCardColor,
+                      icon: const Icon(Icons.keyboard_arrow_down,
+                          color: Colors.white54),
+                      isExpanded: true,
+                      items: state.provinces
+                          .map((e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e.name,
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 13)),
+                              ))
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          bloc.add(SelectProvinceEvent(val));
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // District Filter
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white10,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<DistrictModel>(
+                      value: state.selectedDistrict,
+                      hint: const Text("Quận/Huyện",
+                          style:
+                              TextStyle(color: Colors.white54, fontSize: 13)),
+                      dropdownColor: kCardColor,
+                      icon: const Icon(Icons.keyboard_arrow_down,
+                          color: Colors.white54),
+                      isExpanded: true,
+                      items: state.districts
+                          .map((e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e.name,
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 13)),
+                              ))
+                          .toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          bloc.add(SelectDistrictEvent(val));
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // RESET BUTTON
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.refresh, color: kNeonCyan),
+                  tooltip: "Làm mới bộ lọc",
+                  onPressed: () {
+                    bloc.add(ResetFilterEvent());
+                  },
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -642,11 +713,6 @@ class _BookingPageState extends State<BookingPage> {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.filter_list, color: Colors.white, size: 20),
-            style: IconButton.styleFrom(backgroundColor: Colors.white10),
-          ),
         ],
       ),
     );
@@ -654,43 +720,51 @@ class _BookingPageState extends State<BookingPage> {
 
   Widget _buildContextSelector(BuildContext context, BookingPageState state) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-                color: kCardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white10)),
+        // --- 1. LOẠI HÌNH (SPACE) ---
+        _buildSectionTitle(Icons.videogame_asset, "Loại hình"),
+        if (state.spaces.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              children: state.spaces.map((space) {
-                bool isActive =
-                    state.selectedSpace?.stationSpaceId == space.stationSpaceId;
+              children: state.spaces.map((s) {
+                bool isSelected = state.selectedSpace == s;
                 return Expanded(
-                  child: GestureDetector(
-                    onTap: () => bloc.add(SelectSpaceEvent(space)),
+                  child: InkWell(
+                    onTap: () => bloc.add(SelectSpaceEvent(s)),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                          color: isActive ? Colors.white : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Row(
+                        color: isSelected ? kPrimaryPurple : kCardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: isSelected ? kNeonCyan : Colors.white10),
+                        boxShadow: isSelected
+                            ? [
+                                BoxShadow(
+                                    color: kPrimaryPurple.withOpacity(0.4),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2))
+                              ]
+                            : [],
+                      ),
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // Use helper function here
-                          getIcon(space.metadata?.icon,
-                              size: 16,
-                              color:
-                                  isActive ? kPrimaryPurple : Colors.white60),
-                          const SizedBox(width: 6),
-                          Text(space.spaceCode!,
-                              style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: isActive
-                                      ? kPrimaryPurple
-                                      : Colors.white60)),
+                          getIcon(s.spaceCode,
+                              color: isSelected ? Colors.white : Colors.white54,
+                              size: 24),
+                          const SizedBox(height: 4),
+                          Text(
+                            s.spaceCode ?? "",
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.white54,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -699,40 +773,55 @@ class _BookingPageState extends State<BookingPage> {
               }).toList(),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+
+        // --- 2. KHU VỰC (AREA) ---
+        _buildSectionTitle(Icons.map, "Khu vực"),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
-            children: state.areas.map((area) {
-              bool isActive = state.selectedArea?.areaId == area.areaId;
-              return GestureDetector(
-                onTap: () => bloc.add(SelectAreaEvent(area)),
+            children: state.areas.map((a) {
+              bool isSelected = state.selectedArea == a;
+              return InkWell(
+                onTap: () => bloc.add(SelectAreaEvent(a)),
                 child: Container(
-                  margin: const EdgeInsets.only(right: 10),
+                  margin: const EdgeInsets.only(right: 12),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isActive ? kNeonCyan.withOpacity(0.1) : kCardColor,
-                    borderRadius: BorderRadius.circular(12),
+                    color:
+                        isSelected ? kNeonCyan.withOpacity(0.15) : kCardColor,
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: isActive ? kNeonCyan : Colors.white10),
+                        color: isSelected ? kNeonCyan : Colors.white10),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(area.areaName ?? "",
-                          style: TextStyle(
-                              color: isActive ? kNeonCyan : Colors.white70,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold)),
-                      Text("${formatCurrency(area.price ?? 0)}/h",
-                          style: TextStyle(
-                              color: isActive
-                                  ? kNeonCyan.withOpacity(0.7)
-                                  : Colors.white38,
-                              fontSize: 11)),
+                      Text(
+                        a.areaName ?? "",
+                        style: TextStyle(
+                          color: isSelected ? kNeonCyan : Colors.white70,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      if (a.price != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black26,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            formatCurrency(a.price!.toDouble()),
+                            style: const TextStyle(
+                                color: Colors.white54, fontSize: 10),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -764,18 +853,37 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildDateTimeline(BuildContext context, BookingPageState state) {
+    // Nếu chưa có lịch hoặc lịch rỗng sau khi filter
+    if (state.schedules.isEmpty) {
+      return const SizedBox(
+          height: 75,
+          child: Center(
+              child: Text("Chưa có lịch hoạt động",
+                  style: TextStyle(color: Colors.white54, fontSize: 13))));
+    }
+
     return SizedBox(
       height: 75,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         scrollDirection: Axis.horizontal,
-        itemCount: 14,
+        itemCount: state.schedules.length,
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          DateTime date = DateTime.now().add(Duration(days: index));
+          final schedule = state.schedules[index];
+          DateTime? date = DateTime.tryParse(schedule.date ?? "");
+
           bool isSelected = state.selectedDateIndex == index;
-          String weekday = "T${date.weekday + 1}";
-          if (date.weekday == 7) weekday = "CN";
+
+          // Format text hiển thị
+          String weekdayStr = "---";
+          String dayStr = "--";
+          if (date != null) {
+            weekdayStr = "T${date.weekday + 1}";
+            if (date.weekday == 7) weekdayStr = "CN";
+            dayStr = "${date.day}/${date.month}";
+          }
+
           return GestureDetector(
             onTap: () => bloc.add(SelectDateEvent(index)),
             child: Container(
@@ -797,14 +905,15 @@ class _BookingPageState extends State<BookingPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(weekday,
+                  Text(weekdayStr,
                       style: TextStyle(
                           color: isSelected ? Colors.white70 : Colors.grey,
                           fontSize: 11)),
-                  Text("${date.day}",
+                  Text(dayStr,
                       style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize:
+                              14, // Giảm font size một chút vì hiện cả tháng
                           fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -851,63 +960,58 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildTimeList(BuildContext context, BookingPageState state) {
-    // Helper để kiểm tra giờ đã qua
-    bool _isTimePassed(String timeStr) {
-      final now = DateTime.now();
-      final parts = timeStr.split(':');
-      final hour = int.parse(parts[0]);
-      final minute = int.parse(parts[1]);
-
-      // Tạo mốc thời gian của khung giờ đó trong ngày hôm nay
-      final timeDate = DateTime(now.year, now.month, now.day, hour, minute);
-
-      // Nếu giờ đó < giờ hiện tại => đã qua
-      return timeDate.isBefore(now);
+    if (state.availableTimes.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Text("Không có giờ nào khả dụng",
+            style: TextStyle(color: Colors.white30, fontSize: 13)),
+      );
     }
 
     return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        scrollDirection: Axis.horizontal,
-        itemCount: kStartTimes.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          String time = kStartTimes[index];
-          bool isSelected = state.selectedTime == time;
-          bool isPast = false;
-          if (state.selectedDateIndex == 0) {
-            isPast = _isTimePassed(time);
-          }
-          return IgnorePointer(
-            ignoring: isPast, // Không cho click nếu đã qua
-            child: Opacity(
-              opacity: isPast ? 0.3 : 1.0, // Làm mờ nếu đã qua
-              child: GestureDetector(
-                onTap: () => bloc.add(SelectTimeEvent(time)),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color:
-                        isSelected ? kNeonCyan.withOpacity(0.15) : kCardColor,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: isSelected ? kNeonCyan : Colors.transparent),
-                  ),
-                  child: Text(time,
-                      style: TextStyle(
-                          color: isSelected ? kNeonCyan : Colors.white60,
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal)),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
+        height: 40,
+        child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            itemCount: state.availableTimes.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (ctx, i) {
+              final slot = state.availableTimes[i];
+              String t = slot.begin ?? "--:--";
+              bool sel = state.selectedTime == t;
+
+              // Disable conditions:
+              // 1. Parent schedule not valid (handled by isSelectable)
+              // 2. Slot is booked (statusCode != 'FREE') (optional check)
+              bool isDisabled = !slot.isSelectable;
+
+              return InkWell(
+                  onTap: isDisabled ? null : () => bloc.add(SelectTimeEvent(t)),
+                  child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: isDisabled
+                              ? Colors.white10
+                              : (sel
+                                  ? kNeonCyan.withOpacity(0.15)
+                                  : kCardColor),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: isDisabled
+                                  ? Colors.transparent
+                                  : (sel ? kNeonCyan : Colors.transparent))),
+                      child: Text(t,
+                          style: TextStyle(
+                              color: isDisabled
+                                  ? Colors.white24
+                                  : (sel ? kNeonCyan : Colors.white60),
+                              fontWeight:
+                                  sel ? FontWeight.bold : FontWeight.normal,
+                              decoration: isDisabled
+                                  ? TextDecoration.lineThrough
+                                  : null))));
+            }));
   }
 
   Widget _buildAutoPickButton(BuildContext context, BookingPageState state) {
@@ -966,164 +1070,195 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildResourceRows(BuildContext context, BookingPageState state) {
-    if (state.resourceRows.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.all(30.0),
-        child: Center(
-            child: Text("Vui lòng chọn Khu vực để xem máy",
-                style: TextStyle(color: Colors.white30))),
-      );
+    if (state.resources.isEmpty) {
+      return const Center(
+          child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Text("Không có máy nào trong khu vực này",
+                  style: TextStyle(color: Colors.white30))));
     }
 
+    // Logic gom nhóm (group by rowName) được chuyển xuống UI
+    Map<String, List<StationResourceModel>> groups = {};
+    for (var r in state.resources) {
+      String key = r.rowName ?? r.rowCode ?? "Khác";
+      if (!groups.containsKey(key)) groups[key] = [];
+      groups[key]!.add(r);
+    }
+
+    // Sort các nhóm nếu cần và render
     return Column(
-      children: state.resourceRows.map((row) {
-        return Padding(
+        children: groups.entries.map((entry) {
+      String rowName = entry.key;
+      List<StationResourceModel> rowResources = entry.value;
+      // Sort resources trong row theo displayOrder
+      rowResources
+          .sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0));
+      String areaName = state.selectedArea?.areaName ?? "";
+
+      return Padding(
           padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Row Header
-              Row(
-                children: [
-                  Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                          color: kNeonCyan, shape: BoxShape.circle)),
-                  const SizedBox(width: 8),
-                  Text(row.label.toUpperCase(),
-                      style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 8),
-                  Container(height: 12, width: 1, color: Colors.white24),
-                  const SizedBox(width: 8),
-                  // Link xem cấu hình
-                  if (row.resources.isNotEmpty)
-                    InkWell(
-                      onTap: () => _showSpecDetails(
-                          context, state, row.label, row.resources.first.spec),
-                      borderRadius: BorderRadius.circular(4),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 4, vertical: 2),
-                        child: Text(
-                          "Xem cấu hình",
-                          style: TextStyle(
-                            color: kNeonCyan,
-                            fontSize: 11,
-                            fontStyle: FontStyle.italic,
-                            decoration: TextDecoration.underline,
-                            decorationColor: kNeonCyan,
-                          ),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            // --- Updated Header with View Config Link ---
+            Row(
+              children: [
+                Container(
+                    width: 8,
+                    height: 8,
+                    decoration: const BoxDecoration(
+                        color: kNeonCyan, shape: BoxShape.circle)),
+                const SizedBox(width: 8),
+                Text(" $rowName ($areaName)".toUpperCase(),
+                    style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold)),
+                const SizedBox(width: 8),
+                Container(height: 12, width: 1, color: Colors.white24),
+                const SizedBox(width: 8),
+                // Link xem cấu hình
+                if (rowResources.isNotEmpty && rowResources.first.spec != null)
+                  InkWell(
+                    onTap: () => _showSpecDetails(
+                        context, state, rowName, rowResources.first.spec),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 2),
+                      child: Text(
+                        "Xem cấu hình",
+                        style: const TextStyle(
+                          color: kNeonCyan,
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                          decoration: TextDecoration.underline,
+                          decorationColor: kNeonCyan,
                         ),
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Resource Grid
-              GridView.builder(
-                padding: EdgeInsets.zero,
+                  ),
+              ],
+            ),
+            // ------------------------------------------
+            const SizedBox(height: 12),
+            GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 1.0,
+                  crossAxisCount: 3, // Giảm số cột để card to đẹp hơn
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 0.85, // Tỉ lệ khung hình thẻ
                 ),
-                itemCount: row.resources.length,
-                itemBuilder: (context, index) {
-                  final resource = row.resources[index];
-                  bool isSelected = state.selectedResourceCodes
-                      .contains(resource.resourceCode);
-                  bool isBusy = resource.statusCode == 'BUSY';
+                itemCount: rowResources.length,
+                itemBuilder: (ctx, i) {
+                  final res = rowResources[i];
+                  bool isSelected =
+                      state.selectedResourceCodes.contains(res.resourceCode);
+                  bool isBusy = res.statusCode == 'BUSY';
+
+                  // Màu nền và viền dựa trên trạng thái
+                  Color bgColor = isBusy
+                      ? Colors.white10
+                      : (isSelected ? kCardColor : kCardColor);
+                  Color borderColor = isBusy
+                      ? Colors.transparent
+                      : (isSelected ? kSelectedColor : Colors.white10);
+                  Color iconColor = isBusy
+                      ? Colors.white24
+                      : (isSelected ? kSelectedColor : Colors.white54);
 
                   return InkWell(
                     onTap: isBusy
                         ? null
-                        : () => bloc
-                            .add(ToggleResourceEvent(resource.resourceCode!)),
-                    borderRadius: BorderRadius.circular(12),
+                        : () =>
+                            bloc.add(ToggleResourceEvent(res.resourceCode!)),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isBusy
-                            ? Colors.black26
-                            : (isSelected ? kPrimaryPurple : kCardColor),
-                        borderRadius: BorderRadius.circular(12),
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                            color: isSelected ? kNeonCyan : Colors.transparent,
-                            width: isSelected ? 1.5 : 0),
+                            color: borderColor, width: isSelected ? 2 : 1),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                    color: kNeonCyan.withOpacity(0.3),
-                                    blurRadius: 8)
+                                    color: kSelectedColor.withOpacity(0.3),
+                                    blurRadius: 10,
+                                    spreadRadius: 1)
                               ]
                             : [],
                       ),
                       child: Stack(
-                        alignment: Alignment.center,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Use helper
-
-                              getIcon(
-                                state.selectedSpace?.metadata?.icon,
-                                color: isBusy
-                                    ? kBusyColor.withOpacity(0.5)
-                                    : (isSelected ? kNeonCyan : Colors.white54),
-                                size: 22,
-                              ),
-                              const SizedBox(height: 6),
-                              Text(
-                                resource.resourceName ?? "",
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : (isBusy
-                                          ? Colors.white30
-                                          : Colors.white70),
-                                  fontSize: 13,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                          // Nội dung chính
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                getIcon(state.selectedSpace?.spaceCode ?? "PC",
+                                    size: 32, color: iconColor),
+                                const SizedBox(height: 8),
+                                Text(
+                                  res.resourceName ?? "",
+                                  style: TextStyle(
+                                    color: isBusy
+                                        ? Colors.white24
+                                        : (isSelected
+                                            ? Colors.white
+                                            : Colors.white70),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          if (isSelected)
-                            Positioned(
-                                top: 6,
-                                right: 6,
-                                child: Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: const BoxDecoration(
-                                        color: kNeonCyan,
-                                        shape: BoxShape.circle))),
+                          // Chấm trạng thái góc trên phải
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: isBusy ? kBusyColor : kGreenColor,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (isBusy ? kBusyColor : kGreenColor)
+                                        .withOpacity(0.6),
+                                    blurRadius: 6,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   );
-                },
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
+                })
+          ]));
+    }).toList());
   }
 
   void _showSpecDetails(BuildContext context, BookingPageState state,
       String title, ResourceSpecModel? spec) {
     if (spec == null) return;
-    final details = spec.toMap();
+
+    // Determine which map to show based on non-null sub-model
+    Map<String, dynamic> details = {};
+    if (spec.pc != null) {
+      details = spec.pc!.toMap();
+    } else if (spec.billiardTable != null) {
+      details = spec.billiardTable!.toMap();
+    } else if (spec.console != null) {
+      details = spec.console!.toMap();
+    } else {
+      // Fallback empty if nothing is set
+      details = {};
+    }
 
     showModalBottomSheet(
       context: context,
@@ -1152,8 +1287,6 @@ class _BookingPageState extends State<BookingPage> {
             const SizedBox(height: 20),
             Row(
               children: [
-                // Use helper
-
                 getIcon(
                   state.selectedSpace?.metadata?.icon,
                   color: kNeonCyan,
@@ -1171,37 +1304,44 @@ class _BookingPageState extends State<BookingPage> {
               ],
             ),
             const SizedBox(height: 20),
-            Divider(color: Colors.white10),
+            const Divider(color: Colors.white10),
             const SizedBox(height: 10),
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    // Lọc bỏ các giá trị null hoặc rỗng trước khi map
-                    ...details.entries
-                        .where((e) =>
-                            e.value != null && e.value!.toString().isNotEmpty)
-                        .map((e) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                      flex: 2,
-                                      child: Text(_formatKey(e.key),
-                                          style: const TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 13))),
-                                  Expanded(
-                                      flex: 3,
-                                      child: Text(e.value!.toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500))),
-                                ],
-                              ),
-                            )),
+                    if (details.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Text("Chưa có thông tin cấu hình",
+                            style: TextStyle(color: Colors.white54)),
+                      )
+                    else
+                      ...details.entries
+                          .where((e) =>
+                              e.value != null && e.value!.toString().isNotEmpty)
+                          .map((e) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                        flex: 2,
+                                        child: Text(_formatKey(e.key),
+                                            style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 13))),
+                                    Expanded(
+                                        flex: 3,
+                                        child: Text(e.value!.toString(),
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500))),
+                                  ],
+                                ),
+                              )),
                   ],
                 ),
               ),
@@ -1264,96 +1404,64 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildBottomSheet(BuildContext context, BookingPageState state) {
-    bool hasSelection = state.bookingType != null;
-    String statusText = "Vui lòng chọn máy";
-    if (state.bookingType == 'auto') {
-      statusText = "⚡ Chế độ Auto-Pick";
-    } else if (state.selectedResourceCodes.isNotEmpty)
-      statusText = "Đã chọn: ${state.selectedResourceCodes.length} máy";
+    // Check nếu chưa chọn giờ thì disable nút
+    bool hasSel = state.bookingType != null && state.selectedTime.isNotEmpty;
+
+    // --- UPDATED: Get selected resource name
+    String selectedName = "Chưa chọn";
+    if (state.selectedResourceCodes.isNotEmpty) {
+      try {
+        final code = state.selectedResourceCodes.first;
+        // Tìm tên resource từ danh sách đã load
+        final res = state.resources.firstWhere((e) => e.resourceCode == code,
+            orElse: () => StationResourceModel(resourceName: code));
+        selectedName = res.resourceName ?? code;
+      } catch (_) {}
+    } else if (state.bookingType == 'auto') {
+      selectedName = "Tự động chọn";
+    }
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: kCardColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black45, blurRadius: 10, offset: Offset(0, -2))
-        ],
-      ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(statusText,
-                        style: const TextStyle(
-                            color: kNeonCyan,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14)),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                            "${state.selectedTime} - ${state.endTime} (${state.duration}h)",
-                            style: const TextStyle(
-                                color: Colors.white54, fontSize: 12)),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.circle, size: 4, color: Colors.grey),
-                        const SizedBox(width: 8),
-                        Text(state.selectedArea?.areaName ?? "",
-                            style: const TextStyle(
-                                color: Colors.white54, fontSize: 12)),
-                      ],
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(formatCurrency(state.totalPrice),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold)),
-                    Text("${formatCurrency(state.selectedArea?.price ?? 0)}/h",
-                        style: const TextStyle(
-                            color: Colors.white38, fontSize: 10)),
-                  ],
-                )
-              ],
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+            color: kCardColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        child: SafeArea(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+            // --- UPDATED: Display Resource Name instead of Count
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Đã chọn:",
+                      style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text(selectedName,
+                      style: const TextStyle(
+                          color: kNeonCyan,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
+                      overflow: TextOverflow.ellipsis),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
+            const SizedBox(width: 16),
+            Text(formatCurrency(state.totalPrice),
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold))
+          ]),
+          const SizedBox(height: 16),
+          SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: hasSelection ? () {} : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimaryPurple,
-                  disabledBackgroundColor: Colors.grey[800],
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: hasSelection ? 4 : 0,
-                  shadowColor: kPrimaryPurple.withOpacity(0.5),
-                ),
-                child: Text(
-                  hasSelection ? "XÁC NHẬN ĐẶT LỊCH" : "CHỌN MÁY ĐỂ TIẾP TỤC",
-                  style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: hasSelection ? Colors.white : Colors.white38),
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+                  onPressed: hasSel ? () {} : null,
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: kPrimaryPurple),
+                  child: const Text("XÁC NHẬN ĐẶT LỊCH",
+                      style: TextStyle(color: Colors.white))))
+        ])));
   }
 }

@@ -4,53 +4,55 @@ part of 'booking_page_bloc.dart';
 enum BookingStatus { initial, loading, success, failure }
 
 // blocState
-enum BookingBlocState { initial, locationErrorState, filterResetState }
+enum BookingBlocState {
+  initial,
+  locationErrorState,
+  filterResetState,
+  unauthenticated
+}
 
 class BookingPageState extends Equatable {
   final BookingBlocState blocState;
   final BookingStatus status;
   final String message;
-
   final bool isSelectingStation;
 
-  // Station Selection & Pagination Data
-  final List<StationDetailModel>
-      filteredStations; // Danh sách hiển thị hiện tại
-  final bool hasReachedMaxStations; // Đã tải hết tất cả trang chưa
-  final int currentPage; // 'current' trong meta
-  final int totalItems; // 'total' trong meta
-  final int pageSize; // 'pageSize' trong meta
-  final String searchQuery; // Lưu lại để dùng khi LoadMore
-
-  // Location Filters
+  // Data
+  final List<StationDetailModel> filteredStations;
+  final int currentPage;
+  final int totalItems;
+  final int pageSize;
+  final String searchQuery;
   final List<ProvinceModel> provinces;
   final List<DistrictModel> districts;
   final ProvinceModel? selectedProvince;
   final DistrictModel? selectedDistrict;
 
+  // Selection
   final StationDetailModel? selectedStation;
   final StationSpaceModel? selectedSpace;
   final AreaModel? selectedArea;
-
   final int selectedDateIndex;
   final String selectedTime;
   final double duration;
   final String? bookingType;
   final List<String> selectedResourceCodes;
-  final List<ResourceRow> resourceRows;
 
-  // Data Lists
+  // Lists
+  final List<ScheduleModel> schedules;
   final List<StationSpaceModel> spaces;
   final List<AreaModel> areas;
   final List<PlatformSpaceModel> platformSpaces;
+  final List<StationResourceModel> resources;
+  // --- UPDATED: availableTimes changed from List<String> to List<TimeslotModel> ---
+  final List<TimeslotModel> availableTimes;
 
   const BookingPageState({
     this.blocState = BookingBlocState.initial,
     this.status = BookingStatus.initial,
     this.message = '',
-    this.isSelectingStation = false,
+    this.isSelectingStation = true,
     this.filteredStations = const [],
-    this.hasReachedMaxStations = false,
     this.currentPage = 0,
     this.totalItems = 0,
     this.pageSize = 10,
@@ -63,30 +65,33 @@ class BookingPageState extends Equatable {
     this.selectedSpace,
     this.selectedArea,
     this.selectedDateIndex = 0,
-    this.selectedTime = '14:00',
-    this.duration = 2.0,
+    this.selectedTime = '', // KHÔNG CHỌN MẶC ĐỊNH
+    this.duration = 1.0,
     this.bookingType,
     this.selectedResourceCodes = const [],
-    this.resourceRows = const [],
+    this.schedules = const [],
     this.spaces = const [],
     this.areas = const [],
     this.platformSpaces = const [],
+    this.resources = const [],
+    this.availableTimes = const [],
   });
 
   double get totalPrice {
-    int machineCount =
+    int count =
         selectedResourceCodes.isEmpty ? 1 : selectedResourceCodes.length;
-    return duration * (selectedArea?.price ?? 0) * machineCount;
+    return duration * (selectedArea?.price ?? 0) * count;
   }
 
   String get endTime {
+    if (selectedTime.isEmpty) return "--:--";
     List<String> parts = selectedTime.split(':');
     int hour = int.parse(parts[0]);
     int minute = int.parse(parts[1]);
-    double totalHours = hour + (minute / 60.0) + duration;
-    int endHour = totalHours.floor() % 24;
-    int endMinute = ((totalHours - totalHours.floor()) * 60).round();
-    return "${endHour.toString().padLeft(2, '0')}:${endMinute.toString().padLeft(2, '0')}";
+    double total = hour + (minute / 60.0) + duration;
+    int endH = total.floor() % 24;
+    int endM = ((total - total.floor()) * 60).round();
+    return "${endH.toString().padLeft(2, '0')}:${endM.toString().padLeft(2, '0')}";
   }
 
   BookingPageState copyWith({
@@ -95,10 +100,8 @@ class BookingPageState extends Equatable {
     String? message,
     bool? isSelectingStation,
     List<StationDetailModel>? filteredStations,
-    bool? hasReachedMaxStations,
     int? currentPage,
     int? totalItems,
-    int? pageSize,
     String? searchQuery,
     List<ProvinceModel>? provinces,
     List<DistrictModel>? districts,
@@ -115,10 +118,13 @@ class BookingPageState extends Equatable {
     String? bookingType,
     bool clearBookingType = false,
     List<String>? selectedResourceCodes,
-    List<ResourceRow>? resourceRows,
+    List<ScheduleModel>? schedules,
     List<StationSpaceModel>? spaces,
     List<AreaModel>? areas,
     List<PlatformSpaceModel>? platformSpaces,
+    List<StationResourceModel>? resources,
+    // --- UPDATED TYPE ---
+    List<TimeslotModel>? availableTimes,
   }) {
     return BookingPageState(
       blocState: blocState ?? BookingBlocState.initial,
@@ -126,11 +132,8 @@ class BookingPageState extends Equatable {
       message: message ?? this.message,
       isSelectingStation: isSelectingStation ?? this.isSelectingStation,
       filteredStations: filteredStations ?? this.filteredStations,
-      hasReachedMaxStations:
-          hasReachedMaxStations ?? this.hasReachedMaxStations,
       currentPage: currentPage ?? this.currentPage,
       totalItems: totalItems ?? this.totalItems,
-      pageSize: pageSize ?? this.pageSize,
       searchQuery: searchQuery ?? this.searchQuery,
       provinces: provinces ?? this.provinces,
       districts: districts ?? this.districts,
@@ -149,10 +152,12 @@ class BookingPageState extends Equatable {
       bookingType: clearBookingType ? null : (bookingType ?? this.bookingType),
       selectedResourceCodes:
           selectedResourceCodes ?? this.selectedResourceCodes,
-      resourceRows: resourceRows ?? this.resourceRows,
+      schedules: schedules ?? this.schedules,
       spaces: spaces ?? this.spaces,
       areas: areas ?? this.areas,
       platformSpaces: platformSpaces ?? this.platformSpaces,
+      resources: resources ?? this.resources,
+      availableTimes: availableTimes ?? this.availableTimes,
     );
   }
 
@@ -163,10 +168,8 @@ class BookingPageState extends Equatable {
         message,
         isSelectingStation,
         filteredStations,
-        hasReachedMaxStations,
         currentPage,
         totalItems,
-        pageSize,
         searchQuery,
         provinces,
         districts,
@@ -180,9 +183,9 @@ class BookingPageState extends Equatable {
         duration,
         bookingType,
         selectedResourceCodes,
-        resourceRows,
+        resources,
+        availableTimes,
         spaces,
-        areas,
-        platformSpaces,
+        areas
       ];
 }

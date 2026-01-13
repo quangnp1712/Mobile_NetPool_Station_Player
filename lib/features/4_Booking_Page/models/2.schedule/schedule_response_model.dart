@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/schedule_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
-class ResoucreListModelResponse extends BaseResponse {
-  List<StationResourceModel>? data;
+class ScheduleModelResponse extends BaseResponse {
+  ScheduleModel? data;
   MetaModel? meta;
 
-  ResoucreListModelResponse({
+  ScheduleModelResponse({
     this.data,
     this.meta,
     status,
@@ -19,14 +19,10 @@ class ResoucreListModelResponse extends BaseResponse {
     message,
   });
 
-  factory ResoucreListModelResponse.fromMap(Map<String, dynamic> map) {
-    return ResoucreListModelResponse(
+  factory ScheduleModelResponse.fromMap(Map<String, dynamic> map) {
+    return ScheduleModelResponse(
       data: map['data'] != null
-          ? List<StationResourceModel>.from(
-              (map['data'] as List).map(
-                (x) => StationResourceModel.fromMap(x as Map<String, dynamic>),
-              ),
-            )
+          ? ScheduleModel.fromMap(map['data'] as Map<String, dynamic>)
           : null,
       meta: map['meta'] != null
           ? MetaModel.fromMap(map['meta'] as Map<String, dynamic>)
@@ -40,6 +36,6 @@ class ResoucreListModelResponse extends BaseResponse {
     );
   }
 
-  factory ResoucreListModelResponse.fromJson(Map<String, dynamic> source) =>
-      ResoucreListModelResponse.fromMap(source);
+  factory ScheduleModelResponse.fromJson(Map<String, dynamic> source) =>
+      ScheduleModelResponse.fromMap(source);
 }

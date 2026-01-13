@@ -7,6 +7,8 @@ sealed class BookingPageEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class BookingInitEvent extends BookingPageEvent {}
+
 class LoadBookingDataEvent extends BookingPageEvent {}
 
 class SearchStationEvent extends BookingPageEvent {

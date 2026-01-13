@@ -1,9 +1,9 @@
 // --- 1. Stations ---
 import 'package:flutter/material.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1_station/station_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2_space/space_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2_space/station_space_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_area/area_list_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/space_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/station_space_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_area/area_list_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
 
 final List<ProvinceModel> kProvinces = [

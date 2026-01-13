@@ -21,4 +21,7 @@ class BookingApi {
   //$  Resouce Spec
   final String pubResouceSpecUrl = "$domainUrl/v1/pub/station-resources/specs";
   final String apiResouceSpecUrl = "$domainUrl/v1/api/station-resources/specs";
+
+  //$  Schedule
+  final String pubScheduleUrl = "$domainUrl/v1/pub/schedules";
 }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_spec_model.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class StationResourceModel {
@@ -12,9 +12,15 @@ class StationResourceModel {
   String? resourceCode;
   String? typeCode;
   String? typeName;
-  String? allowDirectPayment;
+  bool? allowDirectPayment;
   String? statusCode;
   String? statusName;
+
+  int? displayOrder;
+  String? rowCode;
+  String? rowName;
+
+  int? price;
 
   StationResourceModel({
     this.stationResourceId,
@@ -27,6 +33,10 @@ class StationResourceModel {
     this.allowDirectPayment,
     this.statusCode,
     this.statusName,
+    this.displayOrder,
+    this.rowCode,
+    this.rowName,
+    this.price,
   });
 
   Map<String, dynamic> toMap() {
@@ -41,6 +51,10 @@ class StationResourceModel {
       'allowDirectPayment': allowDirectPayment,
       'statusCode': statusCode,
       'statusName': statusName,
+      'displayOrder': displayOrder,
+      'rowCode': rowCode,
+      'rowName': rowName,
+      'price': price,
     };
   }
 
@@ -60,12 +74,17 @@ class StationResourceModel {
       typeCode: map['typeCode'] != null ? map['typeCode'] as String : null,
       typeName: map['typeName'] != null ? map['typeName'] as String : null,
       allowDirectPayment: map['allowDirectPayment'] != null
-          ? map['allowDirectPayment'] as String
+          ? map['allowDirectPayment'] as bool
           : null,
       statusCode:
           map['statusCode'] != null ? map['statusCode'] as String : null,
       statusName:
           map['statusName'] != null ? map['statusName'] as String : null,
+      rowCode: map['rowCode'] != null ? map['rowCode'] as String : null,
+      rowName: map['rowName'] != null ? map['rowName'] as String : null,
+      displayOrder:
+          map['displayOrder'] != null ? map['displayOrder'] as int : null,
+      price: map['price'] != null ? map['price'] as int : null,
     );
   }
 
@@ -77,18 +96,23 @@ class StationResourceModel {
   StationResourceModel copyWith({
     int? stationResourceId,
     int? areaId,
+    int? price,
     ResourceSpecModel? spec,
     String? resourceCode,
     String? resourceName,
     String? typeCode,
     String? typeName,
-    String? allowDirectPayment,
+    bool? allowDirectPayment,
     String? statusCode,
     String? statusName,
+    int? displayOrder,
+    String? rowCode,
+    String? rowName,
   }) {
     return StationResourceModel(
       stationResourceId: stationResourceId ?? this.stationResourceId,
       areaId: areaId ?? this.areaId,
+      price: price ?? this.price,
       spec: spec ?? this.spec,
       resourceCode: resourceCode ?? this.resourceCode,
       resourceName: resourceName ?? this.resourceName,
@@ -97,6 +121,9 @@ class StationResourceModel {
       allowDirectPayment: allowDirectPayment ?? this.allowDirectPayment,
       statusCode: statusCode ?? this.statusCode,
       statusName: statusName ?? this.statusName,
+      displayOrder: displayOrder ?? this.displayOrder,
+      rowCode: rowCode ?? this.rowCode,
+      rowName: rowName ?? this.rowName,
     );
   }
 }

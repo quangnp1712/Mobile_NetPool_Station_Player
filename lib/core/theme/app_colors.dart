@@ -21,6 +21,7 @@ const Color kTextWhite = Colors.white;
 const Color kTextGrey = Colors.white54;
 const Color kBusyColor = Colors.redAccent;
 const Color kGreenColor = Color(0xFF00E676);
+const Color kSelectedColor = Color(0xFF00E5FF);
 
 class AppColors {
   static const bgDark = Color(0xFF3B1F5A);

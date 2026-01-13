@@ -3,7 +3,7 @@ import 'package:mobile_netpool_station_player/core/network/exceptions/app_except
 import 'package:mobile_netpool_station_player/core/network/exceptions/exception_handlers.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/shared_preferences/auth_shared_preferences.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/api/booking_api.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
 
 abstract class IBookingRepository {
   Future<Map<String, dynamic>> listStation(
@@ -31,6 +31,19 @@ abstract class IBookingRepository {
     String? statusCodes,
     String? current,
     String? pageSize,
+  );
+  Future<Map<String, dynamic>> getResouceDetail(
+    String? resouceId,
+  );
+  Future<Map<String, dynamic>> findAllScheduleWithStation(
+    String? stationId,
+    String? dateTo,
+    String? dateFrom,
+    String? statusCodes,
+    String? pageSize,
+  );
+  Future<Map<String, dynamic>> findDetailWithSchedule(
+    String? scheduleId,
   );
 }
 
@@ -167,7 +180,87 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Accept': '*/*',
           'Authorization': 'Bearer $jwtToken',
         },
-      ).timeout(const Duration(seconds: 30));
+      ).timeout(const Duration(seconds: 180));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! get Resouce Detail
+  @override
+  Future<Map<String, dynamic>> getResouceDetail(
+    String? resouceId,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse("$pubResouceUrl/$resouceId");
+      final client = http.Client();
+      final response = await client.get(
+        uri,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      ).timeout(const Duration(seconds: 180));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! find All Schedule
+  @override
+  Future<Map<String, dynamic>> findAllScheduleWithStation(
+    String? stationId,
+    String? dateFrom,
+    String? dateTo,
+    String? statusCodes,
+    String? pageSize,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse(
+          "$pubScheduleUrl/station?stationId=$stationId&dateRange=$dateFrom&dateRange=$dateTo&statusCodes=$statusCodes&pageSize=$pageSize");
+      final client = http.Client();
+      final response = await client.get(
+        uri,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      ).timeout(const Duration(seconds: 50));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! find Detail Schedule
+  @override
+  Future<Map<String, dynamic>> findDetailWithSchedule(
+    String? scheduleId,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse("$pubScheduleUrl/$scheduleId");
+      final client = http.Client();
+      final response = await client.get(
+        uri,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      ).timeout(const Duration(seconds: 50));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);
