@@ -2,12 +2,12 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/7.account/account_info_model.dart';
 
-class ResoucreModelResponse extends BaseResponse {
-  StationResourceModel? data;
+class AccountInfoModelResponse extends BaseResponse {
+  AccountInfoModel? data;
 
-  ResoucreModelResponse({
+  AccountInfoModelResponse({
     this.data,
     status,
     success,
@@ -16,20 +16,20 @@ class ResoucreModelResponse extends BaseResponse {
     message,
   });
 
-  factory ResoucreModelResponse.fromMap(Map<String, dynamic> map) {
-    return ResoucreModelResponse(
+  factory AccountInfoModelResponse.fromMap(Map<String, dynamic> map) {
+    return AccountInfoModelResponse(
       data: map['data'] != null
-          ? StationResourceModel.fromMap(map['data'] as Map<String, dynamic>)
+          ? AccountInfoModel.fromMap(map['data'] as Map<String, dynamic>)
           : null,
       status: map['status'] != null ? map['status'] as String : null,
       success: map['success'] != null ? map['success'] as bool : null,
-      errorCode: map['errorCode'] != null ? map['errorCode'] as String : null,
+      errorCode: map['errorCode'] as dynamic,
       responseAt:
           map['responseAt'] != null ? map['responseAt'] as String : null,
       message: map['message'] != null ? map['message'] as String : null,
     );
   }
 
-  factory ResoucreModelResponse.fromJson(Map<String, dynamic> source) =>
-      ResoucreModelResponse.fromMap(source);
+  factory AccountInfoModelResponse.fromJson(Map<String, dynamic> source) =>
+      AccountInfoModelResponse.fromMap(source);
 }

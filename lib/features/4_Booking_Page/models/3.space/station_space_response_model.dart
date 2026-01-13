@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4.area/area_list_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3.space/station_space_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
-class AreaListModelResponse extends BaseResponse {
-  List<AreaModel>? data;
+class StationSpaceListModelResponse extends BaseResponse {
+  List<StationSpaceModel>? data;
   MetaModel? meta;
 
-  AreaListModelResponse({
+  StationSpaceListModelResponse({
     this.data,
     this.meta,
     status,
@@ -19,12 +19,23 @@ class AreaListModelResponse extends BaseResponse {
     message,
   });
 
-  factory AreaListModelResponse.fromMap(Map<String, dynamic> map) {
-    return AreaListModelResponse(
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'data': data?.map((x) => x.toMap()).toList(),
+      'status': status,
+      'success': success,
+      'errorCode': errorCode,
+      'responseAt': responseAt,
+      'message': message,
+    };
+  }
+
+  factory StationSpaceListModelResponse.fromMap(Map<String, dynamic> map) {
+    return StationSpaceListModelResponse(
       data: map['data'] != null
-          ? List<AreaModel>.from(
+          ? List<StationSpaceModel>.from(
               (map['data'] as List).map(
-                (x) => AreaModel.fromMap(x as Map<String, dynamic>),
+                (x) => StationSpaceModel.fromMap(x as Map<String, dynamic>),
               ),
             )
           : null,
@@ -40,6 +51,8 @@ class AreaListModelResponse extends BaseResponse {
     );
   }
 
-  factory AreaListModelResponse.fromJson(Map<String, dynamic> source) =>
-      AreaListModelResponse.fromMap(source);
+  String toJson() => json.encode(toMap());
+
+  factory StationSpaceListModelResponse.fromJson(Map<String, dynamic> source) =>
+      StationSpaceListModelResponse.fromMap(source);
 }

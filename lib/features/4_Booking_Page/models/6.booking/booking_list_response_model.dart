@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/station_space_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/6.booking/booking_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
-class StationSpaceListModelResponse extends BaseResponse {
-  List<StationSpaceModel>? data;
+class BookingListModelResponse extends BaseResponse {
+  List<BookingModel>? data;
   MetaModel? meta;
 
-  StationSpaceListModelResponse({
+  BookingListModelResponse({
     this.data,
     this.meta,
     status,
@@ -19,23 +19,12 @@ class StationSpaceListModelResponse extends BaseResponse {
     message,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'data': data?.map((x) => x.toMap()).toList(),
-      'status': status,
-      'success': success,
-      'errorCode': errorCode,
-      'responseAt': responseAt,
-      'message': message,
-    };
-  }
-
-  factory StationSpaceListModelResponse.fromMap(Map<String, dynamic> map) {
-    return StationSpaceListModelResponse(
+  factory BookingListModelResponse.fromMap(Map<String, dynamic> map) {
+    return BookingListModelResponse(
       data: map['data'] != null
-          ? List<StationSpaceModel>.from(
+          ? List<BookingModel>.from(
               (map['data'] as List).map(
-                (x) => StationSpaceModel.fromMap(x as Map<String, dynamic>),
+                (x) => BookingModel.fromMap(x as Map<String, dynamic>),
               ),
             )
           : null,
@@ -51,8 +40,6 @@ class StationSpaceListModelResponse extends BaseResponse {
     );
   }
 
-  String toJson() => json.encode(toMap());
-
-  factory StationSpaceListModelResponse.fromJson(Map<String, dynamic> source) =>
-      StationSpaceListModelResponse.fromMap(source);
+  factory BookingListModelResponse.fromJson(Map<String, dynamic> source) =>
+      BookingListModelResponse.fromMap(source);
 }

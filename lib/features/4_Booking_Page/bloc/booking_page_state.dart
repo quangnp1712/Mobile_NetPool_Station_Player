@@ -44,8 +44,9 @@ class BookingPageState extends Equatable {
   final List<AreaModel> areas;
   final List<PlatformSpaceModel> platformSpaces;
   final List<StationResourceModel> resources;
-  // --- UPDATED: availableTimes changed from List<String> to List<TimeslotModel> ---
   final List<TimeslotModel> availableTimes;
+
+  final int? userBalance;
 
   const BookingPageState({
     this.blocState = BookingBlocState.initial,
@@ -75,6 +76,7 @@ class BookingPageState extends Equatable {
     this.platformSpaces = const [],
     this.resources = const [],
     this.availableTimes = const [],
+    this.userBalance = 0,
   });
 
   double get totalPrice {
@@ -123,8 +125,8 @@ class BookingPageState extends Equatable {
     List<AreaModel>? areas,
     List<PlatformSpaceModel>? platformSpaces,
     List<StationResourceModel>? resources,
-    // --- UPDATED TYPE ---
     List<TimeslotModel>? availableTimes,
+    int? userBalance,
   }) {
     return BookingPageState(
       blocState: blocState ?? BookingBlocState.initial,
@@ -158,6 +160,7 @@ class BookingPageState extends Equatable {
       platformSpaces: platformSpaces ?? this.platformSpaces,
       resources: resources ?? this.resources,
       availableTimes: availableTimes ?? this.availableTimes,
+      userBalance: userBalance ?? this.userBalance,
     );
   }
 
@@ -186,6 +189,7 @@ class BookingPageState extends Equatable {
         resources,
         availableTimes,
         spaces,
-        areas
+        areas,
+        userBalance
       ];
 }

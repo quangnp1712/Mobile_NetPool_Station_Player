@@ -3,7 +3,8 @@ import 'package:mobile_netpool_station_player/core/network/exceptions/app_except
 import 'package:mobile_netpool_station_player/core/network/exceptions/exception_handlers.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/shared_preferences/auth_shared_preferences.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/api/booking_api.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/6.booking/booking_model.dart';
 
 abstract class IBookingRepository {
   Future<Map<String, dynamic>> listStation(
@@ -44,6 +45,13 @@ abstract class IBookingRepository {
   );
   Future<Map<String, dynamic>> findDetailWithSchedule(
     String? scheduleId,
+  );
+
+  Future<Map<String, dynamic>> createBooking(
+    BookingModel booking,
+  );
+  Future<Map<String, dynamic>> updateBooking(
+    BookingModel booking,
   );
 }
 
@@ -261,6 +269,63 @@ class BookingRepository extends BookingApi implements IBookingRepository {
           'Authorization': 'Bearer $jwtToken',
         },
       ).timeout(const Duration(seconds: 50));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! create Booking
+  @override
+  Future<Map<String, dynamic>> createBooking(
+    BookingModel booking,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse(apiBookingUrl);
+
+      final client = http.Client();
+      final response = await client
+          .post(
+            uri,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              'Content-Type': 'application/json',
+              'Accept': '*/*',
+              'Authorization': 'Bearer $jwtToken',
+            },
+            body: booking.toJson(),
+          )
+          .timeout(const Duration(seconds: 50));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! update Booking
+  @override
+  Future<Map<String, dynamic>> updateBooking(
+    BookingModel booking,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse("$apiBookingUrl/${booking.bookingId}");
+      final client = http.Client();
+      final response = await client
+          .put(
+            uri,
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              'Content-Type': 'application/json',
+              'Accept': '*/*',
+              'Authorization': 'Bearer $jwtToken',
+            },
+            body: booking.toJson(),
+          )
+          .timeout(const Duration(seconds: 180));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);

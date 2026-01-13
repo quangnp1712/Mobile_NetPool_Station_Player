@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_spec_model.dart';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class StationResourceModel {

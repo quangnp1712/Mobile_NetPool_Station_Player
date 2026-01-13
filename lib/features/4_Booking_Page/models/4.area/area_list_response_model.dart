@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 import 'package:mobile_netpool_station_player/core/model/base_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_area/area_list_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4.area/area_list_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
 class AreaListModelResponse extends BaseResponse {

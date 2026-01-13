@@ -8,22 +8,22 @@ import 'package:mobile_netpool_station_player/core/services/location_service.dar
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/core/utils/utf8_encoding.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/data/mock_data.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1_station/station_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1_station/station_response_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1.station/station_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1.station/station_response_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/schedule_list_response_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/schedule_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/schedule_response_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/timeslot_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/space_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/space_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/station_space_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3_space/station_space_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_area/area_list_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4_area/area_list_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_list_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3.space/space_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3.space/space_response_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3.space/station_space_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/3.space/station_space_response_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4.area/area_list_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4.area/area_list_response_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_list_response_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_response_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_spec_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/repository/booking_repository.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_repository.dart';
@@ -364,18 +364,49 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       final res = await BookingRepository()
           .findDetailWithSchedule(schedule.scheduleId.toString());
       final detailData = ScheduleModelResponse.fromJson(res['body']).data;
-
       List<TimeslotModel> slots = detailData?.timeSlots ?? [];
 
-      // Determine if the day is valid for selection based on schedule properties
-      // Condition: "statusCode": "ENABLED" and "allowUpdate": true
+      // Check điều kiện ngày (Status ENABLED & allowUpdate)
       bool isDayValid = (detailData?.statusCode == "ENABLED" &&
           detailData?.allowUpdate == true);
 
-      // Mark individual slots based on parent day validity
-      for (var slot in slots) {
-        slot.isSelectable = isDayValid;
+      // --- UPDATED: Check giờ quá khứ nếu là hôm nay ---
+      DateTime now = DateTime.now();
+      DateTime? scheduleDate = DateTime.tryParse(schedule.date ?? "");
+
+      bool isToday = false;
+      if (scheduleDate != null) {
+        isToday = scheduleDate.year == now.year &&
+            scheduleDate.month == now.month &&
+            scheduleDate.day == now.day;
       }
+
+      for (var slot in slots) {
+        bool isTimeValid = true;
+
+        // Nếu là hôm nay, kiểm tra giờ
+        if (isToday && slot.begin != null) {
+          try {
+            List<String> parts = slot.begin!.split(':');
+            if (parts.length >= 2) {
+              int hour = int.parse(parts[0]);
+              int minute = int.parse(parts[1]);
+              DateTime slotTime =
+                  DateTime(now.year, now.month, now.day, hour, minute);
+
+              // Nếu giờ slot nhỏ hơn giờ hiện tại -> Invalid
+              if (slotTime.isBefore(now)) {
+                isTimeValid = false;
+              }
+            }
+          } catch (_) {}
+        }
+
+        // Kết hợp điều kiện ngày và điều kiện giờ
+        slot.isSelectable = isDayValid && isTimeValid;
+      }
+      // ---------------------------------------------------
+
       return slots;
     } catch (e) {
       return [];

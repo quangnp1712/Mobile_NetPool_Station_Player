@@ -1,4 +1,4 @@
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
 
 class ResourceRow {
   final String rowId;

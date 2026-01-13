@@ -7,9 +7,10 @@ import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/data/mock_data.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1_station/station_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5_resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1.station/station_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/bill_preview_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/shared_preferences/booking_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/widget/helper_widget.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
@@ -37,12 +38,12 @@ class _BookingPageState extends State<BookingPage> {
 
   void _startLoadingTimer() {
     _loadingTimer?.cancel(); // Hủy timer cũ nếu có
-    _loadingTimer = Timer(const Duration(seconds: 3), () {
+    _loadingTimer = Timer(const Duration(seconds: 4), () {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Hệ thống đang tải, vui lòng chờ..."),
-            duration: Duration(seconds: 3),
+            duration: Duration(seconds: 4),
             backgroundColor: kPrimaryPurple,
           ),
         );
@@ -666,7 +667,7 @@ class _BookingPageState extends State<BookingPage> {
       padding: const EdgeInsets.only(top: 40, left: 16, right: 16, bottom: 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF2B0C4E), Color(0xFF5A1CCB)],
+          colors: [Color.fromARGB(255, 99, 24, 134), Color(0xFF5A1CCB)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -737,14 +738,16 @@ class _BookingPageState extends State<BookingPage> {
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? kPrimaryPurple : kCardColor,
+                        color: isSelected
+                            ? kprimaryGlow.withOpacity(0.8)
+                            : kCardColor,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                             color: isSelected ? kNeonCyan : Colors.white10),
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                    color: kPrimaryPurple.withOpacity(0.4),
+                                    color: kprimaryGlow.withOpacity(0.4),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2))
                               ]
@@ -790,18 +793,20 @@ class _BookingPageState extends State<BookingPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color:
-                        isSelected ? kNeonCyan.withOpacity(0.15) : kCardColor,
+                    color: isSelected
+                        ? const Color.fromARGB(253, 203, 48, 224)
+                            .withOpacity(0.2)
+                        : kCardColor,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                        color: isSelected ? kNeonCyan : Colors.white10),
+                        color: isSelected ? kprimaryGlow : Colors.white10),
                   ),
                   child: Row(
                     children: [
                       Text(
                         a.areaName ?? "",
                         style: TextStyle(
-                          color: isSelected ? kNeonCyan : Colors.white70,
+                          color: isSelected ? kTextWhite : Colors.white70,
                           fontWeight:
                               isSelected ? FontWeight.bold : FontWeight.normal,
                         ),
@@ -889,14 +894,14 @@ class _BookingPageState extends State<BookingPage> {
             child: Container(
               width: 55,
               decoration: BoxDecoration(
-                color: isSelected ? kPrimaryPurple : kCardColor,
+                color: isSelected ? kprimaryGlow : kCardColor,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                    color: isSelected ? kPrimaryPurple : Colors.transparent),
+                    color: isSelected ? kprimaryGlow : Colors.transparent),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                            color: kPrimaryPurple.withOpacity(0.4),
+                            color: kprimaryGlow.withOpacity(0.4),
                             blurRadius: 8,
                             offset: const Offset(0, 2))
                       ]
@@ -944,7 +949,7 @@ class _BookingPageState extends State<BookingPage> {
             alignment: Alignment.center,
             child: Text("${state.duration}h",
                 style: const TextStyle(
-                    color: kNeonCyan,
+                    color: kprimaryGlow,
                     fontWeight: FontWeight.bold,
                     fontSize: 14)),
           ),
@@ -994,18 +999,18 @@ class _BookingPageState extends State<BookingPage> {
                           color: isDisabled
                               ? Colors.white10
                               : (sel
-                                  ? kNeonCyan.withOpacity(0.15)
+                                  ? kprimaryGlow.withOpacity(0.15)
                                   : kCardColor),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
                               color: isDisabled
                                   ? Colors.transparent
-                                  : (sel ? kNeonCyan : Colors.transparent))),
+                                  : (sel ? kprimaryGlow : Colors.transparent))),
                       child: Text(t,
                           style: TextStyle(
                               color: isDisabled
                                   ? Colors.white24
-                                  : (sel ? kNeonCyan : Colors.white60),
+                                  : (sel ? kprimaryGlow : Colors.white60),
                               fontWeight:
                                   sel ? FontWeight.bold : FontWeight.normal,
                               decoration: isDisabled
@@ -1164,10 +1169,10 @@ class _BookingPageState extends State<BookingPage> {
                       : (isSelected ? kCardColor : kCardColor);
                   Color borderColor = isBusy
                       ? Colors.transparent
-                      : (isSelected ? kSelectedColor : Colors.white10);
+                      : (isSelected ? kprimaryGlow : Colors.white10);
                   Color iconColor = isBusy
                       ? Colors.white24
-                      : (isSelected ? kSelectedColor : Colors.white54);
+                      : (isSelected ? kprimaryGlow : Colors.white54);
 
                   return InkWell(
                     onTap: isBusy
@@ -1183,7 +1188,7 @@ class _BookingPageState extends State<BookingPage> {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                    color: kSelectedColor.withOpacity(0.3),
+                                    color: kprimaryGlow.withOpacity(0.3),
                                     blurRadius: 10,
                                     spreadRadius: 1)
                               ]
@@ -1289,7 +1294,7 @@ class _BookingPageState extends State<BookingPage> {
               children: [
                 getIcon(
                   state.selectedSpace?.metadata?.icon,
-                  color: kNeonCyan,
+                  color: kprimaryGlow,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1438,7 +1443,7 @@ class _BookingPageState extends State<BookingPage> {
                       style: TextStyle(color: Colors.white54, fontSize: 12)),
                   Text(selectedName,
                       style: const TextStyle(
-                          color: kNeonCyan,
+                          color: kprimaryGlow,
                           fontWeight: FontWeight.bold,
                           fontSize: 16),
                       overflow: TextOverflow.ellipsis),
@@ -1457,7 +1462,15 @@ class _BookingPageState extends State<BookingPage> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                  onPressed: hasSel ? () {} : null,
+                  onPressed: hasSel
+                      ? () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) =>
+                                      BillPreviewPage(state: state)));
+                        }
+                      : null,
                   style:
                       ElevatedButton.styleFrom(backgroundColor: kPrimaryPurple),
                   child: const Text("XÁC NHẬN ĐẶT LỊCH",
