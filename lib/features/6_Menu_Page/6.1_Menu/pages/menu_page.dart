@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
+import 'package:mobile_netpool_station_player/features/8_BookingTemporary_Page/pages/booking_temp_page.dart';
 
 class MenuPage extends StatefulWidget {
   final Function? callback;
@@ -133,8 +134,13 @@ class _MenuPageState extends State<MenuPage> {
                     icon: Icons.help_outline,
                     title: 'Hỗ trợ & FAQ',
                     onTap: () {
-                      // TODO: điều hướng UI
-                    },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const BookingTempPage(),
+      ),
+    );
+  },
                   ),
 
                   // Nút đăng xuất

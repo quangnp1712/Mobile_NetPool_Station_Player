@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'wallet_payment_method.dart';
 import 'wallet_qr_box.dart';
-import 'package:intl/intl.dart';
+
 
 class WalletDepositSection extends StatelessWidget {
   final TextEditingController amountCtrl;
