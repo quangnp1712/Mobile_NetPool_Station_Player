@@ -1,23 +1,16 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
-// Lưu ý: Các import bên dưới là giả định dựa trên cấu trúc dự án của bạn.
-// Hãy đảm bảo đường dẫn import chính xác trong dự án thực tế.
-/*
-import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
-import 'package:mobile_netpool_station_player/core/theme/app_text_styles.dart';
-import 'package:mobile_netpool_station_player/features/2_Home_Page/models/station_model.dart';
-*/
 
 class AppFonts {
   static const String semibold = 'Semibold';
 }
-// --------------------------------------------------------------------------
 
-// --- MODEL STATION (Định nghĩa lại để code chạy được) ---
 class Station {
   final String id;
   final String name;
@@ -38,21 +31,20 @@ class Station {
   });
 }
 
-// --------------------------------------------------------------------------
 class TeamLobby {
   final String id;
-  final String title; // Tiêu đề phòng
-  final String gameName; // Tên game
-  final String gameImageUrl; // Ảnh game
-  final String rank; // Điều kiện rank
-  final int currentMembers; // Số người hiện tại
-  final int maxMembers; // Số người tối đa
-  final String hostName; // Tên chủ phòng
-  final String stationName; // Tên quán
-  final String address; // Địa chỉ (Show chi tiết hoặc rút gọn)
-  final double distance; // Khoảng cách
-  final String spaceType; // Loại phòng: Public, VIP, Couple...
-  final String startTime; // Thời gian bắt đầu (Lịch hẹn)
+  final String title;
+  final String gameName;
+  final String gameImageUrl;
+  final String rank;
+  final int currentMembers;
+  final int maxMembers;
+  final String hostName;
+  final String stationName;
+  final String address;
+  final double distance;
+  final String spaceType;
+  final String startTime;
 
   TeamLobby({
     required this.id,
@@ -81,11 +73,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // --- TRẠNG THÁI GIẢ LẬP ---
-  // TODO: Thay thế bằng logic kiểm tra Auth thật (SharedPreferences / Provider / Bloc)
   bool isLoggedIn = false;
 
-  // --- DỮ LIỆU GIẢ ---
   final List<Station> fakeStations = [
     Station(
       id: '1',
@@ -125,7 +114,6 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
-// --- DỮ LIỆU TEAM LOBBY GIẢ (Mới) ---
   final List<TeamLobby> fakeLobbies = [
     TeamLobby(
       id: '1',
@@ -176,19 +164,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Cho phép body tràn lên sau AppBar (để hiển thị background gradient đẹp hơn)
       extendBodyBehindAppBar: true,
 
-      // 2. HomeAppBar - Truyền trạng thái đăng nhập vào
       appBar: HomeAppBar(isLoggedIn: isLoggedIn),
 
-      // Body với nền Gradient
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF3B1F5A), // Màu tím đậm
-              kScaffoldBackground, // Màu nền tối
+              Color(0xFF3B1F5A), 
+              kScaffoldBackground, 
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -201,17 +186,14 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Đệm cho AppBar (vì extendBodyBehindAppBar = true)
                 const SizedBox(height: 15.0),
 
-                // 1. WELCOME CARD
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: WelcomeCard(),
                 ),
                 const SizedBox(height: 20),
 
-                // 2. QUICK ACTION CARD
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: QuickActionBar(),
@@ -219,14 +201,12 @@ class _HomePageState extends State<HomePage> {
 
                 const SizedBox(height: 30),
 
-                // 4. MỤC: TÌM ĐỒNG ĐỘI (MỚI)
-                // Đây là tính năng cốt lõi cho Role Player -> Nên đưa lên trên hoặc ngay sau Station
                 _buildSectionHeader("GHÉP ĐỘI NHANH", onTapViewMore: () {
                   debugPrint("Xem thêm ghép đội");
                 }),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 200, // Chiều cao cho card lobby
+                  height: 200, 
                   child: ListView.builder(
                     padding: const EdgeInsets.only(left: 16.0),
                     scrollDirection: Axis.horizontal,
@@ -242,7 +222,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 30),
 
-                // 5. MỤC: STATION GẦN BẠN
                 _buildSectionHeader("STATION GẦN BẠN", onTapViewMore: () {
                   debugPrint("Xem thêm station");
                 }),
@@ -262,7 +241,6 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
-                // Đệm dưới cùng (Đã bỏ Tin tức & Sự kiện)
                 const SizedBox(height: 80),
               ],
             ),
@@ -273,7 +251,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Helper Widget cho Header có nút Xem thêm
 Widget _buildSectionHeader(String title,
     {required VoidCallback onTapViewMore}) {
   return Padding(
@@ -306,7 +283,6 @@ Widget _buildSectionHeader(String title,
   );
 }
 
-// --- WIDGET MỚI: TEAM LOBBY CARD (GHÉP ĐỘI) ---
 class TeamLobbyCard extends StatelessWidget {
   final TeamLobby lobby;
 
@@ -315,7 +291,7 @@ class TeamLobbyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280, // Tăng chiều rộng
+      width: 280, 
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: kBoxBackground,
@@ -332,11 +308,9 @@ class TeamLobbyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HEADER: GAME + TIME + SPACE TYPE
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Ảnh Game (Avatar)
               Container(
                 width: 48,
                 height: 48,
@@ -344,14 +318,12 @@ class TeamLobbyCard extends StatelessWidget {
                   color: Colors.blueGrey.shade800,
                   borderRadius: BorderRadius.circular(10),
                   image: const DecorationImage(
-                    // Giả lập ảnh game
                     image: AssetImage('assets/images/logo_no_bg.png'),
                     fit: BoxFit.contain,
                   ),
                 ),
               ),
               const SizedBox(width: 10),
-              // Thông tin Game & Host
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +361,6 @@ class TeamLobbyCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Slot Badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -419,10 +390,8 @@ class TeamLobbyCard extends StatelessWidget {
 
           const Divider(
               color: Colors.white10,
-              height: 16), // FIX: Giảm height từ 20 xuống 16
+              height: 16), 
 
-          // BODY: INFO ROWS (Thông tin nhanh)
-          // 1. Thời gian & Lịch hẹn
           Row(
             children: [
               const Icon(Icons.access_time_filled,
@@ -430,7 +399,7 @@ class TeamLobbyCard extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  lobby.startTime, // Ví dụ: "20:00 Tối nay"
+                  lobby.startTime, 
                   style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ),
@@ -450,9 +419,8 @@ class TeamLobbyCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6), // FIX: Giảm height từ 8 xuống 6
+          const SizedBox(height: 6), 
 
-          // 2. Địa điểm & Khoảng cách
           Row(
             children: [
               const Icon(Icons.location_on, color: Colors.redAccent, size: 14),
@@ -470,7 +438,6 @@ class TeamLobbyCard extends StatelessWidget {
 
           const Spacer(),
 
-          // FOOTER: BUTTON JOIN
           SizedBox(
             width: double.infinity,
             height: 36,
@@ -496,9 +463,8 @@ class TeamLobbyCard extends StatelessWidget {
   }
 }
 
-// --- HOME APP BAR ---
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final bool isLoggedIn; // Nhận biến trạng thái
+  final bool isLoggedIn; 
 
   const HomeAppBar({super.key, this.isLoggedIn = false});
 
@@ -521,33 +487,30 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      // Cấu hình vị trí: Logo sát trái, button sát phải
-      titleSpacing: 16, // Khoảng cách từ mép trái màn hình đến logo
-      centerTitle: false, // Tắt căn giữa để logo nằm bên trái
+      titleSpacing: 16, 
+      centerTitle: false, 
 
       title: Padding(
         padding: const EdgeInsets.only(
-            top: 10.0), // Đẩy logo xuống 1 khoảng để căn giữa đẹp hơn
+            top: 10.0),
         child: GradientWidget(
           child: Image.asset(
             'assets/images/logo_no_bg.png',
             color: Colors.white,
-            height: 60, // Giới hạn chiều cao logo
+            height: 60, 
             errorBuilder: (context, error, stackTrace) => const Icon(
                 Icons.gamepad,
                 size: 40,
-                color: Colors.white), // Fallback icon
+                color: Colors.white),
           ),
         ),
       ),
       actions: [
-        // LOGIC: Chỉ hiện nút Đăng nhập khi chưa login
         if (!isLoggedIn)
           Padding(
             padding: const EdgeInsets.only(
-                right: 16, top: 10.0), // Căn chỉnh button cùng mức với logo
+                right: 16, top: 10.0), 
             child: Center(
-              // Center giúp căn giữa button theo chiều dọc trong AppBar
               child: ElevatedButton(
                 onPressed: () {
                   Get.toNamed(loginPageRoute);
@@ -560,7 +523,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  minimumSize: const Size(0, 36), // Chiều cao tối thiểu hợp lý
+                  minimumSize: const Size(0, 36),
                 ),
                 child: const Text(
                   'Đăng nhập',
@@ -572,7 +535,6 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           )
         else
-          // Tùy chọn: Hiện avatar hoặc nút thông báo khi đã login
           Padding(
             padding: const EdgeInsets.only(right: 16, top: 10.0),
             child: CircleAvatar(
@@ -588,7 +550,6 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(70);
 }
 
-// --- GRADIENT WIDGET ---
 class GradientWidget extends StatelessWidget {
   final Widget child;
   const GradientWidget({super.key, required this.child});
@@ -606,7 +567,6 @@ class GradientWidget extends StatelessWidget {
   }
 }
 
-// --- QUICK ACTION BAR ---
 class QuickActionBar extends StatefulWidget {
   const QuickActionBar({super.key});
 
@@ -615,29 +575,31 @@ class QuickActionBar extends StatefulWidget {
 }
 
 class _QuickActionBarState extends State<QuickActionBar> {
-  // CẬP NHẬT: Bổ sung thêm các tính năng quan trọng cho Role Player
   final List<Map<String, dynamic>> actions = [
     {
       'icon': Icons.account_balance_wallet,
       'label': 'Nạp tiền'
-    }, // Mới: Cần thiết cho thanh toán
-    {'icon': Icons.calendar_month, 'label': 'Đặt lịch'}, // Cốt lõi
+    }, 
+    {'icon': Icons.calendar_month, 'label': 'Đặt lịch'}, 
     {
       'icon': Icons.confirmation_number,
       'label': 'Voucher'
-    }, // Mới: Khuyến mãi/Quà tặng
-    {'icon': Icons.history, 'label': 'Lịch sử'}, // Rút gọn tên cho gọn
+    }, 
+    {'icon': Icons.history, 'label': 'Lịch sử'}, 
   ];
 
   void _onActionTap(String label) {
-    debugPrint('👉 Bạn đã chọn: $label');
+    if (label == 'Lịch sử') {
+      Get.toNamed(bookingHistoryPageRoute);
+    } else {
+      debugPrint('👉 Bạn đã chọn: $label');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // SỬA: Chuyển sang SingleChildScrollView để cuộn ngang nếu danh sách dài
     return SizedBox(
-      height: 90, // Chiều cao cố định cho vùng action
+      height: 90, 
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         scrollDirection: Axis.horizontal,
@@ -646,7 +608,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
           final action = actions[index];
           return Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: 12), // Khoảng cách giữa các item
+                horizontal: 12), 
             child: GestureDetector(
               onTap: () => _onActionTap(action['label'] as String),
               child: Column(
@@ -657,7 +619,6 @@ class _QuickActionBarState extends State<QuickActionBar> {
                     decoration: const BoxDecoration(
                       color: Color(0xFF9C27B0),
                       shape: BoxShape.circle,
-                      // Thêm hiệu ứng bóng nhẹ cho nút
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black26,
@@ -668,7 +629,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
                     ),
                     child: Icon(
                       action['icon'] as IconData,
-                      size: 26, // Giảm size một chút để cân đối
+                      size: 26, 
                       color: Colors.white,
                     ),
                   ),
@@ -677,7 +638,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
                     action['label'] as String,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12, // Tăng nhẹ font size cho dễ đọc
+                      fontSize: 12, 
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -691,7 +652,6 @@ class _QuickActionBarState extends State<QuickActionBar> {
   }
 }
 
-// --- STATION CARD ---
 class StationCard extends StatelessWidget {
   final Station station;
   const StationCard({super.key, required this.station});
@@ -890,7 +850,6 @@ class StationCard extends StatelessWidget {
   }
 }
 
-// --- WELCOME CARD ---
 class WelcomeCard extends StatefulWidget {
   const WelcomeCard({super.key});
 
@@ -906,7 +865,6 @@ class _WelcomeCardState extends State<WelcomeCard> {
   void initState() {
     super.initState();
     _now = DateTime.now();
-    // Cập nhật mỗi giây để đảm bảo thời gian luôn đúng
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -918,7 +876,7 @@ class _WelcomeCardState extends State<WelcomeCard> {
 
   @override
   void dispose() {
-    _timer.cancel(); // Hủy timer khi widget bị hủy để tránh rò rỉ bộ nhớ
+    _timer.cancel(); 
     super.dispose();
   }
 
@@ -927,10 +885,8 @@ class _WelcomeCardState extends State<WelcomeCard> {
     if (hour >= 5 && hour < 11) {
       return "Chào buổi sáng";
     } else if (hour >= 11 && hour < 13) {
-      // 11:00 - 12:59: Chào buổi trưa
       return "Chào buổi trưa";
     } else if (hour >= 13 && hour < 18) {
-      // 13:00 - 17:59: Chào buổi chiều
       return "Chào buổi chiều";
     } else {
       return "Chào buổi tối";
@@ -938,7 +894,6 @@ class _WelcomeCardState extends State<WelcomeCard> {
   }
 
   String _getFormattedDate() {
-    // Định dạng thủ công cho tiếng Việt: Thứ X, dd/MM/yyyy
     List<String> weekDays = [
       "Thứ 2",
       "Thứ 3",
@@ -948,7 +903,6 @@ class _WelcomeCardState extends State<WelcomeCard> {
       "Thứ 7",
       "Chủ Nhật"
     ];
-    // weekday trả về từ 1 (Thứ 2) đến 7 (Chủ Nhật)
     String weekDay = weekDays[_now.weekday - 1];
     String day = _now.day.toString().padLeft(2, '0');
     String month = _now.month.toString().padLeft(2, '0');
@@ -989,7 +943,7 @@ class _WelcomeCardState extends State<WelcomeCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "${_getGreeting()}, Mike",
+                _getGreeting(),
                 style: const TextStyle(
                   color: Colors.white,
                 ),
@@ -1009,7 +963,6 @@ class _WelcomeCardState extends State<WelcomeCard> {
     );
   }
 }
-// --- CÁC MODELS BỔ SUNG (Đã sửa lỗi thiếu ngoặc đóng) ---
 
 class StationDetailModel {
   int? stationId;

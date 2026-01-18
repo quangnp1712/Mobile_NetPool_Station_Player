@@ -1,4 +1,4 @@
-// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: curly_braces_in_flow_control_structures, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +6,6 @@ import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/bloc/station_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/models/1_station/station_model.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/widgets/helper_widget.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
@@ -22,14 +21,6 @@ class StationPage extends StatefulWidget {
 class _StationPageState extends State<StationPage> {
   StationPageBloc bloc = StationPageBloc();
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _uiTags = [
-    "All",
-    "Net",
-    "Bida",
-    "PlayStation",
-    "VIP",
-    "PC High End"
-  ];
 
   @override
   void initState() {
@@ -66,36 +57,25 @@ class _StationPageState extends State<StationPage> {
           backgroundColor: kBgColor,
           body: Column(
             children: [
-              // ================= HEADER CONTAINER =================
               _buildHeader(context, state),
-
-              // ================= LIST STATION =================
               Expanded(
                 child: Builder(builder: (context) {
                   if (state.status == StationStatus.loading) {
                     return Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Căn giữa nội dung theo chiều dọc
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const CircularProgressIndicator(color: kNeonCyan),
-
-                          // Chỉ hiển thị text khi có nội dung message (sau 5s delay)
                           if (state.message.isNotEmpty) ...[
-                            const SizedBox(
-                                height:
-                                    16), // Khoảng cách giữa vòng xoay và chữ
+                            const SizedBox(height: 16),
                             Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal:
-                                      32.0), // Padding 2 bên để chữ không sát lề
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 32.0),
                               child: Text(
                                 state.message,
-                                textAlign:
-                                    TextAlign.center, // Căn giữa dòng chữ
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
-                                  color: Colors
-                                      .grey, // Màu chữ (bạn có thể đổi thành kNeonCyan hoặc trắng)
+                                  color: Colors.grey,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                 ),
@@ -142,8 +122,6 @@ class _StationPageState extends State<StationPage> {
   }
 
   Widget _buildHeader(BuildContext context, StationPageState state) {
-    // Tạo danh sách tags động từ state.platformSpaces
-    // Bao gồm cả tên và màu sắc để hiển thị ở filter bar (nếu cần)
     final dynamicTags = ["All"];
     if (state.platformSpaces.isNotEmpty) {
       dynamicTags.addAll(state.platformSpaces
@@ -168,7 +146,6 @@ class _StationPageState extends State<StationPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Row 1: Title + Near Me Button
               const Text("Chọn Station",
                   style: TextStyle(
                       fontSize: 20,
@@ -206,10 +183,7 @@ class _StationPageState extends State<StationPage> {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Row 2: Search Bar
           Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -248,8 +222,6 @@ class _StationPageState extends State<StationPage> {
             ),
           ),
           const SizedBox(height: 10),
-          // Row 3: Dropdowns (Province/District) + Refresh
-
           Row(
             children: [
               Expanded(
@@ -286,8 +258,6 @@ class _StationPageState extends State<StationPage> {
                 ),
               ),
               const SizedBox(width: 8),
-
-              // District Dropdown
               Expanded(
                 child: Container(
                   height: 38,
@@ -322,8 +292,6 @@ class _StationPageState extends State<StationPage> {
                 ),
               ),
               const SizedBox(width: 8),
-
-              // Refresh Button
               Container(
                 height: 38,
                 width: 38,
@@ -340,10 +308,7 @@ class _StationPageState extends State<StationPage> {
               ),
             ],
           ),
-
           const SizedBox(height: 10),
-
-          // Row 4: Filter Tags (Động)
           SizedBox(
             height: 28,
             child: ListView.separated(
@@ -383,7 +348,6 @@ class _StationPageState extends State<StationPage> {
   }
 
   Widget _buildStationCard(BuildContext context, StationDetailModel station) {
-    // Collect tags from spaces, bao gồm cả màu sắc
     List<Map<String, String>> displayTags = [];
     if (station.space != null) {
       for (var s in station.space!) {
@@ -391,7 +355,6 @@ class _StationPageState extends State<StationPage> {
         final bgColor = s.space?.metadata?.bgColor;
 
         if (typeName != null) {
-          // Tránh trùng lặp tag
           if (!displayTags.any((element) => element['name'] == typeName)) {
             displayTags.add({'name': typeName, 'color': bgColor ?? ""});
           }
@@ -399,7 +362,6 @@ class _StationPageState extends State<StationPage> {
       }
     }
 
-    // Fallback nếu không có tag nào
     if (displayTags.isEmpty) {
       displayTags.add({'name': 'Chưa có loại hình', 'color': ''});
     }
@@ -454,8 +416,6 @@ class _StationPageState extends State<StationPage> {
                         const SizedBox(width: 10),
                       ],
                     ),
-
-                    // Số điện thoại
                     Row(
                       children: [
                         const Icon(Icons.phone,
@@ -497,16 +457,13 @@ class _StationPageState extends State<StationPage> {
     );
   }
 
-// === PAGINATION BAR ===
   Widget _buildPaginationBar(
       BuildContext context, StationPageState state, StationPageBloc bloc) {
     if (state.totalItems == 0) return const SizedBox.shrink();
 
-    // Tính tổng số trang
     int totalPages = (state.totalItems / state.pageSize).ceil();
     if (totalPages == 0) totalPages = 1;
 
-    // Index trang bắt đầu từ 0, hiển thị từ 1
     int currentDisplayPage = state.currentPage + 1;
     int startItem = (state.currentPage * state.pageSize) + 1;
     int endItem = ((state.currentPage + 1) * state.pageSize);
@@ -521,13 +478,10 @@ class _StationPageState extends State<StationPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Info text: Hiển thị 1-5 của 20
           Text(
             "Hiển thị $startItem - $endItem của ${state.totalItems}",
             style: const TextStyle(color: Colors.white54, fontSize: 12),
           ),
-
-          // Controls
           Row(
             children: [
               IconButton(
@@ -600,8 +554,6 @@ class _StationPageState extends State<StationPage> {
             },
           ),
         ),
-
-        // Chỉ hiện distance nếu khác null
         if (distance != null)
           Positioned(
             bottom: 12,
@@ -626,7 +578,6 @@ class _StationPageState extends State<StationPage> {
               ),
             ),
           ),
-
         Positioned(
           top: 12,
           left: 12,
@@ -645,7 +596,6 @@ class _StationPageState extends State<StationPage> {
     if (colorCode != null && colorCode.isNotEmpty) {
       baseColor = parseColor(colorCode);
     } else {
-      // Fallback color logic
       if (text.toUpperCase().contains('PS'))
         baseColor = kGradientStart;
       else if (text.toUpperCase().contains('BIDA'))
@@ -664,7 +614,7 @@ class _StationPageState extends State<StationPage> {
       margin: const EdgeInsets.only(right: 6.0),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: baseColor, // Solid color, no opacity/blur
+        color: baseColor,
         borderRadius: BorderRadius.circular(6.0),
       ),
       child: Text(

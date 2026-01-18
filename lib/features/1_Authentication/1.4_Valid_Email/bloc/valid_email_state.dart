@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 part of 'valid_email_bloc.dart';
 
 sealed class ValidEmailState {

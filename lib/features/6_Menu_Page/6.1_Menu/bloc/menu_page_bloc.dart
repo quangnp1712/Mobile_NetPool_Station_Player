@@ -1,9 +1,10 @@
+// ignore_for_file: depend_on_referenced_packages, no_leading_underscores_for_local_identifiers
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:mobile_netpool_station_player/core/services/authentication_service.dart';
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/shared_preferences/auth_shared_preferences.dart';
-import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/models/account_info_model.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/models/account_info_response_model.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/repository/profile_repository.dart';

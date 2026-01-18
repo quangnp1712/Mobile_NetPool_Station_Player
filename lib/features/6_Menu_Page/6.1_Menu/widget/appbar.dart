@@ -8,7 +8,7 @@ class MenuAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      automaticallyImplyLeading: false, // ❌ Bỏ nút back
+      automaticallyImplyLeading: false,
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -49,9 +49,7 @@ class MenuAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.notifications_active_rounded,
               color: Colors.white, size: 26),
-          onPressed: () {
-            // 🔔 TODO: xử lý mở trang thông báo
-          },
+          onPressed: () {},
         ),
         const SizedBox(width: 8),
       ],

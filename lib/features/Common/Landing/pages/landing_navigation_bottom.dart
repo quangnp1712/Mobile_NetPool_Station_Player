@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
-import 'package:mobile_netpool_station_player/core/theme/app_text_styles.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
 import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/pages/station_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
@@ -38,7 +37,6 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
 
   @override
   void initState() {
-    // Lấy token từ arguments
     // landingBloc.add(LandingNavigationBottomInitialEvent());0
     // print('Current Route: ${Get.currentRoute}');
     super.initState();
@@ -57,7 +55,7 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
 
   @override
   void dispose() {
-    // landingBloc.close(); // Đừng quên đóng Bloc
+    // landingBloc.close();
     super.dispose();
   }
 
@@ -75,30 +73,22 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
       bloc: landingBloc,
       listener: (context, state) {},
       builder: (context, state) {
-        // --- THAY ĐỔI BẮT ĐẦU TỪ ĐÂY ---
-
-        // 1. Sử dụng Stack để chồng các lớp lên nhau
         return Stack(
           fit: StackFit.expand,
           children: [
-            // LỚP 1: NỀN CHÍNH CỦA APP (ảnh nền từ file trước)
             Container(
               color: AppColors.bgDark,
             ),
-
-            // LỚP 2: NỀN GRADIENT MỚI CHO NAV BAR
-            // Đặt nó ở dưới cùng, bên dưới mọi thứ
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: 60.0, // Phải bằng chiều cao của nav bar
+                height: 60.0,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    // Gradient Tím -> Đen -> Lam
                     colors: [
-                      Color(0xFF8A2387), // Tím
-                      Colors.black, // Đen
-                      Color(0xFF004D7A), // Lam (Xanh)
+                      Color(0xFF8A2387),
+                      Colors.black,
+                      Color(0xFF004D7A),
                     ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
@@ -106,33 +96,19 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
                 ),
               ),
             ),
-
-            // LỚP 3: SCAFFOLD VÀ NỘI DUNG (lớp trên cùng)
             SafeArea(
               child: PopScope(
                 canPop: false,
                 child: Scaffold(
-                  // Nền Scaffold và page phải TRONG SUỐT
                   backgroundColor: Colors.transparent,
-
                   body: pages[state.bottomIndex],
-
                   bottomNavigationBar: CurvedNavigationBar(
                     key: _bottomNavigationKey,
-
-                    // 1. Nền thanh bar (color) -> TRONG SUỐT
                     color: Colors.transparent,
-
-                    // 2. Nền cutout (backgroundColor) -> TRONG SUỐT
-                    // Cả hai sẽ lộ ra LỚP 2 (gradient)
                     backgroundColor: Colors.transparent,
-
-                    // Nền icon được chọn vẫn là đen
                     buttonBackgroundColor: AppColors.menuActive,
                     height: 60.0,
-
                     items: const [
-                      // ... (items của bạn giữ nguyên)
                       CurvedNavigationBarItem(
                         child: Icon(Icons.home_outlined, color: Colors.white),
                         label: 'Trang chủ',
@@ -176,7 +152,6 @@ class _LandingNavBottomWidgetState extends State<LandingNavBottomWidget> {
             ),
           ],
         );
-        // --- THAY ĐỔI KẾT THÚC TẠI ĐÂY ---
       },
     );
   }

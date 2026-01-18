@@ -1,14 +1,11 @@
-import 'package:flutter/material.dart';
-
-/// Lớp mô hình cho dữ liệu Station
 class Station {
   final String id;
   final String name;
-  final String imageUrl; // Sẽ là đường dẫn asset
+  final String imageUrl;
   final List<String> tags;
-  final String address; // <-- THÊM MỚI
-  final String time; // <-- THÊM MỚI
-  final String phone; // <-- THÊM MỚI
+  final String address;
+  final String time;
+  final String phone;
 
   Station({
     required this.id,

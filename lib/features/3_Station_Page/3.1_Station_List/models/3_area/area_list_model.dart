@@ -2,15 +2,14 @@ import 'dart:convert';
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class AreaModel {
-  int? areaId; // id
+  int? areaId;
   int? stationSpaceId;
   int? price;
-  String? areaCode; // code
-  String? areaName; // name
+  String? areaCode;
+  String? areaName;
   String? statusCode;
   String? statusName;
 
-  // feild hỗ trợ
   String? spaceName;
   AreaModel({
     this.spaceName,

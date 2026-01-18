@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BookingTotalSection extends StatefulWidget {
-  BookingTotalSection({super.key});
+  const BookingTotalSection({super.key});
 
   @override
   State<BookingTotalSection> createState() => _BookingTotalSectionState();

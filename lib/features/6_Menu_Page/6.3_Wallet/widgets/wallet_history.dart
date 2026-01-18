@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:mobile_netpool_station_player/features/Common/MoneyFormatter/money_formatter.dart';
 
@@ -127,7 +129,6 @@ class _WalletHistoryPageState extends State<WalletHistoryPage> {
             ),
           ),
 
-          // 💰 Số tiền (đã format)
           Text(
             MoneyFormatter.formatSigned(isPlus ? amount : -amount),
             style: TextStyle(

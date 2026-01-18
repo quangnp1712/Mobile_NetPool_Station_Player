@@ -11,7 +11,11 @@ enum BookingBlocState {
   unauthenticated
 }
 
+// submissionStatus
+enum BookingSubmissionStatus { initial, loading, success, failure }
+
 class BookingPageState extends Equatable {
+  // ... existing fields ...
   final BookingBlocState blocState;
   final BookingStatus status;
   final String message;
@@ -46,7 +50,12 @@ class BookingPageState extends Equatable {
   final List<StationResourceModel> resources;
   final List<TimeslotModel> availableTimes;
 
-  final int? userBalance;
+  final double userBalance;
+
+  final BookingSubmissionStatus submissionStatus;
+
+  // -- update: Thêm field paymentUrl
+  final String? paymentUrl;
 
   const BookingPageState({
     this.blocState = BookingBlocState.initial,
@@ -66,8 +75,8 @@ class BookingPageState extends Equatable {
     this.selectedSpace,
     this.selectedArea,
     this.selectedDateIndex = 0,
-    this.selectedTime = '', // KHÔNG CHỌN MẶC ĐỊNH
-    this.duration = 1.0,
+    this.selectedTime = '',
+    this.duration = 2.0,
     this.bookingType,
     this.selectedResourceCodes = const [],
     this.schedules = const [],
@@ -76,9 +85,12 @@ class BookingPageState extends Equatable {
     this.platformSpaces = const [],
     this.resources = const [],
     this.availableTimes = const [],
-    this.userBalance = 0,
+    this.userBalance = 0.0,
+    this.submissionStatus = BookingSubmissionStatus.initial,
+    this.paymentUrl, // -- update
   });
 
+  // ... getters totalPrice, endTime ...
   double get totalPrice {
     int count =
         selectedResourceCodes.isEmpty ? 1 : selectedResourceCodes.length;
@@ -126,7 +138,10 @@ class BookingPageState extends Equatable {
     List<PlatformSpaceModel>? platformSpaces,
     List<StationResourceModel>? resources,
     List<TimeslotModel>? availableTimes,
-    int? userBalance,
+    double? userBalance,
+    BookingSubmissionStatus? submissionStatus,
+    String? paymentUrl, // -- update
+    bool clearPaymentUrl = false, // -- update helper
   }) {
     return BookingPageState(
       blocState: blocState ?? BookingBlocState.initial,
@@ -161,6 +176,9 @@ class BookingPageState extends Equatable {
       resources: resources ?? this.resources,
       availableTimes: availableTimes ?? this.availableTimes,
       userBalance: userBalance ?? this.userBalance,
+      submissionStatus: submissionStatus ?? this.submissionStatus,
+      paymentUrl:
+          clearPaymentUrl ? null : (paymentUrl ?? this.paymentUrl), // -- update
     );
   }
 
@@ -190,6 +208,8 @@ class BookingPageState extends Equatable {
         availableTimes,
         spaces,
         areas,
-        userBalance
+        userBalance,
+        submissionStatus,
+        paymentUrl // -- update
       ];
 }

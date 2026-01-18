@@ -4,14 +4,12 @@ import 'package:flutter/services.dart';
 
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 
-/// Ô nhập liệu tùy chỉnh
 class CustomTextField extends StatelessWidget {
   final String label;
   final String hint;
   final IconData icon;
   final bool obscureText;
 
-  // === THÊM CÁC THUỘC TÍNH MỚI ===
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
@@ -50,11 +48,8 @@ class CustomTextField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
-
-          // === ÁP DỤNG VALIDATION ===
           validator: validator,
           autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
-
           style: const TextStyle(
             color: Colors.white,
             fontSize: 16,

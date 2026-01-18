@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/data/mock_data.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1.station/station_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_spec_model.dart';
@@ -37,7 +38,7 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   void _startLoadingTimer() {
-    _loadingTimer?.cancel(); // Hủy timer cũ nếu có
+    _loadingTimer?.cancel();
     _loadingTimer = Timer(const Duration(seconds: 4), () {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -51,7 +52,6 @@ class _BookingPageState extends State<BookingPage> {
     });
   }
 
-  // Hàm hủy đếm ngược
   void _cancelLoadingTimer() {
     if (_loadingTimer != null && _loadingTimer!.isActive) {
       _loadingTimer!.cancel();
@@ -74,11 +74,9 @@ class _BookingPageState extends State<BookingPage> {
           BookingSharedPref.setIsBookingRoute(true);
           Get.toNamed(loginPageRoute);
         }
-        // Lắng nghe lỗi vị trí
         if (state.blocState == BookingBlocState.locationErrorState) {
           ShowSnackBar(state.message, false);
         }
-        // Lắng nghe sự kiện Reset để xóa text tìm kiếm
         if (state.blocState == BookingBlocState.filterResetState) {
           _searchController.clear();
         }
@@ -113,21 +111,13 @@ class _BookingPageState extends State<BookingPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(context, state),
-
                     const SizedBox(height: 16),
-                    // --- BƯỚC 2: CHỌN NGÀY ---
                     _buildSectionTitle(Icons.calendar_today, "Chọn ngày"),
                     _buildDateTimeline(context, state),
-
                     const SizedBox(height: 16),
-
-                    // --- LOGIC ẨN CÁC BƯỚC SAU NẾU KHÔNG CÓ LỊCH ---
                     if (state.schedules.isNotEmpty) ...[
-                      // 1. Context Selector
                       _buildContextSelector(context, state),
                       const SizedBox(height: 16),
-
-                      // 2. Machine Map Title
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Row(
@@ -157,28 +147,25 @@ class _BookingPageState extends State<BookingPage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-
-                      // 3. Auto Pick & Resources
                       _buildAutoPickButton(context, state),
                       const SizedBox(height: 16),
                       _buildResourceRows(context, state),
-
                       const SizedBox(height: 24),
-
-                      // 4. CHỌN GIỜ (Moved to end)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildSectionTitle(Icons.access_time, "Giờ chơi",
-                                noPadding: true),
-                            _buildDurationControl(context, state),
-                          ],
+                      if (state.resources.isNotEmpty) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildSectionTitle(Icons.access_time, "Giờ chơi",
+                                  noPadding: true),
+                              _buildDurationControl(context, state),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      _buildTimeList(context, state),
+                        const SizedBox(height: 12),
+                        _buildTimeList(context, state),
+                      ],
                     ]
                   ],
                 ),
@@ -256,8 +243,6 @@ class _BookingPageState extends State<BookingPage> {
               ],
             ),
           ),
-
-          // Pagination Bar - Fixed at bottom
           _buildPaginationBar(context, state),
         ],
       ),
@@ -284,16 +269,13 @@ class _BookingPageState extends State<BookingPage> {
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white)),
-
-          // --- PHẦN THÊM MỚI: HINT TEXT ---
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.amber.withOpacity(0.15), // Nền mờ màu cam
+              color: Colors.amber.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8),
-              border:
-                  Border.all(color: Colors.amber.withOpacity(0.5)), // Viền cam
+              border: Border.all(color: Colors.amber.withOpacity(0.5)),
             ),
             child: Row(
               children: const [
@@ -303,7 +285,7 @@ class _BookingPageState extends State<BookingPage> {
                   child: Text(
                     "Vui lòng chọn trạm trước khi đặt lịch",
                     style: TextStyle(
-                      color: Colors.amberAccent, // Chữ màu cam sáng
+                      color: Colors.amberAccent,
                       fontSize: 13,
                       fontStyle: FontStyle.italic,
                     ),
@@ -312,11 +294,7 @@ class _BookingPageState extends State<BookingPage> {
               ],
             ),
           ),
-          // --- KẾT THÚC PHẦN THÊM MỚI ---
-
           const SizedBox(height: 12),
-
-          // Location Button
           InkWell(
             onTap: () => bloc.add(FindNearestStationEvent()),
             child: Row(
@@ -336,10 +314,7 @@ class _BookingPageState extends State<BookingPage> {
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // Search Box
           Container(
             height: 45,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -369,11 +344,8 @@ class _BookingPageState extends State<BookingPage> {
             ),
           ),
           const SizedBox(height: 12),
-
-          // Location Filters & Reset Button
           Row(
             children: [
-              // City Filter
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -409,7 +381,6 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              // District Filter
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -445,7 +416,6 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              // RESET BUTTON
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white10,
@@ -469,7 +439,6 @@ class _BookingPageState extends State<BookingPage> {
   Widget _buildPaginationBar(BuildContext context, BookingPageState state) {
     if (state.totalItems == 0) return const SizedBox.shrink();
 
-    // Tính tổng số trang (đảm bảo ít nhất 1 trang)
     int totalPages = (state.totalItems / state.pageSize).ceil();
     if (totalPages == 0) totalPages = 1;
 
@@ -482,13 +451,10 @@ class _BookingPageState extends State<BookingPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Info text: Hiển thị 1-5 của 20
           Text(
             "Hiển thị ${(state.currentPage * state.pageSize) + 1} - ${((state.currentPage + 1) * state.pageSize).clamp(0, state.totalItems)} của ${state.totalItems}",
             style: const TextStyle(color: Colors.white54, fontSize: 12),
           ),
-
-          // Controls
           Row(
             children: [
               IconButton(
@@ -723,7 +689,6 @@ class _BookingPageState extends State<BookingPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // --- 1. LOẠI HÌNH (SPACE) ---
         _buildSectionTitle(Icons.videogame_asset, "Loại hình"),
         if (state.spaces.isNotEmpty)
           Padding(
@@ -777,8 +742,6 @@ class _BookingPageState extends State<BookingPage> {
             ),
           ),
         const SizedBox(height: 16),
-
-        // --- 2. KHU VỰC (AREA) ---
         _buildSectionTitle(Icons.map, "Khu vực"),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -858,7 +821,6 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildDateTimeline(BuildContext context, BookingPageState state) {
-    // Nếu chưa có lịch hoặc lịch rỗng sau khi filter
     if (state.schedules.isEmpty) {
       return const SizedBox(
           height: 75,
@@ -880,7 +842,6 @@ class _BookingPageState extends State<BookingPage> {
 
           bool isSelected = state.selectedDateIndex == index;
 
-          // Format text hiển thị
           String weekdayStr = "---";
           String dayStr = "--";
           if (date != null) {
@@ -917,8 +878,7 @@ class _BookingPageState extends State<BookingPage> {
                   Text(dayStr,
                       style: const TextStyle(
                           color: Colors.white,
-                          fontSize:
-                              14, // Giảm font size một chút vì hiện cả tháng
+                          fontSize: 14,
                           fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -965,10 +925,20 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildTimeList(BuildContext context, BookingPageState state) {
+    // Logic hiển thị: Nếu chưa chọn resource (và không phải auto) thì nhắc người dùng
+    if (state.selectedResourceCodes.isEmpty && state.bookingType != 'auto') {
+      return const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Text("Vui lòng chọn máy để xem giờ trống",
+            style: TextStyle(
+                color: kNeonCyan, fontSize: 13, fontStyle: FontStyle.italic)),
+      );
+    }
+
     if (state.availableTimes.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0),
-        child: Text("Không có giờ nào khả dụng",
+        child: Text("Không có giờ nào khả dụng cho máy này",
             style: TextStyle(color: Colors.white30, fontSize: 13)),
       );
     }
@@ -985,9 +955,6 @@ class _BookingPageState extends State<BookingPage> {
               String t = slot.begin ?? "--:--";
               bool sel = state.selectedTime == t;
 
-              // Disable conditions:
-              // 1. Parent schedule not valid (handled by isSelectable)
-              // 2. Slot is booked (statusCode != 'FREE') (optional check)
               bool isDisabled = !slot.isSelectable;
 
               return InkWell(
@@ -1083,7 +1050,6 @@ class _BookingPageState extends State<BookingPage> {
                   style: TextStyle(color: Colors.white30))));
     }
 
-    // Logic gom nhóm (group by rowName) được chuyển xuống UI
     Map<String, List<StationResourceModel>> groups = {};
     for (var r in state.resources) {
       String key = r.rowName ?? r.rowCode ?? "Khác";
@@ -1091,12 +1057,10 @@ class _BookingPageState extends State<BookingPage> {
       groups[key]!.add(r);
     }
 
-    // Sort các nhóm nếu cần và render
     return Column(
         children: groups.entries.map((entry) {
       String rowName = entry.key;
       List<StationResourceModel> rowResources = entry.value;
-      // Sort resources trong row theo displayOrder
       rowResources
           .sort((a, b) => (a.displayOrder ?? 0).compareTo(b.displayOrder ?? 0));
       String areaName = state.selectedArea?.areaName ?? "";
@@ -1105,7 +1069,6 @@ class _BookingPageState extends State<BookingPage> {
           padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            // --- Updated Header with View Config Link ---
             Row(
               children: [
                 Container(
@@ -1122,7 +1085,6 @@ class _BookingPageState extends State<BookingPage> {
                 const SizedBox(width: 8),
                 Container(height: 12, width: 1, color: Colors.white24),
                 const SizedBox(width: 8),
-                // Link xem cấu hình
                 if (rowResources.isNotEmpty && rowResources.first.spec != null)
                   InkWell(
                     onTap: () => _showSpecDetails(
@@ -1145,16 +1107,15 @@ class _BookingPageState extends State<BookingPage> {
                   ),
               ],
             ),
-            // ------------------------------------------
             const SizedBox(height: 12),
             GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, // Giảm số cột để card to đẹp hơn
+                  crossAxisCount: 3,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 0.85, // Tỉ lệ khung hình thẻ
+                  childAspectRatio: 0.85,
                 ),
                 itemCount: rowResources.length,
                 itemBuilder: (ctx, i) {
@@ -1163,7 +1124,6 @@ class _BookingPageState extends State<BookingPage> {
                       state.selectedResourceCodes.contains(res.resourceCode);
                   bool isBusy = res.statusCode == 'BUSY';
 
-                  // Màu nền và viền dựa trên trạng thái
                   Color bgColor = isBusy
                       ? Colors.white10
                       : (isSelected ? kCardColor : kCardColor);
@@ -1196,7 +1156,6 @@ class _BookingPageState extends State<BookingPage> {
                       ),
                       child: Stack(
                         children: [
-                          // Nội dung chính
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1219,7 +1178,6 @@ class _BookingPageState extends State<BookingPage> {
                               ],
                             ),
                           ),
-                          // Chấm trạng thái góc trên phải
                           Positioned(
                             top: 8,
                             right: 8,
@@ -1252,7 +1210,6 @@ class _BookingPageState extends State<BookingPage> {
       String title, ResourceSpecModel? spec) {
     if (spec == null) return;
 
-    // Determine which map to show based on non-null sub-model
     Map<String, dynamic> details = {};
     if (spec.pc != null) {
       details = spec.pc!.toMap();
@@ -1261,7 +1218,6 @@ class _BookingPageState extends State<BookingPage> {
     } else if (spec.console != null) {
       details = spec.console!.toMap();
     } else {
-      // Fallback empty if nothing is set
       details = {};
     }
 
@@ -1409,15 +1365,12 @@ class _BookingPageState extends State<BookingPage> {
   }
 
   Widget _buildBottomSheet(BuildContext context, BookingPageState state) {
-    // Check nếu chưa chọn giờ thì disable nút
     bool hasSel = state.bookingType != null && state.selectedTime.isNotEmpty;
 
-    // --- UPDATED: Get selected resource name
     String selectedName = "Chưa chọn";
     if (state.selectedResourceCodes.isNotEmpty) {
       try {
         final code = state.selectedResourceCodes.first;
-        // Tìm tên resource từ danh sách đã load
         final res = state.resources.firstWhere((e) => e.resourceCode == code,
             orElse: () => StationResourceModel(resourceName: code));
         selectedName = res.resourceName ?? code;
@@ -1434,7 +1387,6 @@ class _BookingPageState extends State<BookingPage> {
         child: SafeArea(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            // --- UPDATED: Display Resource Name instead of Count
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1464,11 +1416,13 @@ class _BookingPageState extends State<BookingPage> {
               child: ElevatedButton(
                   onPressed: hasSel
                       ? () {
+                          // -- update: Gọi event lấy thông tin ví khi ấn nút xác nhận
+                          bloc.add(GetWalletEvent());
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) =>
-                                      BillPreviewPage(state: state)));
+                                  builder: (_) => BillPreviewPage(
+                                      state: state, bloc: bloc)));
                         }
                       : null,
                   style:

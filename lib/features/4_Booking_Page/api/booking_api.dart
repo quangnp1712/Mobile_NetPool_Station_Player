@@ -1,4 +1,6 @@
 //! Booking  !//
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:mobile_netpool_station_player/core/network/api/api_endpoints.dart';
 
 class BookingApi {
@@ -28,4 +30,7 @@ class BookingApi {
   //$  Booking
   final String pubBookingUrl = "$domainUrl/v1/pub/bookings";
   final String apiBookingUrl = "$domainUrl/v1/api/bookings";
+
+  //$ Wallet
+  final String apiWalletUrl = "$domainUrl/v1/api/wallets";
 }

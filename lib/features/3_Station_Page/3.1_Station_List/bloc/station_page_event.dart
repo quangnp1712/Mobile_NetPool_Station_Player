@@ -14,22 +14,22 @@ class FetchStationsEvent extends StationPageEvent {} // Call API List Stations
 
 class SearchStationEvent extends StationPageEvent {
   final String query;
-  SearchStationEvent(this.query);
+  const SearchStationEvent(this.query);
 }
 
 class SelectProvinceEvent extends StationPageEvent {
   final ProvinceModel province;
-  SelectProvinceEvent(this.province);
+  const SelectProvinceEvent(this.province);
 }
 
 class SelectDistrictEvent extends StationPageEvent {
   final DistrictModel district;
-  SelectDistrictEvent(this.district);
+  const SelectDistrictEvent(this.district);
 }
 
 class SelectTagEvent extends StationPageEvent {
   final String tag;
-  SelectTagEvent(this.tag);
+  const SelectTagEvent(this.tag);
 }
 
 class FindNearestStationEvent extends StationPageEvent {}
@@ -38,5 +38,5 @@ class ResetFilterEvent extends StationPageEvent {}
 
 class ChangePageEvent extends StationPageEvent {
   final int pageIndex;
-  ChangePageEvent(this.pageIndex);
+  const ChangePageEvent(this.pageIndex);
 }

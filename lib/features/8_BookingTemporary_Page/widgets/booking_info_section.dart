@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BookingInfoSection extends StatefulWidget {
-  BookingInfoSection({super.key});
+  const BookingInfoSection({super.key});
 
   @override
   State<BookingInfoSection> createState() => _BookingInfoSectionState();
@@ -21,7 +21,6 @@ class _BookingInfoSectionState extends State<BookingInfoSection> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-
             _row('Booking Code', 'BK-20260108'),
             _row('Station Name', 'Net Pool Station A'),
             _row('Address', '123 Nguyen Van Linh, District 7'),

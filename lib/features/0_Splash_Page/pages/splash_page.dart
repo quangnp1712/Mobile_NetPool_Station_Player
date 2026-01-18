@@ -43,50 +43,33 @@ class _SplashPageState extends State<SplashPage> {
     final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      // Sử dụng Stack để chồng các widget lên nhau
       body: Stack(
-        fit: StackFit.expand, // Đảm bảo Stack lấp đầy toàn bộ màn hình
+        fit: StackFit.expand,
         children: [
-          // Lớp 1: Background Gradient
-          // Dựa trên ảnh, đây là gradient từ Tím/Magenta sang Xanh/Cyan đậm
           _buildBackgroundGradient(),
-
-          // Lớp 2: Logo (Icon và Text)
-          // Chúng ta đặt logo ở 1/3 trên của màn hình
           Positioned(
-            top: screenSize.height * 0.25, // Căn logo ở 25% từ trên xuống
+            top: screenSize.height * 0.25,
             left: 0,
             right: 0,
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 48.0),
-                child:
-                    // !!! QUAN TRỌNG:
-                    // Bạn cần thay thế 'assets/images/netpool_logo_splash.png'
-                    // bằng đường dẫn chính xác đến file ảnh logo của bạn.
-                    // Đừng quên khai báo nó trong file `pubspec.yaml`!
-                    Image.asset(
+                child: Image.asset(
                   'assets/images/logo_mobile.png',
-                  // Bạn có thể điều chỉnh chiều rộng nếu cần
-                  width: screenSize.width * 0.7, // Rộng bằng 70% màn hình
+                  width: screenSize.width * 0.7,
                 ),
               ),
             ),
           ),
-
-          // Lớp 3: Loading Indicator ở dưới cùng
-          // Sử dụng Align để đẩy widget xuống cuối màn hình
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              // Thêm padding để vòng xoay không bị dính sát cạnh dưới
               padding: const EdgeInsets.only(bottom: 64.0),
               child: CircularProgressIndicator(
-                // Đặt màu tím cho vòng xoay như bạn yêu cầu
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  AppColors.primaryGlow, // Màu tím/magenta
+                  AppColors.primaryGlow,
                 ),
-                strokeWidth: 3.0, // Độ dày của vòng xoay
+                strokeWidth: 3.0,
               ),
             ),
           ),
@@ -95,17 +78,11 @@ class _SplashPageState extends State<SplashPage> {
     );
   }
 
-  /// Widget riêng để build nền gradient
   Widget _buildBackgroundGradient() {
     return Container(
       decoration: BoxDecoration(
         image: DecorationImage(
-          // !!! QUAN TRỌNG:
-          // Bạn cần thay thế 'assets/images/splash_background.png'
-          // bằng đường dẫn chính xác đến file ảnh NỀN của bạn.
           image: const AssetImage('assets/images/bg_mobile.png'),
-
-          // Đảm bảo ảnh nền lấp đầy toàn bộ màn hình
           fit: BoxFit.cover,
         ),
       ),

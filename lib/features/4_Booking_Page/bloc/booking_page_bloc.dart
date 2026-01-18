@@ -1,13 +1,10 @@
-import 'dart:math';
+// ignore_for_file: depend_on_referenced_packages
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_netpool_station_player/core/services/authentication_service.dart';
 import 'package:mobile_netpool_station_player/core/services/location_service.dart';
-import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
-import 'package:mobile_netpool_station_player/core/utils/utf8_encoding.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/data/mock_data.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1.station/station_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/1.station/station_response_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/2.schedule/schedule_list_response_model.dart';
@@ -23,24 +20,21 @@ import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/4.a
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_list_response_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_response_model.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_spec_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/6.booking/booking_model.dart';
+import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/8.wallet/wallet_response_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/repository/booking_repository.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_model.dart';
 import 'package:mobile_netpool_station_player/features/Common/data/city_controller/city_repository.dart';
-import 'package:mobile_netpool_station_player/features/Common/data/meta/model/meta_model.dart';
 
 part 'booking_page_event.dart';
 part 'booking_page_state.dart';
 
 class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
-  // Inject Services Real (Giả định đã có class tương ứng)
-
   BookingPageBloc() : super(const BookingPageState()) {
     on<BookingInitEvent>(_onStarted);
     on<LoadBookingDataEvent>(_onLoadBookingData);
     on<FetchStationsEvent>(_onFetchStations);
 
-    // Filters & Location
     on<LoadProvincesEvent>(_onLoadProvinces);
     on<SelectProvinceEvent>(_onSelectProvince);
     on<SelectDistrictEvent>(_onSelectDistrict);
@@ -51,12 +45,11 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     on<ToggleStationSelectionModeEvent>((event, emit) =>
         emit(state.copyWith(isSelectingStation: !state.isSelectingStation)));
 
-    // Booking Flow
     on<SelectStationEvent>(_onSelectStation);
-    on<SelectSpaceEvent>(_onSelectSpace);
-    on<SelectAreaEvent>(_onSelectArea);
+    on<SelectDateEvent>(_onSelectDate); // chọn ngày
+    on<SelectSpaceEvent>(_onSelectSpace); // chọn loại hình
+    on<SelectAreaEvent>(_onSelectArea); // chọn khu vực
 
-    on<SelectDateEvent>(_onSelectDate);
     on<SelectTimeEvent>(
         (event, emit) => emit(state.copyWith(selectedTime: event.time)));
 
@@ -70,6 +63,10 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     on<ToggleResourceEvent>(_onToggleResource);
     on<SelectAutoPickEvent>((event, emit) =>
         emit(state.copyWith(bookingType: 'auto', selectedResourceCodes: [])));
+
+    on<ConfirmBookingEvent>(_onConfirmBooking);
+
+    on<GetWalletEvent>(_onGetWallet);
   }
 
   Future<void> _onStarted(
@@ -92,29 +89,24 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       LoadBookingDataEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(status: BookingStatus.loading));
     try {
-      // 1. Parallel fetch
       final results = await Future.wait([
         CityRepository().getProvinces(),
         BookingRepository().listStation("", "", "", "", "ACTIVE", "0", "10"),
         BookingRepository().getPlatformSpace(),
       ]);
 
-      // 2. Process Provinces
       final provinces = _parseList<ProvinceModel>(
           results[0], (j) => ProvinceModel.fromJson(j));
 
-      // 3. Process Stations
       final stationResp =
           StationDetailModelResponse.fromJson(results[1]['body'] ?? {});
       final stations = stationResp.data ?? [];
       final meta = stationResp.meta;
 
-      // 4. Process Platform Space
       final platforms =
           SpaceListModelResponse.fromJson(results[2]['body'] ?? {}).data ?? [];
       final platformMap = {for (var p in platforms) p.spaceId: p};
 
-      // 5. Fetch Spaces for Stations (Batch)
       if (stations.isNotEmpty) {
         final spaceFutures = stations.map(
             (s) => BookingRepository().getStationSpace(s.stationId.toString()));
@@ -124,7 +116,9 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
                       spaceResults[i]['body'] ?? {})
                   .data ??
               [];
-          for (var sp in spaces) sp.space = platformMap[sp.spaceId];
+          for (var sp in spaces) {
+            sp.space = platformMap[sp.spaceId];
+          }
           stations[i].space = spaces;
         }
       }
@@ -157,7 +151,6 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
           "10");
       final resp = StationDetailModelResponse.fromJson(res['body']);
 
-      // Load Spaces detail for stations (needed for UI icons)
       final stations = resp.data ?? [];
       if (stations.isNotEmpty) {
         final platformMap = {for (var p in state.platformSpaces) p.spaceId: p};
@@ -169,7 +162,9 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
                       spaceResults[i]['body'] ?? {})
                   .data ??
               [];
-          for (var sp in spaces) sp.space = platformMap[sp.spaceId];
+          for (var sp in spaces) {
+            sp.space = platformMap[sp.spaceId];
+          }
           stations[i].space = spaces;
         }
       }
@@ -201,8 +196,6 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     }
   }
 
-  // --- BOOKING FLOW: STATION -> SPACE -> AREA -> RESOURCE (REAL DATA CHAIN) ---
-
   Future<void> _onSelectStation(
       SelectStationEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(
@@ -212,22 +205,19 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
 
     List<ScheduleModel> validSchedules = [];
     try {
-      // Logic lấy 7 ngày
       DateTime now = DateTime.now();
       String dateFrom = DateFormat('yyyy-MM-dd').format(now);
       String dateTo =
           DateFormat('yyyy-MM-dd').format(now.add(Duration(days: 7)));
 
-      final res = await BookingRepository().findAllScheduleWithStation(
+      final resSche = await BookingRepository().findAllScheduleWithStation(
           event.station.stationId.toString(), dateFrom, dateTo, "", "");
       List<ScheduleModel> allSchedules =
-          ScheduleListModelResponse.fromJson(res['body']).data ?? [];
+          ScheduleListModelResponse.fromJson(resSche['body']).data ?? [];
 
-      // LOGIC LỌC: Chỉ lấy ENABLED
       validSchedules =
           allSchedules.where((s) => s.statusCode == 'ENABLED').toList();
 
-      // Sort theo ngày cho chắc chắn
       validSchedules.sort((a, b) => (a.date ?? "").compareTo(b.date ?? ""));
     } catch (_) {}
 
@@ -243,14 +233,14 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
 
     List<AreaModel> areas = [];
     try {
-      final res = await BookingRepository().getArea(
+      final resArea = await BookingRepository().getArea(
           "",
           event.station.stationId.toString(),
-          defaultSpace.spaceId.toString(),
+          defaultSpace.stationSpaceId.toString(),
           "ACTIVE",
           "0",
           "10");
-      areas = AreaListModelResponse.fromJson(res['body']).data ?? [];
+      areas = AreaListModelResponse.fromJson(resArea['body']).data ?? [];
     } catch (_) {}
 
     if (areas.isEmpty) {
@@ -266,12 +256,6 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
 
     final resourceList = await _fetchResources(defaultArea.areaId.toString());
 
-    // --- UPDATED: Fetch timeslots for first day immediately
-    List<TimeslotModel> initialTimes = [];
-    if (validSchedules.isNotEmpty) {
-      initialTimes = await _fetchTimeSlotsForSchedule(validSchedules[0]);
-    }
-
     emit(state.copyWith(
       status: BookingStatus.success,
       schedules: validSchedules,
@@ -280,7 +264,6 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       areas: areas,
       selectedArea: defaultArea,
       resources: resourceList,
-      availableTimes: initialTimes,
       selectedDateIndex: 0,
       selectedTime: '',
     ));
@@ -289,11 +272,11 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
   Future<void> _onSelectSpace(
       SelectSpaceEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(status: BookingStatus.loading));
-    // 1. Fetch new Areas for new Space (REAL API)
     try {
+      //! api Area - khu vực
       final stationId = state.selectedStation?.stationId.toString() ?? "";
-      final res = await BookingRepository().getArea(
-          "", stationId, event.space.spaceId.toString(), "ACTIVE", "0", "10");
+      final res = await BookingRepository().getArea("", stationId,
+          event.space.stationSpaceId.toString(), "ACTIVE", "0", "10");
       final areas = AreaListModelResponse.fromJson(res['body']).data ?? [];
 
       AreaModel? newArea;
@@ -305,14 +288,18 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       }
 
       emit(state.copyWith(
-          status: BookingStatus.success,
-          selectedSpace: event.space,
-          areas: areas,
-          selectedArea: newArea,
-          resources: resourceList,
-          bookingType: null,
-          clearBookingType: true,
-          selectedResourceCodes: []));
+        status: BookingStatus.success,
+        selectedSpace: event.space,
+        areas: areas,
+        selectedArea: newArea,
+        resources: resourceList,
+        // Reset toàn bộ thông tin resource và giờ chơi
+        bookingType: null,
+        clearBookingType: true,
+        selectedResourceCodes: [],
+        availableTimes: [],
+        selectedTime: '',
+      ));
     } catch (e) {
       emit(state.copyWith(
           status: BookingStatus.failure, message: "Lỗi tải Area: $e"));
@@ -322,16 +309,19 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
   Future<void> _onSelectArea(
       SelectAreaEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(status: BookingStatus.loading));
-    // 1. Fetch Resources for new Area (REAL API)
     try {
       final resourceList = await _fetchResources(event.area.areaId.toString());
       emit(state.copyWith(
-          status: BookingStatus.success,
-          selectedArea: event.area,
-          resources: resourceList,
-          bookingType: null,
-          clearBookingType: true,
-          selectedResourceCodes: []));
+        status: BookingStatus.success,
+        selectedArea: event.area,
+        resources: resourceList,
+        // Reset toàn bộ thông tin resource và giờ chơi
+        bookingType: null,
+        clearBookingType: true,
+        selectedResourceCodes: [],
+        availableTimes: [],
+        selectedTime: '',
+      ));
     } catch (e) {
       emit(state.copyWith(
           status: BookingStatus.failure, message: "Lỗi tải máy: $e"));
@@ -340,37 +330,153 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
 
   Future<void> _onSelectDate(
       SelectDateEvent event, Emitter<BookingPageState> emit) async {
-    emit(state.copyWith(status: BookingStatus.loading));
-
-    // --- UPDATED: Fetch timeslots async when date changes
-    List<TimeslotModel> newTimes = [];
-    if (event.index < state.schedules.length) {
-      newTimes = await _fetchTimeSlotsForSchedule(state.schedules[event.index]);
-    }
-
+    // Khi chọn ngày mới => Reset lại lựa chọn resource, giờ chơi
     emit(state.copyWith(
-        status: BookingStatus.success,
-        selectedDateIndex: event.index,
-        availableTimes: newTimes,
-        selectedTime: ''));
+      status: BookingStatus.success,
+      selectedDateIndex: event.index,
+      selectedResourceCodes: [], // Reset resource về rỗng
+      availableTimes: [], // Reset danh sách giờ về rỗng
+      selectedTime: '', // Reset giờ đã chọn
+      bookingType: null,
+      clearBookingType: true,
+    ));
   }
 
-  // --- HELPERS ---
-
-// --- UPDATED: Helper to fetch TimeSlots
-  Future<List<TimeslotModel>> _fetchTimeSlotsForSchedule(
-      ScheduleModel schedule) async {
+  Future<void> _onConfirmBooking(
+      ConfirmBookingEvent event, Emitter<BookingPageState> emit) async {
+    emit(state.copyWith(
+      submissionStatus: BookingSubmissionStatus.loading,
+      clearPaymentUrl: true, // Reset url cũ nếu có
+    ));
     try {
-      final res = await BookingRepository()
-          .findDetailWithSchedule(schedule.scheduleId.toString());
+      // 1. Validate dữ liệu đầu vào
+      int? scheduleId = state.schedules[state.selectedDateIndex].scheduleId;
+      if (scheduleId == null) throw Exception("Schedule ID not found");
+
+      int? stationResourceId;
+      if (state.selectedResourceCodes.isNotEmpty) {
+        final resourceCode = state.selectedResourceCodes.first;
+        final res = state.resources.firstWhere(
+            (r) => r.resourceCode == resourceCode,
+            orElse: () => StationResourceModel());
+        stationResourceId = res.stationResourceId;
+      }
+      if (stationResourceId == null) throw Exception("Resource ID not found");
+
+      List<BookingSlotModel> bookingSlots = [];
+      int startIndex =
+          state.availableTimes.indexWhere((t) => t.begin == state.selectedTime);
+      if (startIndex == -1) throw Exception("Time slot not found");
+
+      int slotCount = state.duration.ceil();
+      for (int i = 0; i < slotCount; i++) {
+        if (startIndex + i < state.availableTimes.length) {
+          int? tId = state.availableTimes[startIndex + i].timeSlotId;
+          if (tId != null) {
+            bookingSlots.add(BookingSlotModel(
+                bookingSlotId: BookingSlotIdModel(timeSlotId: tId)));
+          }
+        }
+      }
+
+      final request = BookingModel(
+        scheduleId: scheduleId,
+        paymentMethodCode: event.paymentMethodCode,
+        paymentMethodName: event.paymentMethodName,
+        stationResourceId: stationResourceId,
+        bookingMenus: [],
+        bookingSlots: bookingSlots,
+      );
+
+      // 2. Gọi API Create Booking
+      final response = await BookingRepository().createBooking(request);
+
+      if (response['success'] == true ||
+          response['status'] == 200 ||
+          response['status'] == 201) {
+        // -- update: Lấy Booking ID từ response (data: 12)
+        // Lưu ý: data trả về là int trực tiếp, không phải object
+        final String bookingId = response['body']['data'].toString();
+
+        // 3. Xử lý thanh toán theo phương thức
+        if (event.paymentMethodCode == 'WALLET') {
+          // -- update: Kiểm tra số dư ví
+          if (state.userBalance < state.totalPrice) {
+            emit(state.copyWith(
+                submissionStatus: BookingSubmissionStatus.failure,
+                message: "Số dư ví không đủ để thanh toán"));
+            return;
+          }
+
+          // -- update: Gọi API thanh toán ví (POST)
+          final payRes = await BookingRepository().paymentWallet(bookingId);
+          if (payRes['success'] == true || payRes['status'] == 200) {
+            emit(state.copyWith(
+                submissionStatus: BookingSubmissionStatus.success,
+                message: "Đặt lịch & Thanh toán ví thành công!"));
+          } else {
+            emit(state.copyWith(
+                submissionStatus: BookingSubmissionStatus.failure,
+                message: payRes['message'] ?? "Thanh toán ví thất bại"));
+          }
+        } else if (event.paymentMethodCode == 'BANK_TRANSFER') {
+          // -- update: Gọi API thanh toán ngân hàng (GET) & lấy link
+          final payRes =
+              await BookingRepository().paymentBankTransfer(bookingId);
+
+          if (payRes['success'] == true || payRes['status'] == 200) {
+            final data = payRes['body']['data'];
+            // Lấy checkoutUrl từ response json
+            String? checkoutUrl = data != null ? data['checkoutUrl'] : null;
+
+            if (checkoutUrl != null) {
+              emit(state.copyWith(
+                  submissionStatus: BookingSubmissionStatus.success,
+                  message: "Đang mở trang thanh toán...",
+                  paymentUrl: checkoutUrl // Lưu link để UI mở
+                  ));
+            } else {
+              emit(state.copyWith(
+                  submissionStatus: BookingSubmissionStatus.failure,
+                  message: "Không tìm thấy link thanh toán"));
+            }
+          } else {
+            emit(state.copyWith(
+                submissionStatus: BookingSubmissionStatus.failure,
+                message: payRes['message'] ?? "Lỗi tạo giao dịch thanh toán"));
+          }
+        } else {
+          // DIRECT (Tiền mặt)
+          emit(state.copyWith(
+              submissionStatus: BookingSubmissionStatus.success,
+              message: "Đặt lịch thành công! Vui lòng thanh toán tại quầy."));
+        }
+      } else {
+        emit(state.copyWith(
+            submissionStatus: BookingSubmissionStatus.failure,
+            message: response['message'] ?? "Đặt lịch thất bại"));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+          submissionStatus: BookingSubmissionStatus.failure,
+          message: e.toString()));
+    }
+  }
+
+  Future<List<TimeslotModel>> _fetchTimeSlotsForSchedule(
+      ScheduleModel schedule, String stationResourceId) async {
+    try {
+      final res = await BookingRepository().findDetailWithResource(
+        schedule.scheduleId.toString(),
+        stationResourceId,
+      );
+
+      // Parse JSON
       final detailData = ScheduleModelResponse.fromJson(res['body']).data;
       List<TimeslotModel> slots = detailData?.timeSlots ?? [];
 
-      // Check điều kiện ngày (Status ENABLED & allowUpdate)
-      bool isDayValid = (detailData?.statusCode == "ENABLED" &&
-          detailData?.allowUpdate == true);
+      bool isDayValid = (detailData?.statusCode == "ENABLED");
 
-      // --- UPDATED: Check giờ quá khứ nếu là hôm nay ---
       DateTime now = DateTime.now();
       DateTime? scheduleDate = DateTime.tryParse(schedule.date ?? "");
 
@@ -384,17 +490,17 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       for (var slot in slots) {
         bool isTimeValid = true;
 
-        // Nếu là hôm nay, kiểm tra giờ
         if (isToday && slot.begin != null) {
           try {
             List<String> parts = slot.begin!.split(':');
             if (parts.length >= 2) {
               int hour = int.parse(parts[0]);
               int minute = int.parse(parts[1]);
+              // Tạo thời gian slot dựa trên ngày hôm nay
               DateTime slotTime =
                   DateTime(now.year, now.month, now.day, hour, minute);
 
-              // Nếu giờ slot nhỏ hơn giờ hiện tại -> Invalid
+              // Nếu giờ slot nhỏ hơn giờ hiện tại => không hợp lệ
               if (slotTime.isBefore(now)) {
                 isTimeValid = false;
               }
@@ -402,10 +508,16 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
           } catch (_) {}
         }
 
-        // Kết hợp điều kiện ngày và điều kiện giờ
-        slot.isSelectable = isDayValid && isTimeValid;
+        // Kiểm tra allowBooking == true hoặc null
+        bool isBookingAllowed =
+            slot.allowBooking == true || slot.allowBooking == null;
+
+        // Tổng hợp điều kiện
+        slot.isSelectable = isDayValid && isTimeValid && isBookingAllowed;
       }
-      // ---------------------------------------------------
+
+      // Sắp xếp lại theo giờ begin
+      slots.sort((a, b) => (a.begin ?? "").compareTo(b.begin ?? ""));
 
       return slots;
     } catch (e) {
@@ -417,7 +529,7 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     try {
       // 1. Get List
       final res =
-          await BookingRepository().getResouce("", areaId, "ACTIVE", "0", "20");
+          await BookingRepository().getResouce("", areaId, "ENABLE", "0", "20");
       List<StationResourceModel> resources =
           ResoucreListModelResponse.fromJson(res['body']).data ?? [];
 
@@ -436,28 +548,53 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     }
   }
 
-  void _onToggleResource(
-      ToggleResourceEvent event, Emitter<BookingPageState> emit) {
+  Future<void> _onToggleResource(
+      ToggleResourceEvent event, Emitter<BookingPageState> emit) async {
+    // 1. Cập nhật danh sách resource đã chọn
     List<String> current = List.from(state.selectedResourceCodes);
     if (current.contains(event.resourceCode)) {
-      // Nếu đã chọn rồi thì bỏ chọn
       current.remove(event.resourceCode);
     } else {
-      // Nếu chưa chọn thì XÓA hết cái cũ và chọn cái mới (Chỉ cho phép 1)
-      current.clear();
+      current.clear(); // Logic chọn 1 máy duy nhất tại 1 thời điểm
       current.add(event.resourceCode);
     }
+
+    // 2. Cập nhật state UI trước
     emit(state.copyWith(
         selectedResourceCodes: current,
         bookingType: current.isEmpty ? null : 'manual',
-        clearBookingType: current.isEmpty));
+        clearBookingType: current.isEmpty,
+        status: BookingStatus.loading)); // Set loading nhẹ
+
+    List<TimeslotModel> newTimes = [];
+
+    // 3. Nếu có resource được chọn, gọi API lấy timeslot
+    if (current.isNotEmpty && state.schedules.isNotEmpty) {
+      try {
+        final resModel = state.resources.firstWhere(
+            (r) => r.resourceCode == event.resourceCode,
+            orElse: () => StationResourceModel());
+
+        if (resModel.stationResourceId != null) {
+          // Gọi hàm lấy timeslot với stationResourceId
+          newTimes = await _fetchTimeSlotsForSchedule(
+            state.schedules[state.selectedDateIndex],
+            resModel.stationResourceId.toString(),
+          );
+        }
+      } catch (_) {}
+    }
+
+    // 4. Emit state cuối cùng với danh sách giờ mới
+    emit(state.copyWith(
+      status: BookingStatus.success,
+      availableTimes: newTimes,
+      selectedTime: '', // Reset giờ đã chọn khi đổi máy
+    ));
   }
 
-  // Filter Handlers
   Future<void> _onLoadProvinces(
-      LoadProvincesEvent event, Emitter<BookingPageState> emit) async {
-    /* Implemented in init */
-  }
+      LoadProvincesEvent event, Emitter<BookingPageState> emit) async {}
   Future<void> _onSelectProvince(
       SelectProvinceEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(status: BookingStatus.loading));
@@ -496,6 +633,24 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
         currentPage: 0,
         districts: []));
     add(FetchStationsEvent());
+  }
+
+  Future<void> _onGetWallet(
+      GetWalletEvent event, Emitter<BookingPageState> emit) async {
+    try {
+      final res = await BookingRepository().getWallet();
+      if (res['success'] == true ||
+          res['status'] == 200 ||
+          res['status'] == '200') {
+        final walletData = WalletModelResponse.fromJson(res['body']).data;
+        if (walletData != null) {
+          emit(state.copyWith(userBalance: walletData.balance));
+        }
+      }
+    } catch (e) {
+      // In case of error, just keep the old balance or set to 0
+      print("Error fetching wallet: $e");
+    }
   }
 
   void _onSearchStation(

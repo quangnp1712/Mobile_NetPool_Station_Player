@@ -5,7 +5,6 @@ class ResourceSpecModel {
   int? stationResourceSpecId;
   int? stationResourceId;
 
-  // --- Nhóm PC - NET ---
   String? pcCpu;
   String? pcGpuModel;
   String? pcRam;
@@ -14,12 +13,10 @@ class ResourceSpecModel {
   String? pcMouse;
   String? pcHeadphone;
 
-  // --- Nhóm BT - BIDA ---
   String? btTableDetail;
   String? btCueDetail;
   String? btBallDetail;
 
-  // --- Nhóm CS - PLAYSTATION ---
   String? csConsoleModel;
   String? csTvModel;
   String? csControllerType;

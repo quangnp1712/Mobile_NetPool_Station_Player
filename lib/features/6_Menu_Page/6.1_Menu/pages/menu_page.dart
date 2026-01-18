@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_final_fields, deprecated_member_use, unused_field
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -17,8 +19,7 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
   MenuPageBloc bloc = MenuPageBloc();
-  // ignore: unused_field
-  int _selectedIndex = 4; // tab Tài khoản đang chọn
+  int _selectedIndex = 4;
 
   @override
   void initState() {
@@ -31,7 +32,6 @@ class _MenuPageState extends State<MenuPage> {
     return BlocConsumer<MenuPageBloc, MenuPageState>(
       bloc: bloc,
       listener: (context, state) {
-        // Xử lý chuyển hướng khi chưa đăng nhập hoặc hết hạn token
         if (state.status == MenuStatus.unauthenticated) {
           MenuSharedPref.setIsMenuRoute(true);
           Get.toNamed(loginPageRoute);
@@ -44,7 +44,6 @@ class _MenuPageState extends State<MenuPage> {
         }
       },
       builder: (context, state) {
-        // Hiển thị loading khi đang check token hoặc load data
         if (state.status == MenuStatus.loading ||
             state.status == MenuStatus.initial) {
           return const Scaffold(
@@ -74,34 +73,24 @@ class _MenuPageState extends State<MenuPage> {
                     phoneNumber: state.accountInfo?.phone ?? "",
                   ),
                   const SizedBox(height: 24),
-                  // 🟣 NHÓM 1: CÁ NHÂN & XÃ HỘI
                   _buildSectionHeader('Hoạt động'),
                   MenuOptionCard(
                     icon: Icons.people_alt_outlined,
                     title: 'Bạn bè & Nhóm',
                     badgeCount: 3,
-                    onTap: () {
-                      // TODO: Mở danh sách bạn bè
-                    },
+                    onTap: () {},
                   ),
                   MenuOptionCard(
                     icon: Icons.emoji_events_outlined,
                     title: 'Thành tích & Huy hiệu',
-                    onTap: () {
-                      // TODO: Xem thành tích
-                    },
+                    onTap: () {},
                   ),
                   MenuOptionCard(
                     icon: Icons.bookmark_border,
                     title: 'Kịch bản đã lưu',
-                    onTap: () {
-                      // TODO: Xem mục đã lưu
-                    },
+                    onTap: () {},
                   ),
-
                   const SizedBox(height: 16),
-
-                  // 🟣 NHÓM 2: TÀI KHOẢN & VÍ
                   _buildSectionHeader('Tài khoản'),
                   MenuOptionCard(
                     icon: Icons.person_outline,
@@ -118,33 +107,25 @@ class _MenuPageState extends State<MenuPage> {
                       Get.toNamed(walletPageRoute);
                     },
                   ),
-
                   const SizedBox(height: 16),
-
-                  // 🟣 NHÓM 3: HỆ THỐNG
                   _buildSectionHeader('Ứng dụng'),
                   MenuOptionCard(
                     icon: Icons.settings_outlined,
                     title: 'Cài đặt chung',
-                    onTap: () {
-                      // TODO: điều hướng UI
-                    },
+                    onTap: () {},
                   ),
                   MenuOptionCard(
                     icon: Icons.help_outline,
                     title: 'Hỗ trợ & FAQ',
                     onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const BookingTempPage(),
-      ),
-    );
-  },
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const BookingTempPage(),
+                        ),
+                      );
+                    },
                   ),
-
-                  // Nút đăng xuất
-
                   MenuLogoutButton(
                     onTap: () {
                       bloc.add(MenuLogoutRequested());
@@ -234,9 +215,7 @@ class MenuAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
           icon: const Icon(Icons.notifications_active_rounded,
               color: Colors.white, size: 26),
-          onPressed: () {
-            // 🔔 TODO: xử lý mở trang thông báo
-          },
+          onPressed: () {},
         ),
         const SizedBox(width: 8),
       ],
@@ -266,8 +245,6 @@ class MenuAvatarSection extends StatelessWidget {
     return Column(
       children: [
         const SizedBox(height: 24),
-
-        // Avatar đơn giản hóa, thêm viền cho đẹp
         Container(
           padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
@@ -286,10 +263,7 @@ class MenuAvatarSection extends StatelessWidget {
                 : null,
           ),
         ),
-
         const SizedBox(height: 12),
-
-        // Tên người dùng
         Text(
           username,
           style: const TextStyle(
@@ -299,10 +273,7 @@ class MenuAvatarSection extends StatelessWidget {
             letterSpacing: 0.5,
           ),
         ),
-
         const SizedBox(height: 8),
-
-        // Hiển thị Email
         if (email.isNotEmpty)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -315,8 +286,6 @@ class MenuAvatarSection extends StatelessWidget {
               ),
             ],
           ),
-
-        // Hiển thị SĐT
         if (phoneNumber.isNotEmpty) ...[
           const SizedBox(height: 4),
           Row(
@@ -331,7 +300,6 @@ class MenuAvatarSection extends StatelessWidget {
             ],
           ),
         ],
-
         const SizedBox(height: 20),
         const Divider(
             color: Colors.white10, thickness: 1, indent: 40, endIndent: 40),

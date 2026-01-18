@@ -19,7 +19,7 @@ class SearchStationEvent extends BookingPageEvent {
 }
 
 class FilterStationEvent extends BookingPageEvent {
-  final String filterType; // 'distance', 'rating', 'all'
+  final String filterType;
   const FilterStationEvent(this.filterType);
   @override
   List<Object?> get props => [filterType];
@@ -108,3 +108,11 @@ class FetchStationsEvent extends BookingPageEvent {}
 
 // Event mới: Reset bộ lọc
 class ResetFilterEvent extends BookingPageEvent {}
+
+class ConfirmBookingEvent extends BookingPageEvent {
+  final String paymentMethodCode;
+  final String paymentMethodName;
+  const ConfirmBookingEvent(this.paymentMethodCode, this.paymentMethodName);
+}
+
+class GetWalletEvent extends BookingPageEvent {}

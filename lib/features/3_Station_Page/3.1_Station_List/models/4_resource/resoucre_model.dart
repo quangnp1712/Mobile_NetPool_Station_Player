@@ -4,7 +4,6 @@ import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.r
 
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class StationResourceModel {
-  // model
   int? stationResourceId;
   int? areaId;
   ResourceSpecModel? spec;

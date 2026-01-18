@@ -22,6 +22,8 @@ import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/page
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/pages/profile_page.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.3_Wallet/pages/wallet_page.dart';
+import 'package:mobile_netpool_station_player/features/8_Booking_History_Page/bloc/booking_history_bloc.dart';
+import 'package:mobile_netpool_station_player/features/8_Booking_History_Page/pages/booking_history_page.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -31,6 +33,7 @@ class RouteGenerator {
   final RegisterBloc registerBloc = RegisterBloc();
   final ValidEmailBloc validEmailBloc = ValidEmailBloc();
   final BookingPageBloc bookingPageBloc = BookingPageBloc();
+  final BookingHistoryBloc bookingHistoryPageBloc = BookingHistoryBloc();
   final StationPageBloc stationPageBloc = StationPageBloc();
   final ProfilePageBloc profilePageBloc = ProfilePageBloc();
   final MenuPageBloc menuPageBloc = MenuPageBloc();
@@ -105,6 +108,14 @@ class RouteGenerator {
           callback(int index) {}
           return BlocProvider<BookingPageBloc>.value(
               value: bookingPageBloc, child: BookingPage(callback));
+        },
+      ),
+
+      GetPage(
+        name: bookingHistoryPageRoute,
+        page: () {
+          return BlocProvider<BookingHistoryBloc>.value(
+              value: bookingHistoryPageBloc, child: BookingHistoryPage());
         },
       ),
 

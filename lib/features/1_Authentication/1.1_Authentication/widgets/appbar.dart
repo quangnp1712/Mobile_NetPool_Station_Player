@@ -22,12 +22,10 @@ class _AuthenticationAppBarState extends State<AuthenticationAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      // 1. Làm cho AppBar trong suốt để nền gradient được thấy
       backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
 
-      // 2. Giữ nguyên icon và title
       leading: IconButton(
         icon: const Icon(
           Icons.arrow_back_ios_new,
@@ -35,7 +33,6 @@ class _AuthenticationAppBarState extends State<AuthenticationAppBar> {
           color: kHintColor,
         ),
         onPressed: () {
-          // Chỉ pop nếu có thể quay lại, tránh lỗi ở màn hình Đăng nhập
           if (MenuSharedPref.getIsMenuRoute()) {
             MenuSharedPref.clearIsMenuRoute();
             Get.offAll(LandingNavBottomWidget(index: 0));
@@ -53,7 +50,6 @@ class _AuthenticationAppBarState extends State<AuthenticationAppBar> {
               fontSize: 20,
               fontFamily: AppFonts.semibold)),
 
-      // 3. Thay thế flexibleSpace bằng ảnh
       flexibleSpace: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -70,6 +66,4 @@ class _AuthenticationAppBarState extends State<AuthenticationAppBar> {
       //
     );
   }
-
-  // 4. Set chiều cao tùy chỉnh là 60.0
 }

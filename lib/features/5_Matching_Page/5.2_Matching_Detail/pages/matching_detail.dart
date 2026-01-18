@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -885,7 +887,6 @@ class MatchingDetailPage extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () {
-                        // TODO: Handle Join Logic
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(

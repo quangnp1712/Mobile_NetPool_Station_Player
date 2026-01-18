@@ -30,23 +30,14 @@ class _BookingTempPageState extends State<BookingTempPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            /// Thông tin booking
             BookingInfoSection(),
             const SizedBox(height: 16),
-
-            /// Thời gian – lịch chơi
             BookingScheduleSection(),
             const SizedBox(height: 16),
-
-            /// Menu đã chọn
             BookingMenuSection(),
             const SizedBox(height: 24),
-
-            /// Thành tiền
             BookingTotalSection(),
             const SizedBox(height: 16),
-
-            /// ===== PAYMENT METHOD =====
             PaymentMethodSection(
               onSelected: (method) {
                 setState(() {
@@ -55,8 +46,6 @@ class _BookingTempPageState extends State<BookingTempPage> {
               },
             ),
             const SizedBox(height: 24),
-
-            /// ===== BUTTON THANH TOÁN =====
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -73,9 +62,6 @@ class _BookingTempPageState extends State<BookingTempPage> {
     );
   }
 
-  /// ==========================
-  /// PAYMENT FLOW CONTROLLER
-  /// ==========================
   void _handlePayment(BuildContext context) {
     switch (_selectedPaymentMethod) {
       case PaymentMethod.qr:

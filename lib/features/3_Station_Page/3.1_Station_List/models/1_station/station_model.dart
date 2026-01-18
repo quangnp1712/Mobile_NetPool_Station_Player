@@ -19,8 +19,8 @@ class StationDetailModel {
   MetaDataModel? metadata;
   List<StationSpaceModel>? space;
 
-  double? distance; // Added for UI demo
-  double? rating; // Added for UI demo
+  double? distance;
+  double? rating;
   StationDetailModel({
     this.stationId,
     this.avatar,

@@ -40,7 +40,7 @@ class AuthenticationService extends IAuthenticationService {
     final expiry = decoded['exp'];
     DateTime expiration = DateTime.fromMillisecondsSinceEpoch(expiry * 1000);
     final dateNow = DateTime.now();
-    final check = expiration.isBefore(dateNow);
+    expiration.isBefore(dateNow);
     return expiration.isBefore(dateNow);
   }
 }

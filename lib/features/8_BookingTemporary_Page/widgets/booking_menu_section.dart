@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BookingMenuSection extends StatefulWidget {
-  BookingMenuSection({super.key});
+  const BookingMenuSection({super.key});
 
   @override
   State<BookingMenuSection> createState() => _BookingMenuSectionState();
@@ -21,7 +21,6 @@ class _BookingMenuSectionState extends State<BookingMenuSection> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-
             _item('PC Gaming (7 hours)', 1, 140000),
             _item('Pepsi', 2, 20000),
             _item('Coca Cola', 1, 15000),
@@ -50,8 +49,8 @@ class _BookingMenuSectionState extends State<BookingMenuSection> {
 
   String _money(int v) {
     return v.toString().replaceAllMapped(
-      RegExp(r'\B(?=(\d{3})+(?!\d))'),
-      (m) => ',',
-    );
+          RegExp(r'\B(?=(\d{3})+(?!\d))'),
+          (m) => ',',
+        );
   }
 }

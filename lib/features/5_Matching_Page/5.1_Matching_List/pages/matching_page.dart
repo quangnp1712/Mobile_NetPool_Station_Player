@@ -1,9 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
-
-// --- DATA MODELS ---
+import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 
 class Station {
   final String id;
@@ -27,18 +28,18 @@ class Station {
 
 class TeamLobby {
   final String id;
-  final String title; // Tiêu đề phòng
-  final String gameName; // Tên game
-  final String gameImageUrl; // Ảnh game
-  final String rank; // Điều kiện rank
-  final int currentMembers; // Số người hiện tại
-  final int maxMembers; // Số người tối đa
-  final String hostName; // Tên chủ phòng
-  final String stationName; // Tên quán
-  final String address; // Địa chỉ (Show chi tiết hoặc rút gọn)
-  final double distance; // Khoảng cách
-  final String spaceType; // Loại phòng: Public, VIP, Couple...
-  final String startTime; // Thời gian bắt đầu (Lịch hẹn)
+  final String title;
+  final String gameName;
+  final String gameImageUrl;
+  final String rank;
+  final int currentMembers;
+  final int maxMembers;
+  final String hostName;
+  final String stationName;
+  final String address;
+  final double distance;
+  final String spaceType;
+  final String startTime;
 
   TeamLobby({
     required this.id,
@@ -57,8 +58,6 @@ class TeamLobby {
   });
 }
 
-// --- MOCK DATA ---
-// Lưu ý: Đã đổi assets thành network url để hiển thị được trên bản preview này
 final List<TeamLobby> fakeLobbies = [
   TeamLobby(
     id: '1',
@@ -126,11 +125,8 @@ final List<TeamLobby> fakeLobbies = [
   ),
 ];
 
-// --- CONSTANTS FOR THEME ---
-const Color kPrimaryPurple = Color(0xFF7C3AED); // Fallback
-const Color kNeonCyan = Color(0xFF00F0FF); // Fallback
-
-// --- MAIN WIDGET ---
+const Color kPrimaryPurple = Color(0xFF7C3AED);
+const Color kNeonCyan = Color(0xFF00F0FF);
 
 class MatchingPage extends StatefulWidget {
   final Function callback;
@@ -145,13 +141,11 @@ class _MatchingPageState extends State<MatchingPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  // Filter States
   bool _isNearMe = false;
   String? _selectedProvince;
   String? _selectedDistrict;
   String _selectedTag = "All";
 
-  // Mock Dropdown Data
   final List<String> _provinces = ["Hồ Chí Minh", "Hà Nội", "Đà Nẵng"];
   final List<String> _districts = [
     "Quận 1",
@@ -161,13 +155,11 @@ class _MatchingPageState extends State<MatchingPage> {
     "Thủ Đức"
   ];
 
-  // Tags được cập nhật theo Game để phù hợp với data mới
   final List<String> _tags = ["All", "LoL", "Valorant", "CS2", "Ranking"];
 
   List<TeamLobby> get _filteredLobbies {
     List<TeamLobby> list = fakeLobbies;
 
-    // Search logic
     if (_searchQuery.isNotEmpty) {
       list = list
           .where((p) =>
@@ -179,10 +171,8 @@ class _MatchingPageState extends State<MatchingPage> {
           .toList();
     }
 
-    // Tag Filter Logic
     if (_selectedTag != "All") {
       if (_selectedTag == "Ranking") {
-        // Giả sử logic lọc rank (ví dụ có dấu + là rank cao)
         list = list.where((p) => p.rank.contains("+")).toList();
       } else if (_selectedTag == "LoL") {
         list = list
@@ -193,7 +183,6 @@ class _MatchingPageState extends State<MatchingPage> {
       }
     }
 
-    // Near Me Logic
     if (_isNearMe) {
       list = list.where((p) => p.distance < 3.0).toList();
       list.sort((a, b) => a.distance.compareTo(b.distance));
@@ -214,10 +203,7 @@ class _MatchingPageState extends State<MatchingPage> {
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // 1. Custom Header
           _buildHeader(context),
-
-          // 2. Main List Content
           Expanded(
             child: _filteredLobbies.isEmpty
                 ? _buildEmptyState()
@@ -252,7 +238,6 @@ class _MatchingPageState extends State<MatchingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Row 1: Title + Near Me Button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -304,10 +289,7 @@ class _MatchingPageState extends State<MatchingPage> {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // Row 2: Search Bar
           Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -346,13 +328,9 @@ class _MatchingPageState extends State<MatchingPage> {
               ],
             ),
           ),
-
           const SizedBox(height: 12),
-
-          // Row 3: Dropdowns + Refresh
           Row(
             children: [
-              // Province Dropdown
               Expanded(
                 child: Container(
                   height: 38,
@@ -388,7 +366,6 @@ class _MatchingPageState extends State<MatchingPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              // District Dropdown
               Expanded(
                 child: Container(
                   height: 38,
@@ -424,7 +401,6 @@ class _MatchingPageState extends State<MatchingPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              // Refresh Button
               Container(
                 height: 38,
                 width: 38,
@@ -451,10 +427,7 @@ class _MatchingPageState extends State<MatchingPage> {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Row 4: Filter Tags
           SizedBox(
             height: 28,
             child: ListView.separated(
@@ -515,8 +488,6 @@ class _MatchingPageState extends State<MatchingPage> {
   }
 }
 
-// --- SUB-WIDGET: UPDATED MATCH CARD ---
-
 class MatchCard extends StatelessWidget {
   final TeamLobby lobby;
 
@@ -524,7 +495,6 @@ class MatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Tính toán % slot đã đầy để hiển thị màu sắc
     final double fillPercent = lobby.currentMembers / lobby.maxMembers;
     final Color slotColor = fillPercent >= 1.0
         ? Colors.redAccent
@@ -542,7 +512,7 @@ class MatchCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: () {
-            print("Tap on Lobby: ${lobby.title}");
+            DebugLogger.printLog("Tap on Lobby: ${lobby.title}");
             Get.toNamed(matchingDetailPageRoute);
           },
           splashColor: AppColors.primaryNeon.withOpacity(0.1),
@@ -552,11 +522,9 @@ class MatchCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Header: Game Logo + Title + Slot Count
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Game Image
                     Container(
                       width: 50,
                       height: 50,
@@ -577,8 +545,6 @@ class MatchCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-
-                    // Title & Host
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,10 +560,8 @@ class MatchCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          // Row hiển thị Host và Station (UPDATED)
                           Row(
                             children: [
-                              // Host Info
                               Icon(Icons.person,
                                   size: 12, color: kPrimaryPurple),
                               const SizedBox(width: 4),
@@ -606,7 +570,6 @@ class MatchCard extends StatelessWidget {
                                 style: TextStyle(
                                     color: Colors.grey[400], fontSize: 11),
                               ),
-
                               const SizedBox(width: 8),
                               Container(
                                   width: 3,
@@ -615,14 +578,12 @@ class MatchCard extends StatelessWidget {
                                       color: Colors.grey[600],
                                       shape: BoxShape.circle)),
                               const SizedBox(width: 8),
-
-                              // Station Info (UPDATED: Icon + Prefix)
                               Icon(Icons.store,
                                   size: 12, color: Colors.blueAccent),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  "Station: ${lobby.stationName}", // Thêm prefix "Station: "
+                                  "Station: ${lobby.stationName}",
                                   style: TextStyle(
                                       color: Colors.grey[400], fontSize: 11),
                                   overflow: TextOverflow.ellipsis,
@@ -633,8 +594,6 @@ class MatchCard extends StatelessWidget {
                         ],
                       ),
                     ),
-
-                    // Slot Count Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -661,10 +620,7 @@ class MatchCard extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
-                // 2. Info Chips Row (Rank, Time, Space)
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -677,14 +633,10 @@ class MatchCard extends StatelessWidget {
                         Colors.purpleAccent),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
-                // 3. Footer: Distance + Action Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Distance & Address
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,10 +666,7 @@ class MatchCard extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
-                    // Large Join Button
                     Container(
                       height: 36,
                       decoration: BoxDecoration(

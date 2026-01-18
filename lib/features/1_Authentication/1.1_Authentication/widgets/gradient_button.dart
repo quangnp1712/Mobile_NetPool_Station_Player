@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 
-/// Nút bấm Gradient
 class GradientButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -14,7 +13,6 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Giá trị này phải giống nhau ở cả 2 chỗ
     const double borderRadiusValue = 8.0;
 
     return Container(

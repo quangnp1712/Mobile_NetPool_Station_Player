@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/appbar.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/custom_text_field.dart';
@@ -41,16 +40,16 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFF3B1F5A), // Màu tím
-            kScaffoldBackground, // Màu đen
+            Color(0xFF3B1F5A),
+            kScaffoldBackground,
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.0, 0.5], // Giữ nguyên stops của bạn
+          stops: [0.0, 0.5],
         ),
       ),
       child: Scaffold(
-        backgroundColor: Colors.transparent, // <-- QUAN TRỌNG
+        backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         appBar: const AuthenticationAppBar(title: 'XÁC THỰC EMAIL'),
         body: SafeArea(
@@ -82,7 +81,6 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Box phát sáng bọc toàn bộ nội dung
                       FormContainer(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,9 +88,7 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
                             Center(
                               child: Image.asset(
                                 'assets/images/logo_no_bg.png',
-                                // Bạn có thể điều chỉnh chiều rộng nếu cần
-                                width: screenSize.width *
-                                    0.6, // Rộng bằng 70% màn hình
+                                width: screenSize.width * 0.6,
                               ),
                             ),
                             const SizedBox(height: 50),
@@ -112,9 +108,7 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
                               controller: emailController,
                               keyboardType: TextInputType.text,
                               inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
-
+                                FilteringTextInputFormatter.singleLineFormatter,
                                 FilteringTextInputFormatter.deny(
                                     RegExp(r'[^a-zA-Z0-9@._-]')),
                               ],
@@ -138,8 +132,7 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
                               controller: codeController,
                               inputFormatters: [
                                 FilteringTextInputFormatter.singleLineFormatter,
-                                FilteringTextInputFormatter
-                                    .digitsOnly, // Chỉ cho phép nhập số
+                                FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(6),
                               ],
                               validator: (value) {
@@ -147,12 +140,10 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
                                   return 'Vui lòng nhập Mã OTP ';
                                 }
 
-                                return null; // Trả về null nếu không có lỗi
+                                return null;
                               },
                             ),
                             const SizedBox(height: 30),
-
-                            // send valid email Button
                             GradientButton(
                               text: 'Xác nhận',
                               onPressed: () {

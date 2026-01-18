@@ -27,8 +27,6 @@ class WalletBalanceCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-
-          /// ✅ CHỈ 1 DÒNG – CÓ đ – FORMAT CHUẨN
           Text(
             MoneyFormatter.formatVND(balance.toInt()),
             style: const TextStyle(

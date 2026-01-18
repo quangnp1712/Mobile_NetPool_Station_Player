@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:geolocator/geolocator.dart';
 import 'package:mobile_netpool_station_player/core/utils/shared_preferences_helper.dart';
 

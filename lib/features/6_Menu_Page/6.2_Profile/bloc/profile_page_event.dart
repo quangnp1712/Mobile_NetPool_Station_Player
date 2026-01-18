@@ -11,7 +11,7 @@ class ProfileStarted extends ProfilePageEvent {}
 
 class ProfileUpdated extends ProfilePageEvent {
   final AccountInfoModel updatedInfo;
-  ProfileUpdated(this.updatedInfo);
+  const ProfileUpdated(this.updatedInfo);
 
   @override
   List<Object?> get props => [updatedInfo];

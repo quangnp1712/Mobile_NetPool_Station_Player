@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BookingScheduleSection extends StatefulWidget {
-  BookingScheduleSection({super.key});
+  const BookingScheduleSection({super.key});
 
   @override
   State<BookingScheduleSection> createState() => _BookingScheduleSectionState();
@@ -21,7 +21,6 @@ class _BookingScheduleSectionState extends State<BookingScheduleSection> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-
             _row('Booking Date', '08/01/2026'),
             _row('Check-in Time', '14:00'),
             _row('Total Play Time', '7 hours'),

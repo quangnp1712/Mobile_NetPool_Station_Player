@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
 import 'dart:math';
 
@@ -46,12 +48,14 @@ class _ProfileViewState extends State<ProfilePage> {
   }
 
   void _populateControllers(AccountInfoModel info) {
-    if (_nameController.text.isEmpty)
+    if (_nameController.text.isEmpty) {
       _nameController.text = info.username ?? '';
+    }
     if (_emailController.text.isEmpty) _emailController.text = info.email ?? '';
     if (_phoneController.text.isEmpty) _phoneController.text = info.phone ?? '';
-    if (_idController.text.isEmpty)
+    if (_idController.text.isEmpty) {
       _idController.text = info.identification ?? '';
+    }
   }
 
   @override
@@ -116,7 +120,6 @@ class _ProfileViewState extends State<ProfilePage> {
                     color: Colors.purpleAccent),
                 onPressed: () {
                   if (isEditing) {
-                    // Logic Lưu
                     if (!state.isCaptchaVerified) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -130,11 +133,9 @@ class _ProfileViewState extends State<ProfilePage> {
                       username: _nameController.text,
                       phone: _phoneController.text,
                       password: "nguyencchay",
-                      // avatar đã được update trong state khi pick
                     );
                     bloc.add(ProfileUpdated(updatedInfo));
                   } else {
-                    // Bật chế độ sửa
                     bloc.add(const ProfileEditToggled(true));
                   }
                 },
@@ -153,19 +154,13 @@ class _ProfileViewState extends State<ProfilePage> {
           ),
           body: Stack(
             children: [
-              // Lớp 1: Nội dung chính
               SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
                     const SizedBox(height: 20),
-
-                    // Avatar
                     _buildAvatarUploader(context, state),
-
                     const SizedBox(height: 16),
-
-                    // Badge Trạng thái
                     if (info.statusName != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -189,10 +184,7 @@ class _ProfileViewState extends State<ProfilePage> {
                           ),
                         ),
                       ),
-
                     const SizedBox(height: 32),
-
-                    // Các trường nhập liệu
                     _buildTextField(
                       label: "Tên tài khoản (Username)",
                       icon: Icons.person_outline,
@@ -200,7 +192,6 @@ class _ProfileViewState extends State<ProfilePage> {
                       enabled: isEditing,
                     ),
                     const SizedBox(height: 16),
-
                     _buildTextField(
                       label: "Số điện thoại (Phone)",
                       icon: Icons.phone_outlined,
@@ -209,7 +200,6 @@ class _ProfileViewState extends State<ProfilePage> {
                       keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 16),
-
                     _buildTextField(
                       label: "Email",
                       icon: Icons.email_outlined,
@@ -218,17 +208,13 @@ class _ProfileViewState extends State<ProfilePage> {
                       hint: "Email",
                     ),
                     const SizedBox(height: 16),
-
                     _buildTextField(
                       label: "CMND/CCCD (Identification)",
                       icon: Icons.badge_outlined,
                       controller: _idController,
                       enabled: false,
                     ),
-
                     const SizedBox(height: 20),
-
-                    // CAPTCHA Section
                     if (isEditing) ...[
                       const Divider(color: Colors.white24),
                       const SizedBox(height: 10),
@@ -241,7 +227,6 @@ class _ProfileViewState extends State<ProfilePage> {
                       _buildCaptchaSection(context, state),
                       const SizedBox(height: 10),
                     ],
-
                     if (isEditing)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -254,9 +239,7 @@ class _ProfileViewState extends State<ProfilePage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-
                     const SizedBox(height: 20),
-
                     if (isEditing)
                       SizedBox(
                         width: double.infinity,
@@ -291,13 +274,11 @@ class _ProfileViewState extends State<ProfilePage> {
                   ],
                 ),
               ),
-
-              // Lớp 2: Loading Overlay
               if (isLoading)
                 Container(
                   width: double.infinity,
                   height: double.infinity,
-                  color: Colors.black.withOpacity(0.5), // Nền mờ phía trước
+                  color: Colors.black.withOpacity(0.5),
                   child: const Center(
                     child:
                         CircularProgressIndicator(color: Colors.purpleAccent),
@@ -310,7 +291,6 @@ class _ProfileViewState extends State<ProfilePage> {
     );
   }
 
-  // --- Widget Avatar Uploader ---
   Widget _buildAvatarUploader(BuildContext context, ProfilePageState state) {
     ImageProvider? bg;
     final String? avatarUrl = state.accountInfo?.avatar;
@@ -376,9 +356,7 @@ class _ProfileViewState extends State<ProfilePage> {
     );
   }
 
-  // --- Widget Captcha ---
   Widget _buildCaptchaSection(BuildContext context, ProfilePageState state) {
-    // Màu cho text captcha
     Color _getRandomCaptchaColor() {
       return Colors.primaries[Random().nextInt(Colors.primaries.length)];
     }
@@ -388,7 +366,6 @@ class _ProfileViewState extends State<ProfilePage> {
       runSpacing: 16,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        // Khung hiển thị mã Captcha
         Container(
           width: 150,
           height: 50,
@@ -417,8 +394,6 @@ class _ProfileViewState extends State<ProfilePage> {
                     onPressed: () => bloc.add(ProfileGenerateCaptcha())))
           ]),
         ),
-
-        // Ô nhập mã Captcha
         SizedBox(
           width: 180,
           child: TextFormField(

@@ -28,6 +28,7 @@ const stationPageRoute = "/netpool/station";
 
 // 4: Booking Page //
 const bookingPageRoute = "/netpool/booking";
+const bookingHistoryPageRoute = "/netpool/booking/h";
 
 // 5: Match Page //
 const matchingListPageRoute = "/netpool/matching";

@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages, no_leading_underscores_for_local_identifiers
+
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -77,7 +79,6 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
 
   void _onEditToggled(
       ProfileEditToggled event, Emitter<ProfilePageState> emit) {
-    // Khi bật chế độ sửa, tạo captcha mới
     String newCaptcha = event.isEditing ? _generateRandomCaptcha() : '';
     emit(state.copyWith(
       isEditing: event.isEditing,
@@ -88,7 +89,6 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
 
   Future<void> _onUpdated(
       ProfileUpdated event, Emitter<ProfilePageState> emit) async {
-    // Kiểm tra Captcha nếu đang bật chế độ sửa (tuỳ logic, ở đây mình assume là cần verified)
     if (state.isEditing && !state.isCaptchaVerified) {
       emit(state.copyWith(
           status: ProfileStatus.failure,
@@ -98,20 +98,16 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
 
     emit(state.copyWith(status: ProfileStatus.updating));
     try {
-      // 1. Kiểm tra xem Avatar có thay đổi (dạng Base64) không, nếu có thì Upload
       String? finalAvatarUrl = event.updatedInfo.avatar;
 
       if (finalAvatarUrl != null && finalAvatarUrl.startsWith('data:image')) {
-        // Upload ảnh lên Firebase
         finalAvatarUrl = await _uploadImagesToFirebase(finalAvatarUrl);
       }
 
-      // 2. Cập nhật model với URL ảnh đã upload
       final infoToUpdate = event.updatedInfo.copyWith(avatar: finalAvatarUrl);
 
-      // 3. Gọi API Update Profile
       await Future.delayed(const Duration(seconds: 1));
-      print("API Update Body: ${infoToUpdate.toJson()}");
+      DebugLogger.printLog("API Update Body: ${infoToUpdate.toJson()}");
 
       emit(state.copyWith(
         status: ProfileStatus.updateSuccess,
@@ -125,7 +121,6 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
     }
   }
 
-  // --- Logic Avatar ---
   Future<void> _onPickAvatar(
       ProfilePickAvatar event, Emitter<ProfilePageState> emit) async {
     emit(state.copyWith(isPickingImage: true));
@@ -139,7 +134,6 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
         String ext = result.files.single.extension ?? 'png';
         String dataUri = "data:image/$ext;base64,$base64String";
 
-        // Cập nhật avatar tạm thời vào accountInfo để hiển thị trên UI
         final currentInfo = state.accountInfo ?? AccountInfoModel();
         emit(state.copyWith(
           isPickingImage: false,
@@ -149,12 +143,11 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
         emit(state.copyWith(isPickingImage: false));
       }
     } catch (e) {
-      print("Pick avatar error: $e");
+      DebugLogger.printLog("Pick avatar error: $e");
       emit(state.copyWith(isPickingImage: false));
     }
   }
 
-  // --- Logic Captcha ---
   void _onGenerateCaptcha(
       ProfileGenerateCaptcha event, Emitter<ProfilePageState> emit) {
     emit(state.copyWith(
@@ -167,50 +160,37 @@ class ProfilePageBloc extends Bloc<ProfilePageEvent, ProfilePageState> {
       ProfileVerifyCaptcha event, Emitter<ProfilePageState> emit) {
     emit(state.copyWith(isVerifyingCaptcha: true));
 
-    // Giả lập delay verify
-    // await Future.delayed(const Duration(milliseconds: 500));
-    // Bloc handler async nếu cần await, ở đây logic đơn giản synchronous cũng được
-
     bool isValid = event.input == state.captchaText;
     emit(state.copyWith(
         isCaptchaVerified: isValid,
         isVerifyingCaptcha: false,
-        isClearCaptchaController: !isValid // Clear text nếu sai
-        ));
+        isClearCaptchaController: !isValid));
   }
 
   String _generateRandomCaptcha() {
     return Random().nextInt(999999).toString().padLeft(6, '0');
   }
 
-  // --- Helper Upload Firebase ---
   Future<String> _uploadImagesToFirebase(String base64Images) async {
     final FirebaseStorage storage = FirebaseStorage.instance;
     String uploadedUrl = "";
 
     try {
-      // 1. Tách chuỗi Base64 (data:image/png;base64,iVBOR...)
       final String base64String = base64Images.split(',').last;
-      // 2. Decode thành bytes
       final Uint8List imageBytes = base64Decode(base64String);
 
-      // 3. Tạo tên file ngẫu nhiên
       final String fileName =
           'user_avatar/avatar_${DateTime.now().millisecondsSinceEpoch}.png';
 
-      // 4. Tạo reference
       final Reference ref = storage.ref().child(fileName);
 
-      // 5. Upload
       final SettableMetadata metadata =
           SettableMetadata(contentType: 'image/png');
       await ref.putData(imageBytes, metadata);
 
-      // 6. Lấy URL
       uploadedUrl = await ref.getDownloadURL();
     } catch (e) {
-      print("Lỗi upload ảnh: $e");
-      // Trả về chuỗi rỗng hoặc ném lỗi tuỳ logic
+      DebugLogger.printLog("Lỗi upload ảnh: $e");
       throw Exception("Upload ảnh thất bại");
     }
     return uploadedUrl;

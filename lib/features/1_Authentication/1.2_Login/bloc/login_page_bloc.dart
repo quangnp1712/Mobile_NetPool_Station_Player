@@ -1,7 +1,7 @@
 import 'dart:async';
 
+// ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';

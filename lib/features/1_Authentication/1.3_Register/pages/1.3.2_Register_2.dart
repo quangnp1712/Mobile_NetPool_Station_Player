@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, type_literal_in_constant_pattern
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,16 +39,16 @@ class _RegisterPage2State extends State<RegisterPage2> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFF3B1F5A), // Màu tím
-            kScaffoldBackground, // Màu đen
+            Color(0xFF3B1F5A),
+            kScaffoldBackground,
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.0, 0.5], // Giữ nguyên stops của bạn
+          stops: [0.0, 0.5],
         ),
       ),
       child: Scaffold(
-        backgroundColor: Colors.transparent, // <-- QUAN TRỌNG
+        backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         appBar: const AuthenticationAppBar(title: 'ĐĂNG NHẬP'),
         body: SafeArea(
@@ -84,7 +86,6 @@ class _RegisterPage2State extends State<RegisterPage2> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Box phát sáng bọc toàn bộ nội dung
                           FormContainer(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,9 +93,7 @@ class _RegisterPage2State extends State<RegisterPage2> {
                                 Center(
                                   child: Image.asset(
                                     'assets/images/logo_no_bg.png',
-                                    // Bạn có thể điều chỉnh chiều rộng nếu cần
-                                    width: screenSize.width *
-                                        0.6, // Rộng bằng 70% màn hình
+                                    width: screenSize.width * 0.6,
                                   ),
                                 ),
                                 const SizedBox(height: 50),
@@ -115,8 +114,7 @@ class _RegisterPage2State extends State<RegisterPage2> {
                                   keyboardType: TextInputType.text,
                                   inputFormatters: [
                                     FilteringTextInputFormatter
-                                        .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
-
+                                        .singleLineFormatter,
                                     FilteringTextInputFormatter.deny(
                                         RegExp(r'[^a-zA-Z0-9@._-]')),
                                   ],
@@ -141,14 +139,14 @@ class _RegisterPage2State extends State<RegisterPage2> {
                                   controller: passwordController,
                                   inputFormatters: [
                                     FilteringTextInputFormatter
-                                        .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                        .singleLineFormatter,
                                   ],
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
                                       return 'Vui lòng nhập mật khẩu ';
                                     }
 
-                                    return null; // Trả về null nếu không có lỗi
+                                    return null;
                                   },
                                 ),
                                 const SizedBox(height: 25),
@@ -160,7 +158,7 @@ class _RegisterPage2State extends State<RegisterPage2> {
                                   controller: confirmPasswordController,
                                   inputFormatters: [
                                     FilteringTextInputFormatter
-                                        .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                        .singleLineFormatter,
                                   ],
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
@@ -169,7 +167,7 @@ class _RegisterPage2State extends State<RegisterPage2> {
                                     if (value != passwordController.text) {
                                       return 'Mật khẩu không khớp';
                                     }
-                                    return null; // Trả về null nếu không có lỗi
+                                    return null;
                                   },
                                 ),
                                 const SizedBox(height: 30),
@@ -199,14 +197,13 @@ class _RegisterPage2State extends State<RegisterPage2> {
                       ),
                     ),
                   ),
-                  // --- WIDGET LOADING TRONG STACK ---
                   if (isLoading)
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
                           color: AppColors.containerBackground.withOpacity(
                             0.8,
-                          ), // Màu nền mờ
+                          ),
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                         child: Center(
@@ -218,7 +215,6 @@ class _RegisterPage2State extends State<RegisterPage2> {
                         ),
                       ),
                     ),
-                  // ------------------------------------
                 ],
               );
             },

@@ -12,7 +12,6 @@ class BookingSharedPref {
   }
 
   static Future<void> clearIsBookingRoute() async {
-    // Dùng remove() để xóa một key
     await SharedPreferencesHelper.preferences.remove("isBookingRoute");
   }
 }

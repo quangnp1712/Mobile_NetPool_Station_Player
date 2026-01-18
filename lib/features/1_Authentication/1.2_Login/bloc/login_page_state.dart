@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 part of 'login_page_bloc.dart';
 
 sealed class LoginPageState {

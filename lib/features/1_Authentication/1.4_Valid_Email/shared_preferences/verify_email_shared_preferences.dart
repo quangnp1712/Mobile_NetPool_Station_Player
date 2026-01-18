@@ -10,7 +10,6 @@ class VerifyEmailPref {
   }
 
   static Future<void> clearEmail() async {
-    // Dùng remove() để xóa một key
     await SharedPreferencesHelper.preferences.remove("valid_email");
   }
 }

@@ -10,8 +10,6 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Auth
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/gradient_button.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/switch_link.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.2_Login/bloc/login_page_bloc.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.1_register_1.dart';
-import 'package:mobile_netpool_station_player/features/2_Home_Page/pages/home_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/shared_preferences/booking_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
@@ -26,7 +24,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final FocusNode _formFocusNode = FocusNode();
 
   final LoginPageBloc loginPageBloc = LoginPageBloc();
 
@@ -44,25 +41,22 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
-    // 1. Bọc MỌI THỨ trong Container chứa gradient
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFF3B1F5A), // Màu tím
-            kScaffoldBackground, // Màu đen
+            Color(0xFF3B1F5A),
+            kScaffoldBackground,
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.0, 0.5], // Giữ nguyên stops của bạn
+          stops: [0.0, 0.5],
         ),
       ),
-      // 2. Đặt Scaffold BÊN TRONG, và làm nó TRONG SUỐT
       child: Scaffold(
-        backgroundColor: Colors.transparent, // <-- QUAN TRỌNG
+        backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         appBar: const AuthenticationAppBar(title: 'ĐĂNG NHẬP'),
-        // 3. Body bây giờ chỉ cần chứa SafeArea và SingleChildScrollView
         body: SafeArea(
           child:
 
@@ -102,7 +96,6 @@ class _LoginPageState extends State<LoginPage> {
                 isLoading = false;
               }
               return SingleChildScrollView(
-                // Padding này là khoảng cách từ box đến viền màn hình
                 padding: const EdgeInsets.symmetric(
                     horizontal: 30.0, vertical: 20.0),
                 child: Form(
@@ -111,18 +104,14 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Box phát sáng bọc toàn bộ nội dung
                       FormContainer(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // const LogoWidget(), // Logo nằm BÊN TRONG box
                             Center(
                               child: Image.asset(
                                 'assets/images/logo_no_bg.png',
-                                // Bạn có thể điều chỉnh chiều rộng nếu cần
-                                width:
-                                    screenSize.width, // Rộng bằng 70% màn hình
+                                width: screenSize.width,
                               ),
                             ),
                             const SizedBox(height: 50),
@@ -146,18 +135,16 @@ class _LoginPageState extends State<LoginPage> {
                                 FilteringTextInputFormatter.deny(
                                     RegExp(r'[^a-zA-Z0-9@._-]')),
                               ],
-                              // === THÊM VALIDATION CHO EMAIL ===
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Email không được để trống';
                                 }
-                                // Biểu thức regex đơn giản cho email
                                 if (!RegExp(
                                         r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                                     .hasMatch(value)) {
                                   return 'Email không hợp lệ';
                                 }
-                                return null; // Hợp lệ
+                                return null;
                               },
                             ),
                             const SizedBox(height: 25),
@@ -168,14 +155,13 @@ class _LoginPageState extends State<LoginPage> {
                               obscureText: true,
                               controller: passwordController,
                               inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                FilteringTextInputFormatter.singleLineFormatter,
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập mật khẩu ';
                                 }
-                                return null; // Trả về null nếu không có lỗi
+                                return null;
                               },
                             ),
                             const SizedBox(height: 30),
@@ -195,7 +181,6 @@ class _LoginPageState extends State<LoginPage> {
                               children: [
                                 // TextButton(
                                 //   onPressed: () {
-                                //     /* TODO: Xử lý quên mật khẩu */
                                 //   },
                                 //   style: TextButton.styleFrom(
                                 //     padding: EdgeInsets.zero,

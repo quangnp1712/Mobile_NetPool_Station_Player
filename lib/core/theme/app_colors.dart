@@ -27,6 +27,10 @@ const Color kCardColorLight = Color(0xFF1E293B); // Slate 800
 const Color kRedColor = Color(0xFFF87171); // Red 400
 const Color kprimaryGlow = Color(0xFFCB30E0);
 
+const Color kCardLightColor = Color(0xFF1A162E);
+const Color kAccentFuchsia = Color(0xFFE879F9); // Fuchsia 400
+const Color kBorderColor = Color(0x1A9333EA); // Purple with opacity
+
 class AppColors {
   static const bgDark = Color(0xFF3B1F5A);
   static const bgBlue = Color.fromARGB(255, 30, 232, 251);

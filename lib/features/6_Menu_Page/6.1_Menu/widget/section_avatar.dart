@@ -1,8 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class MenuAvatarSection extends StatefulWidget {
   final String username;
-  final String avatarUrl; // Có thể là link hoặc asset path
+  final String avatarUrl;
 
   const MenuAvatarSection({
     super.key,
@@ -30,8 +32,6 @@ class _MenuAvatarSectionState extends State<MenuAvatarSection> {
     return Column(
       children: [
         const SizedBox(height: 24),
-
-        // 🟣 Avatar tròn
         CircleAvatar(
           radius: 50,
           backgroundColor: Colors.purpleAccent.withOpacity(0.3),
@@ -45,10 +45,7 @@ class _MenuAvatarSectionState extends State<MenuAvatarSection> {
                 )
               : null,
         ),
-
         const SizedBox(height: 12),
-
-        // 🧑‍💻 Tên người dùng
         Text(
           currentName,
           style: const TextStyle(
@@ -57,7 +54,6 @@ class _MenuAvatarSectionState extends State<MenuAvatarSection> {
             fontWeight: FontWeight.w600,
           ),
         ),
-
         const SizedBox(height: 16),
         const Divider(
           color: Colors.white24,

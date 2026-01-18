@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 
-/// Link chuyển đổi Đăng nhập / Đăng ký
 class AuthSwitchLink extends StatelessWidget {
   final String text;
   final String linkText;
@@ -20,7 +19,6 @@ class AuthSwitchLink extends StatelessWidget {
     return Center(
       child: RichText(
         text: TextSpan(
-          // Cần set style ở đây để RichText có style mặc định
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: kHintColor,
                 fontSize: 15,

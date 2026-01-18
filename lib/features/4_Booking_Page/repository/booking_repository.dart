@@ -3,7 +3,6 @@ import 'package:mobile_netpool_station_player/core/network/exceptions/app_except
 import 'package:mobile_netpool_station_player/core/network/exceptions/exception_handlers.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/shared_preferences/auth_shared_preferences.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/api/booking_api.dart';
-import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/5.resource/resoucre_model.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/models/6.booking/booking_model.dart';
 
 abstract class IBookingRepository {
@@ -21,7 +20,7 @@ abstract class IBookingRepository {
   Future<Map<String, dynamic>> getArea(
     String? search,
     String? stationId,
-    String? spaceId,
+    String? stationSpaceId,
     String? statusCodes,
     String? current,
     String? pageSize,
@@ -43,8 +42,9 @@ abstract class IBookingRepository {
     String? statusCodes,
     String? pageSize,
   );
-  Future<Map<String, dynamic>> findDetailWithSchedule(
+  Future<Map<String, dynamic>> findDetailWithResource(
     String? scheduleId,
+    String? stationResourceId,
   );
 
   Future<Map<String, dynamic>> createBooking(
@@ -53,6 +53,15 @@ abstract class IBookingRepository {
   Future<Map<String, dynamic>> updateBooking(
     BookingModel booking,
   );
+
+  Future<Map<String, dynamic>> paymentWallet(
+    String bookingId,
+  );
+  Future<Map<String, dynamic>> paymentBankTransfer(
+    String bookingId,
+  );
+
+  Future<Map<String, dynamic>> getWallet();
 }
 
 class BookingRepository extends BookingApi implements IBookingRepository {
@@ -139,7 +148,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
   Future<Map<String, dynamic>> getArea(
     String? search,
     String? stationId,
-    String? spaceId,
+    String? stationSpaceId,
     String? statusCodes,
     String? current,
     String? pageSize,
@@ -148,7 +157,7 @@ class BookingRepository extends BookingApi implements IBookingRepository {
       final String jwtToken = AuthenticationPref.getAccessToken().toString();
 
       Uri uri = Uri.parse(
-          "$pubAreaUrl?search=$search&stationId=$stationId&spaceId=$spaceId&statusCodes=$statusCodes&current=$current&pageSize=$pageSize");
+          "$pubAreaUrl?search=$search&stationId=$stationId&stationSpaceId=$stationSpaceId&statusCodes=$statusCodes&current=$current&pageSize=$pageSize");
       final client = http.Client();
       final response = await client.get(
         uri,
@@ -250,15 +259,16 @@ class BookingRepository extends BookingApi implements IBookingRepository {
     }
   }
 
-  //! find Detail Schedule
+  //! find timeslot with resource
   @override
-  Future<Map<String, dynamic>> findDetailWithSchedule(
+  Future<Map<String, dynamic>> findDetailWithResource(
     String? scheduleId,
+    String? stationResourceId,
   ) async {
     try {
       final String jwtToken = AuthenticationPref.getAccessToken().toString();
 
-      Uri uri = Uri.parse("$pubScheduleUrl/$scheduleId");
+      Uri uri = Uri.parse("$pubScheduleUrl/$scheduleId/$stationResourceId");
       final client = http.Client();
       final response = await client.get(
         uri,
@@ -326,6 +336,80 @@ class BookingRepository extends BookingApi implements IBookingRepository {
             body: booking.toJson(),
           )
           .timeout(const Duration(seconds: 180));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! paymentWallet
+  @override
+  Future<Map<String, dynamic>> paymentWallet(
+    String bookingId,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse("$apiBookingUrl/$bookingId/wallet-payment");
+
+      final client = http.Client();
+      final response = await client.post(
+        uri,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      ).timeout(const Duration(seconds: 50));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+//!  paymentBankTransfer
+  @override
+  Future<Map<String, dynamic>> paymentBankTransfer(
+    String bookingId,
+  ) async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse("$apiBookingUrl/$bookingId/payment");
+      final client = http.Client();
+      final response = await client.get(
+        uri,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      ).timeout(const Duration(seconds: 50));
+      return processResponse(response);
+    } catch (e) {
+      return ExceptionHandlers().getExceptionString(e);
+    }
+  }
+
+  //! get wallet
+  @override
+  Future<Map<String, dynamic>> getWallet() async {
+    try {
+      final String jwtToken = AuthenticationPref.getAccessToken().toString();
+
+      Uri uri = Uri.parse("$apiWalletUrl/me");
+      final client = http.Client();
+      final response = await client.get(
+        uri,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          'Content-Type': 'application/json',
+          'Accept': '*/*',
+          'Authorization': 'Bearer $jwtToken',
+        },
+      ).timeout(const Duration(seconds: 30));
       return processResponse(response);
     } catch (e) {
       return ExceptionHandlers().getExceptionString(e);

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable, library_prefixes, non_constant_identifier_names, avoid_print
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,7 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart'
     as getXTransition;
 import 'package:google_fonts/google_fonts.dart';
@@ -23,6 +24,7 @@ import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Statio
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/8_Booking_History_Page/bloc/booking_history_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/404/error.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:sizer/sizer.dart';
@@ -67,7 +69,6 @@ class _MyAppState extends State<MyApp> {
     splashService.initialization();
   }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return Sizer(
@@ -82,6 +83,7 @@ class _MyAppState extends State<MyApp> {
             BlocProvider(create: (_) => StationPageBloc()),
             BlocProvider(create: (_) => MenuPageBloc()),
             BlocProvider(create: (_) => ProfilePageBloc()),
+            BlocProvider(create: (_) => BookingHistoryBloc()),
           ],
           child: GetMaterialApp(
             localizationsDelegates: const [
@@ -102,20 +104,14 @@ class _MyAppState extends State<MyApp> {
               textTheme: GoogleFonts.robotoTextTheme(),
             ),
             initialRoute: splashPageRoute,
-            // --- XỬ LÝ KHI RỜI TRANG ---
             routingCallback: (routing) {
-              // Định nghĩa các route thuộc luồng Đăng ký / Quên mật khẩu
-              // (Đây là các route mà bạn *cần* giữ lại email)
               const authFlowRoutes = [
                 validEmailPageRoute,
               ];
 
-              final previousRoute = routing?.previous; // Route vừa rời đi
-              final currentRoute = routing?.current; // Route sắp vào
+              final previousRoute = routing?.previous;
+              final currentRoute = routing?.current;
 
-              // KIỂM TRA: Nếu ta vừa rời (previous) 1 trang trong luồng auth
-              // VÀ ta sắp vào (current) 1 trang KHÔNG NẰM trong luồng auth
-              // (ví dụ: đi từ /register -> /login hoặc /dashboard)
               if (authFlowRoutes.contains(previousRoute)) {
                 RegisterSharedPref.clearEmail();
                 VerifyEmailPref.clearEmail();

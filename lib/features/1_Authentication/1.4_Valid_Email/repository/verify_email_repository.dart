@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'package:http/http.dart' as http;
 import 'package:mobile_netpool_station_player/core/network/exceptions/app_exceptions.dart';
 import 'package:mobile_netpool_station_player/core/network/exceptions/exception_handlers.dart';

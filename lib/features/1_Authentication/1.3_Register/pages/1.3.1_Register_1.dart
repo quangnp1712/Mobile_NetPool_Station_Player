@@ -1,3 +1,5 @@
+// ignore_for_file: type_literal_in_constant_pattern
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +12,6 @@ import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Auth
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/gradient_button.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/widgets/switch_link.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/bloc/register_bloc.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/pages/1.3.2_Register_2.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 //! Register 1 - Player thông tin cơ bản !//
@@ -39,16 +40,16 @@ class _RegisterPage1State extends State<RegisterPage1> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFF3B1F5A), // Màu tím
-            kScaffoldBackground, // Màu đen
+            Color(0xFF3B1F5A),
+            kScaffoldBackground,
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.0, 0.5], // Giữ nguyên stops của bạn
+          stops: [0.0, 0.5],
         ),
       ),
       child: Scaffold(
-        backgroundColor: Colors.transparent, // <-- QUAN TRỌNG
+        backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         appBar: const AuthenticationAppBar(title: 'ĐĂNG KÝ'),
         body: SafeArea(
@@ -79,7 +80,6 @@ class _RegisterPage1State extends State<RegisterPage1> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Box phát sáng bọc toàn bộ nội dung
                       FormContainer(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,9 +87,8 @@ class _RegisterPage1State extends State<RegisterPage1> {
                             Center(
                               child: Image.asset(
                                 'assets/images/logo_no_bg.png',
-                                // Bạn có thể điều chỉnh chiều rộng nếu cần
                                 width: screenSize.width *
-                                    0.6, // Rộng bằng 70% màn hình
+                                    0.6, 
                               ),
                             ),
                             const SizedBox(height: 50),
@@ -109,13 +108,13 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               controller: firstNameController,
                               inputFormatters: [
                                 FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                    .singleLineFormatter, 
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Họ ';
                                 }
-                                return null; // Trả về null nếu không có lỗi
+                                return null; 
                               },
                             ),
                             const SizedBox(height: 25),
@@ -126,13 +125,13 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               controller: lastNameController,
                               inputFormatters: [
                                 FilteringTextInputFormatter
-                                    .singleLineFormatter, // Đảm bảo chỉ nhập trên một dòng
+                                    .singleLineFormatter,
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Tên ';
                                 }
-                                return null; // Trả về null nếu không có lỗi
+                                return null; 
                               },
                             ),
                             const SizedBox(height: 25),
@@ -146,13 +145,13 @@ class _RegisterPage1State extends State<RegisterPage1> {
                                 FilteringTextInputFormatter.singleLineFormatter,
                                 FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(
-                                    12), // Đảm bảo chỉ nhập trên một dòng
+                                    12), 
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Sô định danh cá nhân ';
                                 }
-                                return null; // Trả về null nếu không có lỗi
+                                return null;
                               },
                             ),
                             const SizedBox(height: 25),
@@ -165,14 +164,14 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               inputFormatters: [
                                 FilteringTextInputFormatter.singleLineFormatter,
                                 FilteringTextInputFormatter
-                                    .digitsOnly, // Chỉ cho phép nhập số
+                                    .digitsOnly, 
                                 LengthLimitingTextInputFormatter(10),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Số điện thoại';
                                 }
-                                return null; // Trả về null nếu không có lỗi
+                                return null; 
                               },
                             ),
                             const SizedBox(height: 30),

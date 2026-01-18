@@ -1,3 +1,5 @@
+// ignore_for_file: camel_case_types
+
 part of 'register_bloc.dart';
 
 sealed class RegisterState {

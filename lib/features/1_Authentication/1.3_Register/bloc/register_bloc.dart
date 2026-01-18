@@ -1,12 +1,11 @@
 import 'dart:async';
 
+// ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/model/register_model.dart';
-import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/model/register_response_model.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/repository/register_repository.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.3_Register/shared_preferences/register_shared_pref.dart';
 
@@ -65,10 +64,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       var responseMessage = results['message'];
       var responseStatus = results['status'];
       var responseSuccess = results['success'];
-      var responseBody = results['body'];
       if (responseSuccess || responseStatus == 200) {
-        RegisterModelResponse registerModelResponse =
-            RegisterModelResponse.fromJson(responseBody);
         RegisterSharedPref.clearAll();
         RegisterSharedPref.setEmail(event.email);
         DebugLogger.printLog(

@@ -12,9 +12,7 @@ class StationPageState extends Equatable {
   final StationBlocState blocState;
   final String message;
 
-  // fetchedStations: Danh sách gốc lấy từ API về (cho trang hiện tại)
   final List<StationDetailModel> fetchedStations;
-  // stations: Danh sách hiển thị sau khi đã lọc Tag local
   final List<StationDetailModel> stations;
 
   final List<ProvinceModel> provinces;
@@ -27,7 +25,6 @@ class StationPageState extends Equatable {
   final String selectedTag;
   final bool isNearMe;
 
-  // Location Data
   final double? latitude;
   final double? longitude;
 
