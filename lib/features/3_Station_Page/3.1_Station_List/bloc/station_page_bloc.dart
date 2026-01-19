@@ -408,11 +408,7 @@ class StationPageBloc extends Bloc<StationPageEvent, StationPageState> {
           ));
           add(FetchStationsEvent());
         } else {
-          emit(state.copyWith(
-              status: StationStatus.failure,
-              message:
-                  "Không thể lấy vị trí. Vui lòng kiểm tra quyền truy cập.",
-              isNearMe: false));
+          emit(state.copyWith(isNearMe: false));
         }
       } catch (e) {
         emit(state.copyWith(

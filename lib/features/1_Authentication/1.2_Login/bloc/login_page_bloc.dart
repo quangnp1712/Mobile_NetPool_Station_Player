@@ -79,6 +79,8 @@ class LoginPageBloc extends Bloc<LoginPageEvent, LoginPageState> {
                   .toList();
 
               AuthenticationPref.setStationsJson(stationJsonList ?? []);
+              AuthenticationPref.setUserName(
+                  authenticationModelResponse.data?.username ?? "");
 
               emit(Login_LoadingState(isLoading: false));
               emit(LoginSuccessState(

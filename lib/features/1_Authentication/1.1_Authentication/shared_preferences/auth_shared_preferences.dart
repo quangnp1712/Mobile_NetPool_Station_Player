@@ -65,4 +65,12 @@ class AuthenticationPref {
     return SharedPreferencesHelper.preferences.getStringList("auth_stations") ??
         [];
   }
+
+  static Future<void> setUserName(String userName) async {
+    await SharedPreferencesHelper.preferences.setString("userName", userName);
+  }
+
+  static String getUserName() {
+    return SharedPreferencesHelper.preferences.getString("userName") ?? "";
+  }
 }

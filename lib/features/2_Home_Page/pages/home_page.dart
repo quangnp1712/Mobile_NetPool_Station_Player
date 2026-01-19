@@ -3,65 +3,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
+import 'package:mobile_netpool_station_player/features/2_Home_Page/bloc/home_page_bloc.dart';
+import 'package:mobile_netpool_station_player/features/2_Home_Page/models/1.station/station_model.dart';
+import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class AppFonts {
   static const String semibold = 'Semibold';
-}
-
-class Station {
-  final String id;
-  final String name;
-  final String imageUrl;
-  final List<String> tags;
-  final String address;
-  final String time;
-  final String phone;
-
-  Station({
-    required this.id,
-    required this.name,
-    required this.imageUrl,
-    required this.tags,
-    required this.address,
-    required this.time,
-    required this.phone,
-  });
-}
-
-class TeamLobby {
-  final String id;
-  final String title;
-  final String gameName;
-  final String gameImageUrl;
-  final String rank;
-  final int currentMembers;
-  final int maxMembers;
-  final String hostName;
-  final String stationName;
-  final String address;
-  final double distance;
-  final String spaceType;
-  final String startTime;
-
-  TeamLobby({
-    required this.id,
-    required this.title,
-    required this.gameName,
-    required this.gameImageUrl,
-    required this.rank,
-    required this.currentMembers,
-    required this.maxMembers,
-    required this.hostName,
-    required this.stationName,
-    required this.address,
-    required this.distance,
-    required this.spaceType,
-    required this.startTime,
-  });
 }
 
 class HomePage extends StatefulWidget {
@@ -74,47 +26,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  bool isLoggedIn = false;
-
-  final List<Station> fakeStations = [
-    Station(
-      id: '1',
-      name: 'Ways Station - 483 Thống Nhất',
-      imageUrl: 'assets/images/STATION.png',
-      tags: ['NET', 'PLAYSTATION', 'BIDA'],
-      address: '483 Thống Nhất, P.16, Q.Gò Vấp, TP.HCM',
-      time: '05:00 - 24:00',
-      phone: '0944844344',
-    ),
-    Station(
-      id: '2',
-      name: 'CyberCore Gaming - Quang Trung',
-      imageUrl: 'assets/images/STATION.png',
-      tags: ['NET', 'VIP'],
-      address: '123 Quang Trung, P.10, Q.Gò Vấp, TP.HCM',
-      time: 'Cả ngày',
-      phone: '0123456789',
-    ),
-    Station(
-      id: '3',
-      name: 'PS5 Zone - Lê Văn Thọ',
-      imageUrl: 'assets/images/STATION.png',
-      tags: ['PLAYSTATION', 'VIP'],
-      address: '456 Lê Văn Thọ, P.9, Q.Gò Vấp, TP.HCM',
-      time: '09:00 - 23:00',
-      phone: '0987654321',
-    ),
-    Station(
-      id: '4',
-      name: 'Bida King - Phan Văn Trị',
-      imageUrl: 'assets/images/STATION.png',
-      tags: ['BIDA', 'FOOD'],
-      address: '789 Phan Văn Trị, P.5, Q.Gò Vấp, TP.HCM',
-      time: '10:00 - 02:00',
-      phone: '0112233445',
-    ),
-  ];
-
+  HomePageBloc homeBloc = HomePageBloc();
+  bool _isLobbyLoading = true;
   final List<TeamLobby> fakeLobbies = [
     TeamLobby(
       id: '1',
@@ -162,119 +75,233 @@ class _HomePageState extends State<HomePage> {
       startTime: '14:30 Chiều nay',
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // 1. Check Auth (Nhanh, không cần Skeleton)
+    homeBloc.add(HomeCheckAuthEvent());
+
+    // 2. Load Station (Sẽ dùng Skeleton từ State của Bloc)
+
+    // 3. Giả lập load Lobby (Dùng Skeleton Local)
+    _simulateLobbyLoading();
+  }
+
+  void _simulateLobbyLoading() {
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isLobbyLoading = false;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: HomeAppBar(isLoggedIn: isLoggedIn),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF3B1F5A),
-              kScaffoldBackground,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.0, 0.5],
-          ),
-        ),
-        child: SafeArea(
-          bottom: false,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 15.0),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: WelcomeCard(),
+    // BlocConsumer bao bọc toàn bộ Scaffold để xử lý Logic và Update UI toàn màn hình
+    return BlocConsumer<HomePageBloc, HomePageState>(
+      bloc: homeBloc,
+      listener: (context, state) {
+        if (state.stationListStatus == HomeStatus.failure &&
+            state.message.isNotEmpty) {
+          ShowSnackBar(context, state.message, false);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          // AppBar cập nhật dựa trên state.isLoggedIn
+          appBar: HomeAppBar(isLoggedIn: state.isLoggedIn),
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF3B1F5A), kScaffoldBackground],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: [0.0, 0.5],
+              ),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 15.0),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      // 1. WelcomeCard: Load nhanh, không cần Skeleton
+                      child: WelcomeCard(
+                        isLoggedIn: state.isLoggedIn,
+                        userName: state.userName,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: QuickActionBar(),
+                    ),
+                    const SizedBox(height: 30),
+
+                    // --- 2. PHẦN LOBBY (Skeleton Loading) ---
+                    _buildSectionHeader("GHÉP ĐỘI NHANH",
+                        onTapViewMore: () => widget.callback(3)),
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      height: 200,
+                      child: _isLobbyLoading
+                          ? ListView.separated(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 2, // Hiển thị 2 skeleton đang load
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(width: 16),
+                              itemBuilder: (context, index) =>
+                                  const LobbySkeletonCard(),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: fakeLobbies.length,
+                              clipBehavior: Clip.none,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 16.0),
+                                  child:
+                                      TeamLobbyCard(lobby: fakeLobbies[index]),
+                                );
+                              },
+                            ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // --- 3. PHẦN STATION (Skeleton Loading từ Bloc) ---
+                    _buildSectionHeader("STATION GẦN BẠN",
+                        onTapViewMore: () => widget.callback(1)),
+                    const SizedBox(height: 12),
+
+                    if (state.stationListStatus == HomeStatus.loading)
+                      // Skeleton loading cho danh sách Station
+                      SizedBox(
+                        height: 340,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 3, // Hiển thị 3 skeleton
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 16),
+                          itemBuilder: (context, index) =>
+                              const StationSkeletonCard(),
+                        ),
+                      )
+                    else if (state.stations.isEmpty &&
+                        state.stationListStatus == HomeStatus.success)
+                      const SizedBox(
+                        height: 340,
+                        child: Center(
+                          child: Text("Chưa có Station nào.",
+                              style: TextStyle(color: Colors.white70)),
+                        ),
+                      )
+                    else
+                      SizedBox(
+                        height: 340,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: state.stations.length,
+                          clipBehavior: Clip.none,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child:
+                                  StationCard(station: state.stations[index]),
+                            );
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 80),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: QuickActionBar(),
-                ),
-                const SizedBox(height: 30),
-                _buildSectionHeader("GHÉP ĐỘI NHANH", onTapViewMore: () {
-                  debugPrint("Xem thêm ghép đội");
-                }),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 200,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: fakeLobbies.length,
-                    clipBehavior: Clip.none,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: TeamLobbyCard(lobby: fakeLobbies[index]),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 30),
-                _buildSectionHeader("STATION GẦN BẠN", onTapViewMore: () {
-                  debugPrint("Xem thêm station");
-                }),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 340,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: fakeStations.length,
-                    clipBehavior: Clip.none,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: StationCard(station: fakeStations[index]),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 80),
-              ],
+              ),
             ),
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionHeader(String title,
+      {required VoidCallback onTapViewMore}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              letterSpacing: 1.1,
+              color: kHintColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          GestureDetector(
+            onTap: onTapViewMore,
+            child: const Text(
+              "Xem thêm",
+              style: TextStyle(
+                color: kLinkActive,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-Widget _buildSectionHeader(String title,
-    {required VoidCallback onTapViewMore}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            letterSpacing: 1.1,
-            color: kHintColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        GestureDetector(
-          onTap: onTapViewMore,
-          child: const Text(
-            "Xem thêm",
-            style: TextStyle(
-              color: kLinkActive,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
+// =============================================================================
+// CÁC WIDGET PHỤ TRỢ & SKELETON
+// =============================================================================
+
+class TeamLobby {
+  final String id;
+  final String title;
+  final String gameName;
+  final String gameImageUrl;
+  final String rank;
+  final int currentMembers;
+  final int maxMembers;
+  final String hostName;
+  final String stationName;
+  final String address;
+  final double distance;
+  final String spaceType;
+  final String startTime;
+
+  TeamLobby({
+    required this.id,
+    required this.title,
+    required this.gameName,
+    required this.gameImageUrl,
+    required this.rank,
+    required this.currentMembers,
+    required this.maxMembers,
+    required this.hostName,
+    required this.stationName,
+    required this.address,
+    required this.distance,
+    required this.spaceType,
+    required this.startTime,
+  });
 }
 
 class TeamLobbyCard extends StatelessWidget {
@@ -453,7 +480,10 @@ class TeamLobbyCard extends StatelessWidget {
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool isLoggedIn;
 
-  const HomeAppBar({super.key, this.isLoggedIn = false});
+  const HomeAppBar({
+    super.key,
+    this.isLoggedIn = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -516,14 +546,6 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
           )
-        else
-          Padding(
-            padding: const EdgeInsets.only(right: 16, top: 10.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[800],
-              child: const Icon(Icons.person, color: Colors.white),
-            ),
-          ),
       ],
     );
   }
@@ -560,7 +582,6 @@ class _QuickActionBarState extends State<QuickActionBar> {
   final List<Map<String, dynamic>> actions = [
     {'icon': Icons.account_balance_wallet, 'label': 'Nạp tiền'},
     {'icon': Icons.calendar_month, 'label': 'Đặt lịch'},
-    {'icon': Icons.confirmation_number, 'label': 'Voucher'},
     {'icon': Icons.history, 'label': 'Lịch sử'},
   ];
 
@@ -568,9 +589,8 @@ class _QuickActionBarState extends State<QuickActionBar> {
     if (label == 'Lịch sử') {
       Get.toNamed(bookingHistoryPageRoute);
     } else if (label == 'Nạp tiền') {
-    } else if (label == 'Voucher') {
-    } else {
-      debugPrint('👉 Bạn đã chọn: $label');
+    } else if (label == 'Đặt lịch') {
+      Get.offAll(() => const LandingNavBottomWidget(index: 2));
     }
   }
 
@@ -630,7 +650,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
 }
 
 class StationCard extends StatelessWidget {
-  final Station station;
+  final StationDetailModel station;
   const StationCard({super.key, required this.station});
 
   @override
@@ -660,54 +680,75 @@ class StationCard extends StatelessWidget {
   }
 
   Widget _buildImageHeader() {
+    final String imageUrl = station.avatar ?? '';
+
     return Stack(
       children: [
         ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(12.0),
-            topRight: Radius.circular(12.0),
-          ),
-          child: Image.asset(
-            station.imageUrl,
-            height: 180,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                height: 180,
-                color: Colors.grey[850],
-                child: const Center(
-                  child: Icon(Icons.image_not_supported,
-                      color: kHintColor, size: 50),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+          child: imageUrl.isEmpty
+              ? _buildImagePlaceholder()
+              : Image.network(
+                  imageUrl,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      height: 180,
+                      width: double.infinity,
+                      color: Colors.black26,
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: kLinkActive,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return _buildImagePlaceholder();
+                  },
                 ),
-              );
-            },
-          ),
-        ),
-        Positioned(
-          top: 12,
-          right: 12,
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.favorite_border,
-              color: kLinkActive,
-              size: 20,
-            ),
-          ),
         ),
         Positioned(
           top: 12,
           left: 12,
           child: Row(
-            children: station.tags.map((tag) => _buildTag(tag)).toList(),
+            children: (station.space ?? [])
+                .map((s) => _buildTag(s.spaceName ?? '', s.metadata?.bgColor))
+                .toList(),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      height: 180,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E2C),
+        gradient: LinearGradient(
+          colors: [Colors.grey[900]!, const Color(0xFF25254B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.image_not_supported_outlined, color: kHintColor, size: 40),
+          SizedBox(height: 8),
+          Text(
+            "Hình ảnh không khả dụng",
+            style: TextStyle(
+                color: kHintColor, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
     );
   }
 
@@ -717,75 +758,74 @@ class StationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            station.name,
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            station.address,
-            style: const TextStyle(color: kHintColor, fontSize: 13),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 16),
+          Text(station.stationName ?? 'Không có tên',
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 4),
+          Text(station.address ?? '',
+              style: const TextStyle(color: kHintColor, fontSize: 13),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis),
+          const SizedBox(height: 12),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow(
-                      icon: Icons.access_time_filled,
-                      text: station.time,
-                      iconColor: Colors.greenAccent[400]!,
-                    ),
-                    const SizedBox(height: 8),
-                    _buildInfoRow(
-                      icon: Icons.phone,
-                      text: station.phone,
-                      iconColor: kLinkForgot,
-                    ),
+                    _infoRow(Icons.phone, station.hotline ?? '09.xxx.xxx',
+                        Colors.blue),
+                    const SizedBox(height: 4),
+                    if (station.distance != null) ...[
+                      _infoRow(
+                          Icons.location_on,
+                          "${station.distance?.toStringAsFixed(1) ?? '0'} km",
+                          Colors.redAccent),
+                    ]
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kLinkActive,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                child: const Text(
-                  "ĐẶT LỊCH NGAY",
-                  style: TextStyle(
-                    color: AppColors.textMain,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
+                    backgroundColor: kLinkActive,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8))),
+                child: const Text("ĐẶT LỊCH",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12)),
+              )
             ],
-          ),
+          )
         ],
       ),
     );
   }
 
-  Widget _buildTag(String text) {
+  Widget _infoRow(IconData icon, String text, Color color) {
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+            child: Text(text,
+                style: const TextStyle(color: kHintColor, fontSize: 12),
+                overflow: TextOverflow.ellipsis)),
+      ],
+    );
+  }
+
+  Widget _buildTag(String text, String? colorHex) {
     Color tagColor = kLinkActive;
-    if (text.toUpperCase() == 'PLAYSTATION') {
-      tagColor = kGradientStart;
-    } else if (text.toUpperCase() == 'BIDA') {
-      tagColor = Colors.greenAccent;
+    if (colorHex != null) {
+      try {
+        tagColor = Color(int.parse(colorHex.replaceFirst('#', '0xFF')));
+      } catch (_) {}
     }
 
     return Container(
@@ -795,14 +835,9 @@ class StationCard extends StatelessWidget {
         color: tagColor.withOpacity(0.8),
         borderRadius: BorderRadius.circular(6.0),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
-        ),
-      ),
+      child: Text(text,
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
     );
   }
 
@@ -828,7 +863,10 @@ class StationCard extends StatelessWidget {
 }
 
 class WelcomeCard extends StatefulWidget {
-  const WelcomeCard({super.key});
+  final bool isLoggedIn;
+  final String? userName;
+
+  const WelcomeCard({super.key, required this.isLoggedIn, this.userName});
 
   @override
   State<WelcomeCard> createState() => _WelcomeCardState();
@@ -919,11 +957,23 @@ class _WelcomeCardState extends State<WelcomeCard> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _getGreeting(),
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
+              Row(
+                children: [
+                  Text(
+                    _getGreeting(),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
+                  // Hiển thị tên kế bên câu chào nếu đã đăng nhập
+                  if (widget.isLoggedIn && widget.userName != null)
+                    Text(
+                      ", ${widget.userName!}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
@@ -941,112 +991,185 @@ class _WelcomeCardState extends State<WelcomeCard> {
   }
 }
 
-class StationDetailModel {
-  int? stationId;
-  String? avatar;
-  String? stationCode;
-  String? stationName;
-  String? address;
-  String? province;
-  String? commune;
-  String? district;
-  String? hotline;
-  String? statusCode;
-  String? statusName;
-  List<MediaModel>? media;
-  MetaDataModel? metadata;
-  List<StationSpaceModel>? space;
+// -----------------------------------------------------------------------------
+// SKELETON WIDGETS
+// -----------------------------------------------------------------------------
 
-  double? distance;
-  double? rating;
+class ShimmerLoading extends StatefulWidget {
+  final double width;
+  final double height;
+  final BorderRadius borderRadius;
 
-  StationDetailModel({
-    this.stationId,
-    this.avatar,
-    this.stationCode,
-    this.stationName,
-    this.address,
-    this.province,
-    this.commune,
-    this.district,
-    this.hotline,
-    this.statusCode,
-    this.statusName,
-    this.media,
-    this.metadata,
-    this.distance,
-    this.rating,
-    this.space,
+  const ShimmerLoading({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = BorderRadius.zero,
   });
+
+  @override
+  State<ShimmerLoading> createState() => _ShimmerLoadingState();
 }
 
-class MediaModel {
-  String? url;
-  MediaModel({
-    this.url,
-  });
+class _ShimmerLoadingState extends State<ShimmerLoading>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tạo controller lặp đi lặp lại
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            borderRadius: widget.borderRadius,
+            // Gradient di chuyển để tạo hiệu ứng lấp lánh
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: const [
+                Colors.white10,
+                Colors.white24, // Màu sáng hơn ở giữa
+                Colors.white10,
+              ],
+              stops: [
+                _controller.value - 0.3,
+                _controller.value,
+                _controller.value + 0.3,
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
-class MetaDataModel {
-  String? rejectReason;
-  DateTime? rejectAt;
-  MetaDataModel({
-    this.rejectReason,
-    this.rejectAt,
-  });
+/// Skeleton Card cho Station
+class StationSkeletonCard extends StatelessWidget {
+  const StationSkeletonCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 300,
+      decoration: BoxDecoration(
+        color: kBoxBackground,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image placeholder với Shimmer
+          const ShimmerLoading(
+            width: double.infinity,
+            height: 180,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title line
+                const ShimmerLoading(height: 16, width: 200),
+                const SizedBox(height: 8),
+                // Address line
+                const ShimmerLoading(height: 12, width: 150),
+                const SizedBox(height: 16),
+                // Info & Button
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          ShimmerLoading(height: 10, width: 80),
+                          SizedBox(height: 6),
+                          ShimmerLoading(height: 10, width: 60),
+                        ],
+                      ),
+                    ),
+                    const ShimmerLoading(
+                      height: 30,
+                      width: 80,
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class StationSpaceModel {
-  int? stationSpaceId;
-  int? stationId;
-  int? spaceId;
-  String? spaceCode;
-  String? spaceName;
-  int? capacity;
-  String? statusCode;
-  String? statusName;
-  SpaceMetaDataModel? metadata;
-  PlatformSpaceModel? space;
+/// Skeleton Card cho Lobby
+class LobbySkeletonCard extends StatelessWidget {
+  const LobbySkeletonCard({super.key});
 
-  StationSpaceModel({
-    this.stationSpaceId,
-    this.stationId,
-    this.spaceId,
-    this.spaceCode,
-    this.spaceName,
-    this.capacity,
-    this.statusCode,
-    this.statusName,
-    this.space,
-    this.metadata,
-  });
-}
-
-class PlatformSpaceModel {
-  int? spaceId;
-  String? typeCode;
-  String? typeName;
-  String? statusCode;
-  String? statusName;
-  String? description;
-  SpaceMetaDataModel? metadata;
-
-  PlatformSpaceModel({
-    this.spaceId,
-    this.typeCode,
-    this.typeName,
-    this.statusCode,
-    this.statusName,
-    this.description,
-    this.metadata,
-  });
-}
-
-class SpaceMetaDataModel {
-  String? icon;
-  String? bgColor;
-  SpaceMetaDataModel({
-    this.icon,
-    this.bgColor,
-  });
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 280,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: kBoxBackground,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const ShimmerLoading(
+                width: 48,
+                height: 48,
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ShimmerLoading(height: 10, width: 80),
+                    SizedBox(height: 6),
+                    ShimmerLoading(height: 14, width: 120),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          const ShimmerLoading(
+            width: double.infinity,
+            height: 36,
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ],
+      ),
+    );
+  }
 }
