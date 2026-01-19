@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
+import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class AppFonts {
   static const String semibold = 'Semibold';
@@ -165,15 +166,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-
       appBar: HomeAppBar(isLoggedIn: isLoggedIn),
-
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF3B1F5A), 
-              kScaffoldBackground, 
+              Color(0xFF3B1F5A),
+              kScaffoldBackground,
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -187,26 +186,22 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 15.0),
-
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: WelcomeCard(),
                 ),
                 const SizedBox(height: 20),
-
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16.0),
                   child: QuickActionBar(),
                 ),
-
                 const SizedBox(height: 30),
-
                 _buildSectionHeader("GHÉP ĐỘI NHANH", onTapViewMore: () {
                   debugPrint("Xem thêm ghép đội");
                 }),
                 const SizedBox(height: 12),
                 SizedBox(
-                  height: 200, 
+                  height: 200,
                   child: ListView.builder(
                     padding: const EdgeInsets.only(left: 16.0),
                     scrollDirection: Axis.horizontal,
@@ -221,7 +216,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
                 _buildSectionHeader("STATION GẦN BẠN", onTapViewMore: () {
                   debugPrint("Xem thêm station");
                 }),
@@ -291,7 +285,7 @@ class TeamLobbyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280, 
+      width: 280,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: kBoxBackground,
@@ -387,11 +381,7 @@ class TeamLobbyCard extends StatelessWidget {
               )
             ],
           ),
-
-          const Divider(
-              color: Colors.white10,
-              height: 16), 
-
+          const Divider(color: Colors.white10, height: 16),
           Row(
             children: [
               const Icon(Icons.access_time_filled,
@@ -399,7 +389,7 @@ class TeamLobbyCard extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  lobby.startTime, 
+                  lobby.startTime,
                   style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ),
@@ -419,8 +409,7 @@ class TeamLobbyCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6), 
-
+          const SizedBox(height: 6),
           Row(
             children: [
               const Icon(Icons.location_on, color: Colors.redAccent, size: 14),
@@ -435,9 +424,7 @@ class TeamLobbyCard extends StatelessWidget {
               ),
             ],
           ),
-
           const Spacer(),
-
           SizedBox(
             width: double.infinity,
             height: 36,
@@ -464,7 +451,7 @@ class TeamLobbyCard extends StatelessWidget {
 }
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final bool isLoggedIn; 
+  final bool isLoggedIn;
 
   const HomeAppBar({super.key, this.isLoggedIn = false});
 
@@ -487,29 +474,24 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      titleSpacing: 16, 
-      centerTitle: false, 
-
+      titleSpacing: 16,
+      centerTitle: false,
       title: Padding(
-        padding: const EdgeInsets.only(
-            top: 10.0),
+        padding: const EdgeInsets.only(top: 10.0),
         child: GradientWidget(
           child: Image.asset(
             'assets/images/logo_no_bg.png',
             color: Colors.white,
-            height: 60, 
-            errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.gamepad,
-                size: 40,
-                color: Colors.white),
+            height: 60,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.gamepad, size: 40, color: Colors.white),
           ),
         ),
       ),
       actions: [
         if (!isLoggedIn)
           Padding(
-            padding: const EdgeInsets.only(
-                right: 16, top: 10.0), 
+            padding: const EdgeInsets.only(right: 16, top: 10.0),
             child: Center(
               child: ElevatedButton(
                 onPressed: () {
@@ -576,21 +558,17 @@ class QuickActionBar extends StatefulWidget {
 
 class _QuickActionBarState extends State<QuickActionBar> {
   final List<Map<String, dynamic>> actions = [
-    {
-      'icon': Icons.account_balance_wallet,
-      'label': 'Nạp tiền'
-    }, 
-    {'icon': Icons.calendar_month, 'label': 'Đặt lịch'}, 
-    {
-      'icon': Icons.confirmation_number,
-      'label': 'Voucher'
-    }, 
-    {'icon': Icons.history, 'label': 'Lịch sử'}, 
+    {'icon': Icons.account_balance_wallet, 'label': 'Nạp tiền'},
+    {'icon': Icons.calendar_month, 'label': 'Đặt lịch'},
+    {'icon': Icons.confirmation_number, 'label': 'Voucher'},
+    {'icon': Icons.history, 'label': 'Lịch sử'},
   ];
 
   void _onActionTap(String label) {
     if (label == 'Lịch sử') {
       Get.toNamed(bookingHistoryPageRoute);
+    } else if (label == 'Nạp tiền') {
+    } else if (label == 'Voucher') {
     } else {
       debugPrint('👉 Bạn đã chọn: $label');
     }
@@ -599,7 +577,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 90, 
+      height: 90,
       child: ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         scrollDirection: Axis.horizontal,
@@ -607,8 +585,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
         itemBuilder: (context, index) {
           final action = actions[index];
           return Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 12), 
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: GestureDetector(
               onTap: () => _onActionTap(action['label'] as String),
               child: Column(
@@ -629,7 +606,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
                     ),
                     child: Icon(
                       action['icon'] as IconData,
-                      size: 26, 
+                      size: 26,
                       color: Colors.white,
                     ),
                   ),
@@ -638,7 +615,7 @@ class _QuickActionBarState extends State<QuickActionBar> {
                     action['label'] as String,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12, 
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -876,7 +853,7 @@ class _WelcomeCardState extends State<WelcomeCard> {
 
   @override
   void dispose() {
-    _timer.cancel(); 
+    _timer.cancel();
     super.dispose();
   }
 

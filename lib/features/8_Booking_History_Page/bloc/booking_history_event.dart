@@ -48,3 +48,10 @@ class PayBookingEvent extends BookingHistoryEvent {
   @override
   List<Object?> get props => [bookingId, paymentMethodCode];
 }
+
+class UpdateBookingPaymentMethodEvent extends BookingHistoryEvent {
+  final String paymentMethodCode;
+  final String paymentMethodName;
+  const UpdateBookingPaymentMethodEvent(
+      this.paymentMethodCode, this.paymentMethodName);
+}

@@ -27,6 +27,7 @@ class BookingHistoryBloc
     on<ChangeMonthFilter>(_onChangeMonth);
     on<CancelBookingEvent>(_onCancelBooking);
     on<PayBookingEvent>(_onPayBooking);
+    on<UpdateBookingPaymentMethodEvent>(_onUpdatePaymentMethod);
   }
 
   Future<void> _fetchBookings(Emitter<BookingHistoryState> emit,
@@ -98,7 +99,9 @@ class BookingHistoryBloc
 
   Future<void> _onSelectDetail(
       SelectBookingDetailEvent event, Emitter<BookingHistoryState> emit) async {
-    emit(state.copyWith(isLoadingDetail: true));
+    emit(state.copyWith(
+      isLoadingDetail: true,
+    ));
     try {
       final bookingRes = await BookingHistoryRepository()
           .findDetailBooking(event.bookingId.toString());
@@ -189,41 +192,151 @@ class BookingHistoryBloc
 
   Future<void> _onPayBooking(
       PayBookingEvent event, Emitter<BookingHistoryState> emit) async {
-    emit(state.copyWith(actionStatus: BookingActionStatus.loading));
+    emit(state.copyWith(
+        actionStatus: BookingActionStatus.loading,
+        actionMessage: "", // Clear message cũ
+        paymentUrl: null // Reset payment url
+        ));
     try {
       Map<String, dynamic> res;
+      String? checkoutUrl;
+      String message = "";
+
       if (event.paymentMethodCode == 'WALLET') {
         res = await BookingHistoryRepository()
             .paymentWallet(event.bookingId.toString());
-        if (res["success"] == true) {
-          DebugLogger.printLog("Thanh toán bằng ví hệ thống thành công");
+        if (res["success"] == true || res['status'] == 200) {
+          message = "Thanh toán bằng ví thành công";
         } else {
-          DebugLogger.printLog(
-              "Thanh toán bằng ví hệ thống thất bại: ${res["message"]}");
+          message = res["message"] ?? "Thanh toán bằng ví thất bại";
         }
       } else if (event.paymentMethodCode == 'BANK_TRANSFER') {
         res = await BookingHistoryRepository()
             .paymentBankTransfer(event.bookingId.toString());
-        if (res["success"] == true) {
-          DebugLogger.printLog("Thanh toán chuyển khoản thành công");
+
+        if (res["success"] == true || res['status'] == 200) {
+          message = "Đang mở trang thanh toán...";
+          // -- update: Extract checkoutUrl
+          if (res['body'] != null && res['body']['data'] != null) {
+            checkoutUrl = res['body']['data']['checkoutUrl'];
+          }
         } else {
-          DebugLogger.printLog(
-              "Thanh toán chuyển khoản thất bại: ${res["message"]}");
+          message = res["message"] ?? "Lỗi tạo giao dịch thanh toán";
         }
       } else {
         throw Exception("Phương thức thanh toán không hỗ trợ online");
       }
 
-      if (res['success'] == true || res['status'] == '200') {
+      if (res['success'] == true ||
+          res['status'] == 200 ||
+          res['status'] == '200') {
         emit(state.copyWith(
           actionStatus: BookingActionStatus.success,
-          actionMessage: "Thanh toán thành công",
+          actionMessage: message,
+          paymentUrl: checkoutUrl, // -- update: emit payment url
         ));
         add(InitBookingHistory());
       } else {
         emit(state.copyWith(
           actionStatus: BookingActionStatus.failure,
-          actionMessage: res['message'] ?? "Thanh toán thất bại",
+          actionMessage: message,
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        actionStatus: BookingActionStatus.failure,
+        actionMessage: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onUpdatePaymentMethod(UpdateBookingPaymentMethodEvent event,
+      Emitter<BookingHistoryState> emit) async {
+    emit(state.copyWith(actionStatus: BookingActionStatus.loading));
+    try {
+      final currentBooking = state.selectedBooking;
+      if (currentBooking == null) {
+        throw Exception("Không tìm thấy thông tin đơn");
+      }
+
+      // Reconstruct BookingModel for update request
+      // Mapping fields from BookingDetail (currentBooking) to Request Body
+      final requestModel = BookingModel(
+        bookingId: currentBooking.bookingId, // Important for URL
+        scheduleId: currentBooking.schedule?.scheduleId,
+        stationResourceId: currentBooking.stationResource?.stationResourceId,
+        paymentMethodCode: event.paymentMethodCode, // New Value
+        paymentMethodName: event.paymentMethodName, // New Value
+        bookingMenus: currentBooking.bookingMenus,
+        bookingSlots: currentBooking.bookingSlots,
+      );
+
+      final res = await BookingHistoryRepository().updateBooking(requestModel);
+
+      if (res['success'] == true || res['status'] == 200) {
+        try {
+          final bookingRes = await BookingHistoryRepository()
+              .findDetailBooking(currentBooking.bookingId.toString());
+          final bookingDetail =
+              BookingDetailModelResponse.fromMap(bookingRes["body"]).data;
+
+          if (bookingDetail != null) {
+            String stationId = "2";
+            if (bookingDetail.schedule?.stationId != null) {
+              stationId = bookingDetail.schedule!.stationId.toString();
+            }
+
+            final stationResult =
+                await BookingHistoryRepository().findDetailStation(stationId);
+            var stationResBody = stationResult["body"];
+            if (stationResult['success'] == true) {
+              StationDetailModelResponse stationDetailModelResponse =
+                  StationDetailModelResponse.fromJson(stationResBody);
+              if (stationDetailModelResponse.data != null) {
+                bookingDetail.station = stationDetailModelResponse.data;
+              }
+            }
+
+            if (bookingDetail.stationResourceId != null) {
+              final resourceRes = await BookingHistoryRepository()
+                  .getResouceDetail(bookingDetail.stationResourceId.toString());
+              final resourceResponse =
+                  ResoucreModelResponse.fromMap(resourceRes["body"]);
+
+              if (resourceResponse.data != null) {
+                bookingDetail.stationResource = resourceResponse.data;
+
+                if (bookingDetail.stationResource?.areaId != null) {
+                  final areaRes = await BookingHistoryRepository()
+                      .getDetailArea(
+                          bookingDetail.stationResource!.areaId.toString());
+                  final areaResponse =
+                      AreaListModelResponse.fromMap(areaRes["body"]);
+                  if (areaResponse.data != null) {
+                    bookingDetail.area = areaResponse.data;
+                  }
+                }
+              }
+            }
+          }
+          emit(state.copyWith(
+            actionStatus: BookingActionStatus.success,
+            actionMessage: "Cập nhật phương thức thanh toán thành công",
+            blocState: BlocState.showBookingDetail,
+            selectedBooking: bookingDetail,
+          ));
+        } catch (e) {
+          DebugLogger.printLog("Lỗi: $e");
+          emit(state.copyWith(
+            actionStatus: BookingActionStatus.failure,
+            actionMessage: "Lỗi: $e",
+          ));
+          return;
+        }
+      } else {
+        emit(state.copyWith(
+          actionStatus: BookingActionStatus.failure,
+          actionMessage: res['message'] ?? "Cập nhật thất bại",
         ));
       }
     } catch (e) {

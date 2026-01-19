@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 case const (ShowSnackBarActionState):
                   final snackBarState = state as ShowSnackBarActionState;
-                  ShowSnackBar(snackBarState.message, snackBarState.success);
+                  ShowSnackBar(context,snackBarState.message, snackBarState.success);
                   break;
               }
             },

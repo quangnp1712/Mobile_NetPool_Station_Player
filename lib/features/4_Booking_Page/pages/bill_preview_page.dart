@@ -29,7 +29,7 @@ class _BillPreviewPageState extends State<BillPreviewPage> {
       listener: (context, state) async {
         // -- update async
         if (state.submissionStatus == BookingSubmissionStatus.success) {
-          ShowSnackBar(state.message, true);
+          ShowSnackBar(context, state.message, true);
 
           // -- update: Kiểm tra và mở link thanh toán nếu có
           if (state.paymentUrl != null && state.paymentUrl!.isNotEmpty) {
@@ -44,7 +44,7 @@ class _BillPreviewPageState extends State<BillPreviewPage> {
 
           Get.to(LandingNavBottomWidget(index: 0));
         } else if (state.submissionStatus == BookingSubmissionStatus.failure) {
-          ShowSnackBar(state.message, false);
+          ShowSnackBar(context, state.message, false);
         }
       },
       builder: (context, state) {

@@ -66,7 +66,8 @@ class _RegisterPage2State extends State<RegisterPage2> {
                   break;
                 case ShowSnackBarActionState:
                   final snackBarState = state as ShowSnackBarActionState;
-                  ShowSnackBar(snackBarState.message, snackBarState.success);
+                  ShowSnackBar(
+                      context, snackBarState.message, snackBarState.success);
                   break;
               }
             },

@@ -64,7 +64,8 @@ class _ValidEmailPageState extends State<ValidEmailPage> {
               switch (state.runtimeType) {
                 case ShowSnackBarActionState:
                   final snackBarState = state as ShowSnackBarActionState;
-                  ShowSnackBar(snackBarState.message, snackBarState.success);
+                  ShowSnackBar(
+                      context, snackBarState.message, snackBarState.success);
                   break;
               }
             },

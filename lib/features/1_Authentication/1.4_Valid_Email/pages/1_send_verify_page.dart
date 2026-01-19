@@ -35,16 +35,16 @@ class _SendValidPageState extends State<SendValidPage> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFF3B1F5A), 
-            kScaffoldBackground, 
+            Color(0xFF3B1F5A),
+            kScaffoldBackground,
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: [0.0, 0.5], 
+          stops: [0.0, 0.5],
         ),
       ),
       child: Scaffold(
-        backgroundColor: Colors.transparent, 
+        backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         appBar: const AuthenticationAppBar(title: 'XÁC THỰC EMAIL'),
         body: SafeArea(
@@ -59,7 +59,8 @@ class _SendValidPageState extends State<SendValidPage> {
               switch (state.runtimeType) {
                 case ShowSnackBarActionState:
                   final snackBarState = state as ShowSnackBarActionState;
-                  ShowSnackBar(snackBarState.message, snackBarState.success);
+                  ShowSnackBar(
+                      context, snackBarState.message, snackBarState.success);
                   break;
               }
             },
@@ -80,8 +81,7 @@ class _SendValidPageState extends State<SendValidPage> {
                             Center(
                               child: Image.asset(
                                 'assets/images/logo_no_bg.png',
-                                width: screenSize.width *
-                                    0.6, 
+                                width: screenSize.width * 0.6,
                               ),
                             ),
                             const SizedBox(height: 50),
@@ -101,9 +101,7 @@ class _SendValidPageState extends State<SendValidPage> {
                               controller: emailController,
                               keyboardType: TextInputType.text,
                               inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, 
-
+                                FilteringTextInputFormatter.singleLineFormatter,
                                 FilteringTextInputFormatter.deny(
                                     RegExp(r'[^a-zA-Z0-9@._-]')),
                               ],
@@ -120,7 +118,6 @@ class _SendValidPageState extends State<SendValidPage> {
                               },
                             ),
                             const SizedBox(height: 30),
-
                             GradientButton(
                               text: 'Xác nhận',
                               onPressed: () {

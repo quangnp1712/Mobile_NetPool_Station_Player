@@ -3,148 +3,94 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Vẫn cần Get để lấy context
 
-void ShowSnackBar(String message, bool success) {
-  OverlayEntry? overlayEntry;
+void ShowSnackBar(BuildContext context, String message, bool success) {
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-  overlayEntry = OverlayEntry(
-    builder: (context) {
-      return Positioned(
-        top: 20,
-        right: 20,
-        child: _ToastWidget(
-          message: message,
-          success: success,
-          onClose: () {
-            overlayEntry?.remove();
-          },
-        ),
-      );
-    },
-  );
-
-  Overlay.of(Get.overlayContext!).insert(overlayEntry);
-}
-
-class _ToastWidget extends StatefulWidget {
-  final String message;
-  final bool success;
-  final VoidCallback onClose;
-
-  const _ToastWidget({
-    Key? key,
-    required this.message,
-    required this.success,
-    required this.onClose,
-  }) : super(key: key);
-
-  @override
-  _ToastWidgetState createState() => _ToastWidgetState();
-}
-
-class _ToastWidgetState extends State<_ToastWidget>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _progressController;
-  late Color backgroundColor;
-  late Color progressBarColor;
-  late IconData iconData;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // 1. Cài đặt màu sắc
-    if (widget.success) {
-      backgroundColor = const Color(0xFFE6F7ED);
-      progressBarColor = const Color(0xFF28A745);
-      iconData = Icons.check_circle;
-    } else {
-      backgroundColor = const Color(0xFFFDEBEC);
-      progressBarColor = const Color(0xFFDC3545);
-      iconData = Icons.error;
-    }
-
-    // 2. Cài đặt AnimationController cho progress bar
-    _progressController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 5), // 10 giây
-    );
-
-    _progressController.reverse(from: 1.0);
-
-    _progressController.addStatusListener((status) {
-      if (status == AnimationStatus.dismissed) {
-        widget.onClose();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _progressController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 400,
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+      // Margin cách đáy và 2 bên để tạo cảm giác "Floating" (nổi)
+      margin: const EdgeInsets.only(bottom: 20, left: 16, right: 16),
+      padding: EdgeInsets.zero,
+      duration: const Duration(seconds: 4),
+      content: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(8),
+          // Nền màu tối (Charcoal) chuẩn Material Design hiện đại
+          color: const Color(0xFF323232),
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.15),
+              spreadRadius: 1,
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
         ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Icon(iconData, color: progressBarColor, size: 32),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      widget.message,
-                      style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 16,
-                      ),
-                    ),
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              // Dải màu chỉ báo trạng thái bên trái (Accent bar)
+              Container(
+                width: 6,
+                decoration: BoxDecoration(
+                  color: success
+                      ? const Color(0xFF4CAF50)
+                      : const Color(0xFFEF5350),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
                   ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                    icon: Icon(Icons.close, color: Colors.grey[600], size: 20),
-                    onPressed: widget.onClose,
-                  ),
-                ],
+                ),
               ),
-            ),
-            AnimatedBuilder(
-              animation: _progressController,
-              builder: (context, child) {
-                return LinearProgressIndicator(
-                  value: _progressController.value,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    progressBarColor,
+              const SizedBox(width: 12),
+              // Icon trạng thái
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Icon(
+                  success ? Icons.check_circle : Icons.info_outline,
+                  // Icon mang màu sắc, nổi bật trên nền tối
+                  color: success
+                      ? const Color(0xFF4CAF50)
+                      : const Color(0xFFEF5350),
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Nội dung Text
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 0),
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      color: Colors
+                          .white, // Chữ trắng trên nền tối luôn dễ đọc nhất
+                      fontSize: 14,
+                      fontWeight: FontWeight
+                          .w400, // Font mảnh hơn cho cảm giác hiện đại
+                      height: 1.4,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  minHeight: 5,
-                );
-              },
-            ),
-          ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Nút đóng nhỏ (tùy chọn, giúp người dùng chủ động tắt)
+              IconButton(
+                icon: const Icon(Icons.close, size: 20, color: Colors.grey),
+                onPressed: () =>
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }

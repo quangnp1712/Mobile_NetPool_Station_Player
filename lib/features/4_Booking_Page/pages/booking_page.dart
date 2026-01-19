@@ -75,7 +75,7 @@ class _BookingPageState extends State<BookingPage> {
           Get.toNamed(loginPageRoute);
         }
         if (state.blocState == BookingBlocState.locationErrorState) {
-          ShowSnackBar(state.message, false);
+          ShowSnackBar(context, state.message, false);
         }
         if (state.blocState == BookingBlocState.filterResetState) {
           _searchController.clear();

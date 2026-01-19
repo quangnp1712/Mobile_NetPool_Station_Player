@@ -21,6 +21,9 @@ class BookingHistoryState extends Equatable {
   final BookingActionStatus actionStatus;
   final String? actionMessage;
 
+  final String? paymentUrl; 
+
+
   const BookingHistoryState({
     this.status = BookingHistoryStatus.initial,
     this.blocState = BlocState.initial,
@@ -34,6 +37,8 @@ class BookingHistoryState extends Equatable {
     required this.selectedDate,
     this.actionStatus = BookingActionStatus.initial,
     this.actionMessage,
+    this.paymentUrl,
+
   });
 
   // Calculate Date From (First day of month)
@@ -61,6 +66,8 @@ class BookingHistoryState extends Equatable {
     DateTime? selectedDate,
     BookingActionStatus? actionStatus,
     String? actionMessage,
+    String? paymentUrl,
+
   }) {
     return BookingHistoryState(
       status: status ?? BookingHistoryStatus.initial,
@@ -75,6 +82,7 @@ class BookingHistoryState extends Equatable {
       selectedDate: selectedDate ?? this.selectedDate,
       actionStatus: actionStatus ?? BookingActionStatus.initial,
       actionMessage: actionMessage ?? this.actionMessage,
+      paymentUrl: paymentUrl ?? this.paymentUrl,
     );
   }
 
@@ -91,5 +99,6 @@ class BookingHistoryState extends Equatable {
         selectedDate,
         actionStatus,
         actionMessage,
+        paymentUrl,
       ];
 }

@@ -66,7 +66,8 @@ class _RegisterPage1State extends State<RegisterPage1> {
                   break;
                 case ShowSnackBarActionState:
                   final snackBarState = state as ShowSnackBarActionState;
-                  ShowSnackBar(snackBarState.message, snackBarState.success);
+                  ShowSnackBar(
+                      context, snackBarState.message, snackBarState.success);
                   break;
               }
             },
@@ -87,8 +88,7 @@ class _RegisterPage1State extends State<RegisterPage1> {
                             Center(
                               child: Image.asset(
                                 'assets/images/logo_no_bg.png',
-                                width: screenSize.width *
-                                    0.6, 
+                                width: screenSize.width * 0.6,
                               ),
                             ),
                             const SizedBox(height: 50),
@@ -107,14 +107,13 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               icon: Icons.person_outline,
                               controller: firstNameController,
                               inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter, 
+                                FilteringTextInputFormatter.singleLineFormatter,
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Họ ';
                                 }
-                                return null; 
+                                return null;
                               },
                             ),
                             const SizedBox(height: 25),
@@ -124,14 +123,13 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               icon: Icons.lock_outline,
                               controller: lastNameController,
                               inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .singleLineFormatter,
+                                FilteringTextInputFormatter.singleLineFormatter,
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Tên ';
                                 }
-                                return null; 
+                                return null;
                               },
                             ),
                             const SizedBox(height: 25),
@@ -144,8 +142,7 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               inputFormatters: [
                                 FilteringTextInputFormatter.singleLineFormatter,
                                 FilteringTextInputFormatter.digitsOnly,
-                                LengthLimitingTextInputFormatter(
-                                    12), 
+                                LengthLimitingTextInputFormatter(12),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -163,15 +160,14 @@ class _RegisterPage1State extends State<RegisterPage1> {
                               keyboardType: TextInputType.phone,
                               inputFormatters: [
                                 FilteringTextInputFormatter.singleLineFormatter,
-                                FilteringTextInputFormatter
-                                    .digitsOnly, 
+                                FilteringTextInputFormatter.digitsOnly,
                                 LengthLimitingTextInputFormatter(10),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Vui lòng nhập Số điện thoại';
                                 }
-                                return null; 
+                                return null;
                               },
                             ),
                             const SizedBox(height: 30),

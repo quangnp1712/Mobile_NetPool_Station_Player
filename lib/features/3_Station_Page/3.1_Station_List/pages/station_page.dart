@@ -46,10 +46,10 @@ class _StationPageState extends State<StationPage> {
           bloc.add(FetchStationsEvent());
         }
         if (state.status == StationStatus.success && state.message.isNotEmpty) {
-          ShowSnackBar(state.message, true);
+          ShowSnackBar(context, state.message, true);
         }
         if (state.status == StationStatus.failure) {
-          ShowSnackBar(state.message, false);
+          ShowSnackBar(context, state.message, false);
         }
       },
       builder: (context, state) {
