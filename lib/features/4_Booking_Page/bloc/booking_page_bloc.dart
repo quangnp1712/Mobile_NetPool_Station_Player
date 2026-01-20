@@ -199,9 +199,11 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
   Future<void> _onSelectStation(
       SelectStationEvent event, Emitter<BookingPageState> emit) async {
     emit(state.copyWith(
-        status: BookingStatus.loading,
-        isSelectingStation: false,
-        selectedStation: event.station));
+      status: BookingStatus.loading,
+      isSelectingStation: false,
+      selectedStation: event.station,
+      selectedResourceCodes: [],
+    ));
 
     List<ScheduleModel> validSchedules = [];
     try {

@@ -31,6 +31,11 @@ const Color kCardLightColor = Color(0xFF1A162E);
 const Color kAccentFuchsia = Color(0xFFE879F9); // Fuchsia 400
 const Color kBorderColor = Color(0x1A9333EA); // Purple with opacity
 
+const Color kNeonPink = Color(0xFFE100FF); // Màu hồng tím neon mới
+
+const Color kSuccessGreen = Color(0xFF00FF94);
+const Color kErrorRed = Color(0xFFFF2E63);
+
 class AppColors {
   static const bgDark = Color(0xFF3B1F5A);
   static const bgBlue = Color.fromARGB(255, 30, 232, 251);

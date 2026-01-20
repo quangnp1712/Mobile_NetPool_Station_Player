@@ -22,9 +22,10 @@ import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/pages/menu_page.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/pages/profile_page.dart';
-import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.3_Wallet/pages/wallet_page.dart';
-import 'package:mobile_netpool_station_player/features/8_Booking_History_Page/bloc/booking_history_bloc.dart';
-import 'package:mobile_netpool_station_player/features/8_Booking_History_Page/pages/booking_history_page.dart';
+import 'package:mobile_netpool_station_player/features/7_Booking_History_Page/bloc/booking_history_bloc.dart';
+import 'package:mobile_netpool_station_player/features/7_Booking_History_Page/pages/booking_history_page.dart';
+import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/bloc/wallet_bloc.dart';
+import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/pages/wallet_me.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 
@@ -39,6 +40,7 @@ class RouteGenerator {
   final ProfilePageBloc profilePageBloc = ProfilePageBloc();
   final MenuPageBloc menuPageBloc = MenuPageBloc();
   final HomePageBloc homePageBloc = HomePageBloc();
+  final WalletBloc walletBloc = WalletBloc();
 
   List<GetPage> routes() {
     return [
@@ -152,10 +154,11 @@ class RouteGenerator {
             value: profilePageBloc, child: const ProfilePage()),
       ),
 
-      //$ 5.2: Wallet Page //
+      //! 7: Wallet Page //
       GetPage(
         name: walletPageRoute,
-        page: () => const WalletPage(),
+        page: () => BlocProvider<WalletBloc>.value(
+            value: walletBloc, child: const WalletPage()),
       ),
     ];
   }

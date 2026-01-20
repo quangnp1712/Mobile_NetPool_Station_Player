@@ -9,6 +9,7 @@ import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/bloc/home_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/2_Home_Page/models/1.station/station_model.dart';
+import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/pages/wallet_me.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/pages/landing_navigation_bottom.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
@@ -589,6 +590,12 @@ class _QuickActionBarState extends State<QuickActionBar> {
     if (label == 'Lịch sử') {
       Get.toNamed(bookingHistoryPageRoute);
     } else if (label == 'Nạp tiền') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const WalletPage(),
+        ),
+      );
     } else if (label == 'Đặt lịch') {
       Get.offAll(() => const LandingNavBottomWidget(index: 2));
     }

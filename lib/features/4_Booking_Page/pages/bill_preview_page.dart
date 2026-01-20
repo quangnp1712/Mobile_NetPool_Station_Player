@@ -22,6 +22,70 @@ class BillPreviewPage extends StatefulWidget {
 class _BillPreviewPageState extends State<BillPreviewPage> {
   String _paymentMethod = 'WALLET';
 
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          backgroundColor: kCardColor,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: kGreenColor.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check_circle,
+                      color: kGreenColor, size: 40),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Thanh toán thành công!",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: kTextGrey, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close dialog
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kGreenColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text("Đóng",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BookingPageBloc, BookingPageState>(
@@ -29,17 +93,18 @@ class _BillPreviewPageState extends State<BillPreviewPage> {
       listener: (context, state) async {
         // -- update async
         if (state.submissionStatus == BookingSubmissionStatus.success) {
-          ShowSnackBar(context, state.message, true);
-
           // -- update: Kiểm tra và mở link thanh toán nếu có
           if (state.paymentUrl != null && state.paymentUrl!.isNotEmpty) {
             final Uri url = Uri.parse(state.paymentUrl!);
             // Sử dụng url_launcher để mở link
             if (await canLaunchUrl(url)) {
               await launchUrl(url, mode: LaunchMode.externalApplication);
+              _showSuccessDialog(context, "Thanh toán thành công");
             } else {
               print("Could not launch $url");
             }
+          } else {
+            _showSuccessDialog(context, state.message);
           }
 
           Get.to(LandingNavBottomWidget(index: 0));

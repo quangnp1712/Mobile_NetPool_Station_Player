@@ -37,7 +37,9 @@ const matchingDetailPageRoute = "/netpool/matching/detail";
 // 6: Menu Page //
 const menuPageRoute = "/netpool/menu";
 const profilePageRoute = "/netpool/menu/profile";
-const walletPageRoute = "/netpool/menu/wallet";
+
+// 8: wallet - payment history
+const walletPageRoute = "/netpool/wallet";
 
 // ĐĂNG XUẤT //
 const logoutName = "Đăng xuất";

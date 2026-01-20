@@ -25,7 +25,8 @@ import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Statio
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
-import 'package:mobile_netpool_station_player/features/8_Booking_History_Page/bloc/booking_history_bloc.dart';
+import 'package:mobile_netpool_station_player/features/7_Booking_History_Page/bloc/booking_history_bloc.dart';
+import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/bloc/wallet_bloc.dart';
 import 'package:mobile_netpool_station_player/features/Common/404/error.dart';
 import 'package:mobile_netpool_station_player/features/Common/Landing/bloc/landing_navigation_bottom_bloc.dart';
 import 'package:sizer/sizer.dart';
@@ -86,6 +87,7 @@ class _MyAppState extends State<MyApp> {
             BlocProvider(create: (_) => ProfilePageBloc()),
             BlocProvider(create: (_) => BookingHistoryBloc()),
             BlocProvider(create: (_) => HomePageBloc()),
+            BlocProvider(create: (_) => WalletBloc()),
           ],
           child: GetMaterialApp(
             localizationsDelegates: const [
