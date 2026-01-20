@@ -299,7 +299,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "SD: ${_formatCurrency(item.newBalance ?? 0)}",
+                    "Số dư: ${_formatCurrency(item.newBalance ?? 0)}",
                     style: TextStyle(
                         color: Colors.white.withOpacity(0.6), fontSize: 11),
                   ),

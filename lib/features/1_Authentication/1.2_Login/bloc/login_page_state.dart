@@ -2,37 +2,40 @@
 
 part of 'login_page_bloc.dart';
 
-sealed class LoginPageState {
-  const LoginPageState();
-}
+enum LoginStatus { initial, loading, success, failure, navigateRegister }
 
-final class LoginPageInitial extends LoginPageState {
-  String? email;
-  LoginPageInitial({this.email});
-}
-
-abstract class LoginActionState extends LoginPageState {}
-
-class ShowRegisterState extends LoginActionState {}
-
-class Login_ChangeState extends LoginActionState {}
-
-class Login_LoadingState extends LoginPageState {
-  final bool isLoading;
-
-  Login_LoadingState({required this.isLoading});
-}
-
-class LoginSuccessState extends LoginActionState {
-  AuthenticationModel authenticationModel;
-  LoginSuccessState({
-    required this.authenticationModel,
-  });
-}
-
-class ShowSnackBarActionState extends LoginActionState {
+class LoginPageState extends Equatable {
+  final LoginStatus status;
+  final String email;
   final String message;
-  final bool success;
+  final AuthenticationModel? authenticationModel;
 
-  ShowSnackBarActionState({required this.success, required this.message});
+  const LoginPageState({
+    this.status = LoginStatus.initial,
+    this.email = '',
+    this.message = '',
+    this.authenticationModel,
+  });
+
+  // Helper để tạo state mặc định
+  factory LoginPageState.initial() {
+    return const LoginPageState();
+  }
+
+  LoginPageState copyWith({
+    LoginStatus? status,
+    String? email,
+    String? message,
+    AuthenticationModel? authenticationModel,
+  }) {
+    return LoginPageState(
+      status: status ?? LoginStatus.initial,
+      email: email ?? this.email,
+      message: message ?? '',
+      authenticationModel: authenticationModel ?? this.authenticationModel,
+    );
+  }
+
+  @override
+  List<Object?> get props => [status, email, message, authenticationModel];
 }

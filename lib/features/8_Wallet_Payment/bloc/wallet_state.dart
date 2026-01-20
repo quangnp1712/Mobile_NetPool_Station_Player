@@ -2,7 +2,13 @@ part of 'wallet_bloc.dart';
 
 enum WalletStatus { initial, loading, success, failure }
 
-enum PaymentActionStatus { idle, processing, success, failure }
+enum PaymentActionStatus {
+  idle,
+  processing,
+  success,
+  failure,
+  waitingForPayment
+}
 
 class WalletState extends Equatable {
   // Trạng thái chung
@@ -20,6 +26,8 @@ class WalletState extends Equatable {
   final List<WalletLedgerModel> transactions;
   final DateTime selectedDate; // Ngày đang chọn để lọc lịch sử
 
+  final String? paymentUrl;
+
   const WalletState({
     this.message = '',
     this.balanceStatus = WalletStatus.initial,
@@ -28,6 +36,7 @@ class WalletState extends Equatable {
     this.historyStatus = WalletStatus.initial,
     this.transactions = const [],
     required this.selectedDate, // Bắt buộc phải có ngày khởi tạo
+    this.paymentUrl,
   });
 
   // Helper để khởi tạo state mặc định
@@ -43,6 +52,7 @@ class WalletState extends Equatable {
     WalletStatus? historyStatus,
     List<WalletLedgerModel>? transactions,
     DateTime? selectedDate,
+    String? paymentUrl,
   }) {
     return WalletState(
       message: message ?? '',
@@ -52,6 +62,7 @@ class WalletState extends Equatable {
       historyStatus: historyStatus ?? this.historyStatus,
       transactions: transactions ?? this.transactions,
       selectedDate: selectedDate ?? this.selectedDate,
+      paymentUrl: paymentUrl ?? this.paymentUrl,
     );
   }
 
@@ -64,5 +75,6 @@ class WalletState extends Equatable {
         historyStatus,
         transactions,
         selectedDate,
+        paymentUrl,
       ];
 }

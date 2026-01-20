@@ -7,6 +7,7 @@ import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/shared_preferences/menu_shared_pref.dart';
 import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/pages/wallet_me.dart';
+import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class MenuPage extends StatefulWidget {
   final Function? callback;
@@ -38,9 +39,7 @@ class _MenuPageState extends State<MenuPage> {
         }
 
         if (state.status == MenuStatus.failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message ?? "Có lỗi xảy ra")),
-          );
+          ShowSnackBar(context, state.message ?? "Có lỗi xảy ra", false);
         }
       },
       builder: (context, state) {
@@ -102,7 +101,7 @@ class _MenuPageState extends State<MenuPage> {
                   MenuOptionCard(
                     icon: Icons.account_balance_wallet_outlined,
                     title: 'Ví NetPool',
-                    subtitle: 'Số dư: 50.000 đ',
+                    subtitle: 'Số dư: ${state.walletBalance}',
                     onTap: () {
                       Get.toNamed(walletPageRoute);
                     },
@@ -117,14 +116,7 @@ class _MenuPageState extends State<MenuPage> {
                   MenuOptionCard(
                     icon: Icons.help_outline,
                     title: 'Hỗ trợ & FAQ',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const WalletPage(),
-                        ),
-                      );
-                    },
+                    onTap: () {},
                   ),
                   MenuLogoutButton(
                     onTap: () {
@@ -198,27 +190,6 @@ class MenuAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 16),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: const [
-            Icon(
-              Icons.videogame_asset_rounded,
-              color: Colors.purpleAccent,
-              size: 26,
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_active_rounded,
-              color: Colors.white, size: 26),
-          onPressed: () {},
-        ),
-        const SizedBox(width: 8),
-      ],
     );
   }
 

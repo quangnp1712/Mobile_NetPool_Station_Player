@@ -12,6 +12,8 @@ class WalletModel {
   double? amount;
   String? currency;
 
+  String? checkoutUrl;
+
   WalletModel({
     this.walletId,
     this.accountId,
@@ -20,6 +22,7 @@ class WalletModel {
     this.statusName,
     this.amount,
     this.currency,
+    this.checkoutUrl,
   });
 
   Map<String, dynamic> toMap() {
@@ -40,6 +43,8 @@ class WalletModel {
           map['statusName'] != null ? map['statusName'] as String : null,
       amount: map['amount'] != null ? map['amount'] as double : null,
       currency: map['currency'] != null ? map['currency'] as String : null,
+      checkoutUrl:
+          map['checkoutUrl'] != null ? map['checkoutUrl'] as String : null,
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
+import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/models/1.wallet/wallet_model.dart';
 import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/models/1.wallet/wallet_response_model.dart';
 import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/models/2.wallet_ledger/wallet_ledger_model.dart';
@@ -30,23 +31,20 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
 
   /// Lấy số dư ví
   Future<void> _onRefreshBalance(
-    WalletRefreshBalanceEvent event,
-    Emitter<WalletState> emit,
-  ) async {
+      WalletRefreshBalanceEvent event, Emitter<WalletState> emit) async {
     emit(state.copyWith(balanceStatus: WalletStatus.loading));
     try {
       final response = await WalletRepository().getWallet();
       var responseBody = WalletModelResponse.fromJson(response['body']);
-      if (responseBody.success == true && responseBody.data != null) {
-        final dynamic data = responseBody.data;
+      if (response['success'] == true && responseBody.data != null) {
+        WalletModel data = responseBody.data!;
         double balance = 0;
         // Parsing an toàn
-        if (data is Map) {
-          if (data.containsKey('balance')) {
-            balance = (data['balance'] ?? 0).toDouble();
-          } else if (data.containsKey('amount')) {
-            balance = (data['amount'] ?? 0).toDouble();
-          }
+
+        if (data.balance != null) {
+          balance = (data.balance ?? 0).toDouble();
+        } else if (data.amount != null) {
+          balance = (data.amount ?? 0).toDouble();
         }
 
         emit(state.copyWith(
@@ -58,12 +56,15 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
           balanceStatus: WalletStatus.failure,
           message: response['message'] ?? "Không thể lấy thông tin ví",
         ));
+        DebugLogger.printLog(
+            response['message'] ?? "Không thể lấy thông tin ví");
       }
     } catch (e) {
       emit(state.copyWith(
         balanceStatus: WalletStatus.failure,
         message: e.toString(),
       ));
+      DebugLogger.printLog(e.toString());
     }
   }
 
@@ -99,39 +100,92 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     }
 
     // 2. Call API
-    emit(state.copyWith(paymentStatus: PaymentActionStatus.processing));
+    // Lưu số dư cũ để so sánh
+    final double oldBalance = state.balance;
+
+    emit(state.copyWith(
+        paymentStatus: PaymentActionStatus.processing,
+        message: "Đang tạo giao dịch..."));
 
     try {
-      WalletModel walletModel = WalletModel(amount: amount, currency: "VND");
+      final walletModel = WalletModel(amount: amount, currency: "VND");
       final response = await WalletRepository().addMoneyToWallet(walletModel);
       var responseBody = WalletModelResponse.fromJson(response['body']);
 
-      if (responseBody.success == true) {
-        emit(state.copyWith(
-          paymentStatus: PaymentActionStatus.success,
-          message: "Nạp tiền thành công!",
-        ));
-        // Tự động refresh lại số dư sau khi nạp thành công
-        add(WalletRefreshBalanceEvent());
-        // Refresh lại lịch sử nếu đang ở tháng hiện tại
-        if (state.selectedDate.month == DateTime.now().month &&
-            state.selectedDate.year == DateTime.now().year) {
-          add(WalletFetchHistoryEvent());
+      if (response['success'] == true && responseBody.data != null) {
+        final data = responseBody.data!;
+        final String? checkoutUrl = data.checkoutUrl;
+
+        if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+          // 2. Có link thanh toán -> Emit URL để UI mở
+          emit(state.copyWith(
+            paymentStatus: PaymentActionStatus
+                .waitingForPayment, // Trạng thái chờ thanh toán
+            paymentUrl: checkoutUrl,
+            message: "Đang mở cổng thanh toán...",
+          ));
+
+          // 3. Đợi 30 giây để người dùng thanh toán
+          await Future.delayed(const Duration(seconds: 30));
+
+          // 4. Kiểm tra lại số dư
+          // Gọi trực tiếp repo để lấy dữ liệu mới nhất mà không cần qua event
+          final checkResponse = await WalletRepository().getWallet();
+          var checkResponseBody =
+              WalletModelResponse.fromJson(checkResponse['body']);
+
+          double newBalance = oldBalance;
+          if (checkResponse['success'] == true &&
+              checkResponseBody.data != null) {
+            final WalletModel checkData = checkResponseBody.data!;
+
+            if (checkData.balance != null) {
+              newBalance = (checkData.balance ?? 0).toDouble();
+            } else if (checkData.amount != null) {
+              newBalance = (checkData.amount ?? 0).toDouble();
+            }
+          }
+
+          // 5. So sánh
+          if (newBalance > oldBalance) {
+            emit(state.copyWith(
+              paymentStatus: PaymentActionStatus.success,
+              balance: newBalance, // Cập nhật luôn số dư hiển thị
+              message:
+                  "Nạp tiền thành công! +${NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(amount)}",
+              paymentUrl: null, // Reset URL
+            ));
+            // Trigger refresh lịch sử nếu cần
+            add(WalletFetchHistoryEvent());
+          } else {
+            emit(state.copyWith(
+              paymentStatus: PaymentActionStatus.failure,
+              message:
+                  "Chưa nhận được tiền. Nếu bạn đã thanh toán, vui lòng đợi hệ thống cập nhật.",
+              paymentUrl: null,
+            ));
+          }
+        } else {
+          emit(state.copyWith(
+              paymentStatus: PaymentActionStatus.failure,
+              message: "Không lấy được link thanh toán"));
         }
       } else {
         emit(state.copyWith(
-          paymentStatus: PaymentActionStatus.failure,
-          message: response['message'] ?? "Nạp tiền thất bại",
-        ));
+            paymentStatus: PaymentActionStatus.failure,
+            message: response['message'] ?? "Lỗi tạo giao dịch"));
       }
     } catch (e) {
       emit(state.copyWith(
-        paymentStatus: PaymentActionStatus.failure,
-        message: "Lỗi kết nối: $e",
-      ));
+          paymentStatus: PaymentActionStatus.failure, message: "Lỗi: $e"));
     } finally {
-      // Reset status về idle để người dùng có thể nạp tiếp lần sau mà không bị kẹt status
-      emit(state.copyWith(paymentStatus: PaymentActionStatus.idle));
+      // Reset về idle sau khi hoàn tất quy trình (thành công hoặc thất bại) để cho phép nạp tiếp
+      if (state.paymentStatus == PaymentActionStatus.success ||
+          state.paymentStatus == PaymentActionStatus.failure) {
+        // Giữ trạng thái một chút để UI hiển thị dialog rồi mới reset nếu cần,
+        // hoặc UI tự handle việc đóng dialog. Ở đây ta cứ để trạng thái đó.
+        emit(state.copyWith(paymentStatus: PaymentActionStatus.idle));
+      }
     }
   }
 
@@ -156,18 +210,26 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     emit(state.copyWith(historyStatus: WalletStatus.loading));
 
     final DateTime date = state.selectedDate;
-    final DateTime startOfMonth = DateTime(date.year, date.month, 1);
-    final DateTime endOfMonth = DateTime(date.year, date.month + 1, 0);
 
-    final String dateFrom = DateFormat('yyyy-MM-dd').format(startOfMonth);
-    final String dateTo = DateFormat('yyyy-MM-dd').format(endOfMonth);
+    // Ngày đầu tháng: YYYY-MM-01T00:00:00
+    final DateTime startOfMonth = DateTime(date.year, date.month, 1, 0, 0, 0);
+
+    // Ngày cuối tháng: YYYY-MM-LastDayT23:59:59
+    final DateTime endOfMonth =
+        DateTime(date.year, date.month + 1, 0, 23, 59, 59);
+
+    // Format theo ISO 8601 như yêu cầu
+    final String dateFrom =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(startOfMonth);
+    final String dateTo =
+        DateFormat("yyyy-MM-dd'T'HH:mm:ss").format(endOfMonth);
 
     try {
       final response =
           await WalletRepository().getPaymentHistory(dateFrom, dateTo);
       var responseBody = WalletLedgerModelResponse.fromJson(response['body']);
 
-      if (responseBody.success == true && responseBody.data != null) {
+      if (response['success'] == true && responseBody.data != null) {
         final parsedList = responseBody.data!;
 
         // Sort: Cũ nhất -> Mới nhất (hoặc Mới -> Cũ tùy nhu cầu)
@@ -193,8 +255,9 @@ class WalletBloc extends Bloc<WalletEvent, WalletState> {
     } catch (e) {
       emit(state.copyWith(
         historyStatus: WalletStatus.failure,
-        message: e.toString(),
+        message: "Lỗi xin vui lòng thử lại",
       ));
+      DebugLogger.printLog(e.toString());
     }
   }
 }

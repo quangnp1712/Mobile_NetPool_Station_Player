@@ -2,8 +2,7 @@ import 'dart:async';
 
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
-import 'package:get/get.dart';
-import 'package:mobile_netpool_station_player/core/router/routes.dart';
+import 'package:equatable/equatable.dart';
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/model/authentication_model.dart';
 import 'package:mobile_netpool_station_player/features/1_Authentication/1.1_Authentication/model/authentication_response_model.dart';
@@ -16,133 +15,109 @@ part 'login_page_event.dart';
 part 'login_page_state.dart';
 
 class LoginPageBloc extends Bloc<LoginPageEvent, LoginPageState> {
-  String _email = "";
-
-  LoginPageBloc() : super(LoginPageInitial()) {
-    on<LoginInitialEvent>(_loginInitialEvent);
-    on<SubmitLoginEvent>(_submitLoginEvent);
-    on<ShowRegisterEvent>(_showRegisterEvent);
+  LoginPageBloc() : super(LoginPageState.initial()) {
+    on<LoginInitialEvent>(_onLoginInitial);
+    on<SubmitLoginEvent>(_onSubmitLogin);
+    on<ShowRegisterEvent>(_onShowRegister);
   }
 
-  FutureOr<void> _loginInitialEvent(
-      LoginInitialEvent event, Emitter<LoginPageState> emit) {
-    emit(Login_ChangeState());
-    _email = "";
-    if (LoginPref.getEmail().toString() != "") {
-      _email = LoginPref.getEmail().toString();
-    } else {
-      emit(LoginPageInitial());
-    }
-    if (_email != "") {
-      emit(LoginPageInitial(email: _email));
-    }
+  Future<void> _onLoginInitial(
+      LoginInitialEvent event, Emitter<LoginPageState> emit) async {
+    String storedEmail = LoginPref.getEmail() ?? "";
+    emit(state.copyWith(
+      status: LoginStatus.initial,
+      email: storedEmail,
+    ));
   }
 
-  FutureOr<void> _submitLoginEvent(
+  Future<void> _onSubmitLogin(
       SubmitLoginEvent event, Emitter<LoginPageState> emit) async {
-    emit(Login_ChangeState());
+    // 1. Validate cơ bản (Optional)
+    if (event.email.isEmpty || event.password.isEmpty) {
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        message: "Vui lòng nhập đầy đủ email và mật khẩu",
+      ));
+      return;
+    }
 
-    emit(Login_LoadingState(isLoading: true));
+    emit(state.copyWith(status: LoginStatus.loading));
+
     try {
       LoginModel loginModel =
           LoginModel(email: event.email, password: event.password);
       var results = await LoginRepository().login(loginModel);
+
       var responseMessage = results['message'];
       var responseStatus = results['status'];
       var responseSuccess = results['success'];
       var responseBody = results['body'];
+
       if (responseSuccess) {
-        //$ Get role
-
-        AuthenticationModelResponse authenticationModelResponse =
+        AuthenticationModelResponse authResponse =
             AuthenticationModelResponse.fromJson(responseBody);
-        if (authenticationModelResponse.data != null) {
-          if (authenticationModelResponse.data?.roleCode != null) {
-            if (authenticationModelResponse.data?.roleCode == "PLAYER") {
-              AuthenticationPref.setRoleCode(
-                  authenticationModelResponse.data?.roleCode ?? "");
 
-              AuthenticationPref.setAccountID(
-                  authenticationModelResponse.data?.accountId as int);
-              AuthenticationPref.setAccessToken(
-                  authenticationModelResponse.data?.accessToken.toString() ??
-                      "");
-              AuthenticationPref.setAccessExpiredAt(authenticationModelResponse
-                      .data?.accessExpiredAt
-                      .toString() ??
-                  "");
-              AuthenticationPref.setPassword(event.password.toString());
-              AuthenticationPref.setEmail(event.email.toString());
-              List<String>? stationJsonList = authenticationModelResponse
-                  .data?.stations!
-                  .map((s) => s.toJson())
-                  .toList();
+        if (authResponse.data != null &&
+            authResponse.data?.roleCode == "PLAYER") {
+          // Lưu thông tin vào Prefs
+          _saveToPrefs(authResponse.data!, event.password);
 
-              AuthenticationPref.setStationsJson(stationJsonList ?? []);
-              AuthenticationPref.setUserName(
-                  authenticationModelResponse.data?.username ?? "");
-
-              emit(Login_LoadingState(isLoading: false));
-              emit(LoginSuccessState(
-                  authenticationModel: authenticationModelResponse.data!));
-              DebugLogger.printLog(
-                  "$responseStatus - $responseMessage - thành công");
-
-              emit(ShowSnackBarActionState(
-                  message: "Đăng nhập thành công", success: responseSuccess));
-              return;
-            } else {
-              emit(Login_LoadingState(isLoading: false));
-              emit(ShowSnackBarActionState(
-                  message: "Tài khoản không có quyền truy cập",
-                  success: false));
-              return;
-            }
-          }
+          emit(state.copyWith(
+            status: LoginStatus.success,
+            authenticationModel: authResponse.data,
+            message: "Đăng nhập thành công",
+          ));
+          DebugLogger.printLog(
+              "$responseStatus - $responseMessage - thành công");
+        } else {
+          emit(state.copyWith(
+            status: LoginStatus.failure,
+            message: "Tài khoản không có quyền truy cập",
+          ));
         }
-        emit(Login_LoadingState(isLoading: false));
-        emit(ShowSnackBarActionState(
-            message: "Lỗi! Vui lòng thử lại", success: false));
-      } else if (responseStatus == 404) {
-        DebugLogger.printLog("$responseStatus - $responseMessage");
-
-        emit(Login_LoadingState(isLoading: false));
-
-        emit(ShowSnackBarActionState(
-            message: "Email hoặc mật khẩu không đúng",
-            success: responseSuccess));
-      } else if (responseStatus == 401) {
-        DebugLogger.printLog("$responseStatus - $responseMessage");
-
-        emit(Login_LoadingState(isLoading: false));
-
-        emit(ShowSnackBarActionState(
-            message: "Email hoặc mật khẩu không đúng",
-            success: responseSuccess));
-      } else if (responseStatus == 403) {
-        DebugLogger.printLog("Chưa xác thực email");
-
-        emit(Login_LoadingState(isLoading: false));
-
-        emit(ShowSnackBarActionState(
-            message: "Chưa xác thực email", success: responseSuccess));
       } else {
-        DebugLogger.printLog("$responseStatus - $responseMessage");
+        // Xử lý các mã lỗi cụ thể
+        String errorMessage = "Lỗi! Vui lòng thử lại";
+        if (responseStatus == 404 || responseStatus == 401) {
+          errorMessage = "Email hoặc mật khẩu không đúng";
+        } else if (responseStatus == 403) {
+          errorMessage = "Chưa xác thực email";
+        }
 
-        emit(Login_LoadingState(isLoading: false));
-        emit(ShowSnackBarActionState(
-            message: "Lỗi! Vui lòng thử lại", success: responseSuccess));
+        DebugLogger.printLog("$responseStatus - $responseMessage");
+        emit(state.copyWith(
+          status: LoginStatus.failure,
+          message: errorMessage,
+        ));
       }
     } catch (e) {
-      emit(Login_LoadingState(isLoading: false));
-      emit(ShowSnackBarActionState(
-          message: "Lỗi! Vui lòng thử lại", success: false));
       DebugLogger.printLog(e.toString());
+      emit(state.copyWith(
+        status: LoginStatus.failure,
+        message: "Lỗi kết nối: ${e.toString()}",
+      ));
     }
   }
 
-  FutureOr<void> _showRegisterEvent(
-      ShowRegisterEvent event, Emitter<LoginPageState> emit) {
-    Get.toNamed(register1PageRoute);
+  void _onShowRegister(ShowRegisterEvent event, Emitter<LoginPageState> emit) {
+    // Có thể navigate trực tiếp hoặc emit state để UI navigate
+    // Ở đây dùng state để đúng chuẩn Bloc
+    emit(state.copyWith(status: LoginStatus.navigateRegister));
+    // Reset lại status để tránh navigate nhiều lần nếu rebuild
+    emit(state.copyWith(status: LoginStatus.initial));
+  }
+
+  void _saveToPrefs(AuthenticationModel data, String password) {
+    AuthenticationPref.setRoleCode(data.roleCode ?? "");
+    AuthenticationPref.setAccountID(data.accountId as int);
+    AuthenticationPref.setAccessToken(data.accessToken ?? "");
+    AuthenticationPref.setAccessExpiredAt(data.accessExpiredAt.toString());
+    AuthenticationPref.setPassword(password);
+    AuthenticationPref.setEmail(data.email ?? "");
+    AuthenticationPref.setUserName(data.username ?? "");
+
+    List<String>? stationJsonList =
+        data.stations?.map((s) => s.toJson()).toList();
+    AuthenticationPref.setStationsJson(stationJsonList ?? []);
   }
 }

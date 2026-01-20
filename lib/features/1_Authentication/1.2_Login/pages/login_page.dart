@@ -29,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool isLoading = false;
 
   @override
   void initState() {
@@ -63,179 +62,198 @@ class _LoginPageState extends State<LoginPage> {
               //$ Bloc
               BlocConsumer<LoginPageBloc, LoginPageState>(
             bloc: loginPageBloc,
-            listenWhen: (previous, current) => current is LoginActionState,
-            buildWhen: (previous, current) => current is! LoginActionState,
             listener: (context, state) {
-              switch (state.runtimeType) {
-                case const (LoginSuccessState):
-                  if (MenuSharedPref.getIsMenuRoute()) {
-                    MenuSharedPref.clearIsMenuRoute();
-                    Get.offAll(LandingNavBottomWidget(index: 4));
-                  } else if (BookingSharedPref.getIsBookingRoute()) {
-                    BookingSharedPref.clearIsBookingRoute();
-                    Get.offAll(LandingNavBottomWidget(index: 2));
-                  } else {
-                    Get.offAllNamed(landingRoute);
-                  }
-                  break;
+              // 1. Xử lý Đăng nhập thành công
+              if (state.status == LoginStatus.success) {
+                ShowSnackBar(context, state.message, true);
 
-                case const (ShowSnackBarActionState):
-                  final snackBarState = state as ShowSnackBarActionState;
-                  ShowSnackBar(context,snackBarState.message, snackBarState.success);
-                  break;
+                if (MenuSharedPref.getIsMenuRoute()) {
+                  MenuSharedPref.clearIsMenuRoute();
+                  Get.offAll(() => const LandingNavBottomWidget(index: 4));
+                } else if (BookingSharedPref.getIsBookingRoute()) {
+                  BookingSharedPref.clearIsBookingRoute();
+                  Get.offAll(() => const LandingNavBottomWidget(index: 2));
+                } else {
+                  Get.offAllNamed(landingRoute);
+                }
+              }
+
+              // 2. Xử lý Lỗi
+              if (state.status == LoginStatus.failure) {
+                ShowSnackBar(context, state.message, false);
+              }
+
+              // 3. Xử lý chuyển trang Đăng ký
+              if (state.status == LoginStatus.navigateRegister) {
+                Get.toNamed(register1PageRoute);
               }
             },
             builder: (context, state) {
-              if (state is LoginPageInitial) {
-                emailController.text = state.email ?? "";
+              // Cập nhật text field nếu có dữ liệu từ state (chỉ lần đầu)
+              if (state.status == LoginStatus.initial &&
+                  state.email.isNotEmpty &&
+                  emailController.text.isEmpty) {
+                emailController.text = state.email;
               }
-              if (state is Login_LoadingState) {
-                isLoading = state.isLoading;
-              }
-              if (state is ShowSnackBarActionState) {
-                isLoading = false;
-              }
-              return SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 30.0, vertical: 20.0),
-                child: Form(
-                  key: _formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      FormContainer(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Center(
-                              child: Image.asset(
-                                'assets/images/logo_no_bg.png',
-                                width: screenSize.width,
-                              ),
-                            ),
-                            const SizedBox(height: 50),
-                            const Text(
-                              'Đăng nhập',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 30),
-                            CustomTextField(
-                              label: 'Email',
-                              hint: 'Nhập Email',
-                              icon: Icons.person_outline,
-                              controller: emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.singleLineFormatter,
-                                FilteringTextInputFormatter.deny(
-                                    RegExp(r'[^a-zA-Z0-9@._-]')),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email không được để trống';
-                                }
-                                if (!RegExp(
-                                        r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-                                    .hasMatch(value)) {
-                                  return 'Email không hợp lệ';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 25),
-                            CustomTextField(
-                              label: 'Mật khẩu',
-                              hint: 'Nhập Mật khẩu',
-                              icon: Icons.lock_outline,
-                              obscureText: true,
-                              controller: passwordController,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.singleLineFormatter,
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Vui lòng nhập mật khẩu ';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 30),
-                            GradientButton(
-                              text: 'Đăng nhập',
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  loginPageBloc.add(SubmitLoginEvent(
-                                    email: emailController.text,
-                                    password: passwordController.text,
-                                  ));
-                                }
-                              },
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
+
+              final bool isLoading = state.status == LoginStatus.loading;
+              return Stack(
+                children: [
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30.0, vertical: 20.0),
+                    child: Form(
+                      key: _formKey,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          FormContainer(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                // TextButton(
-                                //   onPressed: () {
-                                //   },
-                                //   style: TextButton.styleFrom(
-                                //     padding: EdgeInsets.zero,
-                                //     minimumSize: Size.zero,
-                                //     tapTargetSize:
-                                //         MaterialTapTargetSize.shrinkWrap,
-                                //   ),
-                                //   child: Text(
-                                //     'Quên mật khẩu',
-                                //     style: TextStyle(
-                                //       color: kLinkForgot,
-                                //       fontSize: 14,
-                                //       fontWeight: FontWeight.w500,
-                                //       decoration: TextDecoration.underline,
-                                //       decorationColor: kLinkForgot,
-                                //     ),
-                                //   ),
-                                // ),
-                                TextButton(
-                                  onPressed: () {
-                                    Get.toNamed(sendValidCodePageRoute);
+                                Center(
+                                  child: Image.asset(
+                                    'assets/images/logo_no_bg.png',
+                                    width: screenSize.width,
+                                  ),
+                                ),
+                                const SizedBox(height: 50),
+                                const Text(
+                                  'Đăng nhập',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 30),
+                                CustomTextField(
+                                  label: 'Email',
+                                  hint: 'Nhập Email',
+                                  icon: Icons.person_outline,
+                                  controller: emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .singleLineFormatter,
+                                    FilteringTextInputFormatter.deny(
+                                        RegExp(r'[^a-zA-Z0-9@._-]')),
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Email không được để trống';
+                                    }
+                                    if (!RegExp(
+                                            r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                                        .hasMatch(value)) {
+                                      return 'Email không hợp lệ';
+                                    }
+                                    return null;
                                   },
-                                  style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: Text(
-                                    'Xác thực email',
-                                    style: TextStyle(
-                                      color: kLinkForgot,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: kLinkForgot,
+                                ),
+                                const SizedBox(height: 25),
+                                CustomTextField(
+                                  label: 'Mật khẩu',
+                                  hint: 'Nhập Mật khẩu',
+                                  icon: Icons.lock_outline,
+                                  obscureText: true,
+                                  controller: passwordController,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .singleLineFormatter,
+                                  ],
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập mật khẩu ';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 30),
+                                GradientButton(
+                                  text: 'Đăng nhập',
+                                  onPressed: () {
+                                    if (_formKey.currentState!.validate()) {
+                                      loginPageBloc.add(SubmitLoginEvent(
+                                        email: emailController.text,
+                                        password: passwordController.text,
+                                      ));
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 20),
+                                Row(
+                                  children: [
+                                    // TextButton(
+                                    //   onPressed: () {
+                                    //   },
+                                    //   style: TextButton.styleFrom(
+                                    //     padding: EdgeInsets.zero,
+                                    //     minimumSize: Size.zero,
+                                    //     tapTargetSize:
+                                    //         MaterialTapTargetSize.shrinkWrap,
+                                    //   ),
+                                    //   child: Text(
+                                    //     'Quên mật khẩu',
+                                    //     style: TextStyle(
+                                    //       color: kLinkForgot,
+                                    //       fontSize: 14,
+                                    //       fontWeight: FontWeight.w500,
+                                    //       decoration: TextDecoration.underline,
+                                    //       decorationColor: kLinkForgot,
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Get.toNamed(sendValidCodePageRoute);
+                                      },
+                                      style: TextButton.styleFrom(
+                                        padding: EdgeInsets.zero,
+                                        minimumSize: Size.zero,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                      ),
+                                      child: Text(
+                                        'Xác thực email',
+                                        style: TextStyle(
+                                          color: kLinkForgot,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          decoration: TextDecoration.underline,
+                                          decorationColor: kLinkForgot,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                AuthSwitchLink(
+                                  text: 'Bạn chưa có tài khoản? ',
+                                  linkText: 'Đăng ký',
+                                  onTap: () {
+                                    loginPageBloc.add(ShowRegisterEvent());
+                                  },
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 24),
-                            AuthSwitchLink(
-                              text: 'Bạn chưa có tài khoản? ',
-                              linkText: 'Đăng ký',
-                              onTap: () {
-                                loginPageBloc.add(ShowRegisterEvent());
-                              },
-                            ),
-                          ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Loading Overlay
+                  if (isLoading)
+                    Container(
+                      color: Colors.black54, // Màu nền mờ
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          color: kPrimaryPurple,
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               );
             },
           ),

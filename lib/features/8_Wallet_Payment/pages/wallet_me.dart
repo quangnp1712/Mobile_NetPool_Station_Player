@@ -7,6 +7,7 @@ import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/bloc/wallet_bloc.dart';
 import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/pages/payment_history.dart';
 import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 // Giả định các màu sắc từ theme chung của App
 
@@ -70,16 +71,96 @@ class _WalletPageState extends State<WalletPage> {
     return amount.toString();
   }
 
+  /// Hàm mở link thanh toán
+  Future<void> _launchPaymentUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      Get.snackbar("Lỗi", "Không thể mở liên kết thanh toán",
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    }
+  }
+
+  /// Dialog thành công
+  void _showSuccessDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          backgroundColor: kCardColor,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: kGreenColor.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check_circle,
+                      color: kGreenColor, size: 40),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Thanh toán thành công!",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: kTextGrey, fontSize: 14),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: kGreenColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text("Đóng",
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<WalletBloc, WalletState>(
       bloc: bloc,
       listener: (context, state) {
-        if (state.paymentStatus == PaymentActionStatus.success) {
-          ShowSnackBar(context, state.message, true);
+        // 1. Mở link thanh toán khi có URL và trạng thái waiting
+        if (state.paymentStatus == PaymentActionStatus.waitingForPayment &&
+            state.paymentUrl != null) {
+          _launchPaymentUrl(state.paymentUrl!);
+        }
 
+        // 2. Xử lý kết quả thành công
+        if (state.paymentStatus == PaymentActionStatus.success) {
+          _showSuccessDialog(context, state.message);
           _amountController.clear();
-        } else if (state.paymentStatus == PaymentActionStatus.failure) {
+        }
+
+        // 3. Xử lý thất bại
+        else if (state.paymentStatus == PaymentActionStatus.failure) {
           ShowSnackBar(context, state.message, false);
         }
       },
@@ -204,14 +285,21 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Widget _buildRechargeSection(BuildContext context, WalletState state) {
+    // Kiểm tra xem có đang trong quá trình thanh toán (bao gồm chờ 30s) hay không
+    final bool isWaiting =
+        state.paymentStatus == PaymentActionStatus.waitingForPayment;
+    final bool isProcessing =
+        state.paymentStatus == PaymentActionStatus.processing;
+    final bool isLoading = isWaiting || isProcessing;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          "Nạp tiền vào ví",
-          style: TextStyle(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text("Nạp tiền vào ví",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -233,6 +321,7 @@ class _WalletPageState extends State<WalletPage> {
                   controller: _amountController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  enabled: !isLoading, // Disable khi đang xử lý
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -249,10 +338,11 @@ class _WalletPageState extends State<WalletPage> {
                   ),
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.clear, color: kHintColor),
-                onPressed: () => _amountController.clear(),
-              )
+              if (!isLoading)
+                IconButton(
+                  icon: const Icon(Icons.clear, color: kHintColor),
+                  onPressed: () => _amountController.clear(),
+                )
             ],
           ),
         ),
@@ -262,26 +352,22 @@ class _WalletPageState extends State<WalletPage> {
           runSpacing: 10,
           children: quickAmounts.map((amount) {
             return GestureDetector(
-              onTap: () {
-                _amountController.text = amount.toString();
-              },
+              onTap: isLoading
+                  ? null
+                  : () => _amountController.text = amount.toString(),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                    color: kBoxBackground,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: kNeonPink.withOpacity(0.6)),
-                    boxShadow: [
-                      BoxShadow(
-                          color: kNeonPink.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2))
-                    ]),
+                  color: kBoxBackground,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: kNeonPink.withOpacity(0.6)),
+                ),
                 child: Text(
                   formatQuickAmountToken(amount),
-                  style: const TextStyle(
-                      color: kNeonPink, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: isLoading ? kHintColor : kNeonPink,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             );
@@ -292,7 +378,7 @@ class _WalletPageState extends State<WalletPage> {
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: state.paymentStatus == PaymentActionStatus.processing
+            onPressed: isLoading
                 ? null
                 : () {
                     bloc.add(WalletAddMoneyEvent(_amountController.text));
@@ -303,20 +389,43 @@ class _WalletPageState extends State<WalletPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               elevation: 8,
-              shadowColor: kPrimaryPurple.withOpacity(0.6),
+              disabledBackgroundColor: kBoxBackground,
             ),
-            child: state.paymentStatus == PaymentActionStatus.processing
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                        color: Colors.white, strokeWidth: 2))
-                : const Text(
-                    "NẠP NGAY",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+            child: isLoading
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2)),
+                      const SizedBox(width: 10),
+                      Text(
+                          isWaiting
+                              ? "Đang chờ thanh toán..."
+                              : "Đang xử lý...",
+                          style: const TextStyle(fontSize: 14)),
+                    ],
+                  )
+                : const Text("NẠP NGAY",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ),
+        if (isWaiting)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: const Center(
+              child: Text(
+                "Vui lòng thanh toán trên trình duyệt web...",
+                style: TextStyle(
+                    color: kLinkActive,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic),
+              ),
+            ),
+          )
       ],
     );
   }
