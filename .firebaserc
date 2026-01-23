@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "realmen-2023"
+  },
+  "targets": {
+    "realmen-2023": {
+      "hosting": {
+        "player-site": [
+          "netpool-station-player"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

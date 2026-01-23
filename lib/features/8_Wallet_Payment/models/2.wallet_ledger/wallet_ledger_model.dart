@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/models/2.wallet_ledger/transaction_model.dart';
+import 'package:mobile_netpool_station_player/features/8_Wallet_Payment/models/3.transaction/transaction_model.dart';
 
 class WalletLedgerModel {
   int? walletLedgerId;

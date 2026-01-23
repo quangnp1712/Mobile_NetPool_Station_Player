@@ -248,44 +248,92 @@ class _MatchingPageState extends State<MatchingPage> {
                       color: AppColors.textMain,
                       fontFamily: 'Courier',
                       letterSpacing: 1.5)),
-              InkWell(
-                onTap: () {
-                  setState(() {
-                    _isNearMe = !_isNearMe;
-                  });
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _isNearMe
-                        ? AppColors.primaryNeon.withOpacity(0.2)
-                        : Colors.white10,
+              Row(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      // Xử lý sự kiện tạo phòng
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Tính năng tạo phòng đang phát triển"),
+                        backgroundColor: kPrimaryPurple,
+                        duration: Duration(seconds: 1),
+                      ));
+                    },
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color:
-                            _isNearMe ? AppColors.primaryNeon : Colors.white24),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF9F55FF), kPrimaryPurple],
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: kPrimaryPurple.withOpacity(0.4),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          )
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.add_circle_outline,
+                              color: Colors.white, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            "Tạo phòng",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.near_me,
-                          color: _isNearMe
-                              ? AppColors.primaryNeon
-                              : Colors.white70,
-                          size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        "Gần tôi",
-                        style: TextStyle(
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _isNearMe = !_isNearMe;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _isNearMe
+                            ? AppColors.primaryNeon.withOpacity(0.2)
+                            : Colors.white10,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
                             color: _isNearMe
                                 ? AppColors.primaryNeon
-                                : Colors.white70,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
+                                : Colors.white24),
                       ),
-                    ],
+                      child: Row(
+                        children: [
+                          Icon(Icons.near_me,
+                              color: _isNearMe
+                                  ? AppColors.primaryNeon
+                                  : Colors.white70,
+                              size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Gần tôi",
+                            style: TextStyle(
+                                color: _isNearMe
+                                    ? AppColors.primaryNeon
+                                    : Colors.white70,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
