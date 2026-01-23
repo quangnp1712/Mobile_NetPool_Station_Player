@@ -1,7 +1,7 @@
 {
   "hosting": {
-    "target": "player_site",
-    "public": "y",
+    "target": "player-site",
+    "public": "build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
