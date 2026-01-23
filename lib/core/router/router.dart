@@ -68,12 +68,12 @@ class RouteGenerator {
       GetPage(
         name: register1PageRoute,
         page: () => BlocProvider<RegisterBloc>.value(
-            value: registerBloc, child: const RegisterPage1()),
+            value: registerBloc, child: RegisterPage1()),
       ),
       GetPage(
         name: register2PageRoute,
         page: () => BlocProvider<RegisterBloc>.value(
-            value: registerBloc, child: const RegisterPage2()),
+            value: registerBloc, child: RegisterPage2()),
       ),
       GetPage(
         name: validEmailPageRoute,
