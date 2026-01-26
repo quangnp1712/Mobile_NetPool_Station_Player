@@ -77,6 +77,15 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
       if (isExpired) {
         emit(state.copyWith(blocState: BookingBlocState.unauthenticated));
       } else {
+        final pos = await LocationService().getUserCurrentLocation();
+
+        if (pos != null) {
+          // Lưu vị trí vào state và gọi lại sự kiện tìm kiếm
+          emit(state.copyWith(
+            userLat: pos.latitude.toString(),
+            userLong: pos.longitude.toString(),
+          ));
+        }
         add(LoadBookingDataEvent());
       }
     } catch (e) {
@@ -91,7 +100,8 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     try {
       final results = await Future.wait([
         CityRepository().getProvinces(),
-        BookingRepository().listStation("", "", "", "", "ACTIVE", "0", "10"),
+        BookingRepository().listStation("", "", "", "", "ACTIVE", "0", "10",
+            state.userLong ?? "", state.userLat ?? ""),
         BookingRepository().getPlatformSpace(),
       ]);
 
@@ -142,13 +152,16 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     emit(state.copyWith(status: BookingStatus.loading));
     try {
       final res = await BookingRepository().listStation(
-          state.searchQuery,
-          state.selectedProvince?.name ?? "",
-          "",
-          state.selectedDistrict?.name ?? "",
-          "ACTIVE",
-          state.currentPage.toString(),
-          "10");
+        state.searchQuery,
+        state.selectedProvince?.name ?? "",
+        "",
+        state.selectedDistrict?.name ?? "",
+        "ACTIVE",
+        state.currentPage.toString(),
+        "10",
+        state.userLong ?? "",
+        state.userLat ?? "",
+      );
       final resp = StationDetailModelResponse.fromJson(res['body']);
 
       final stations = resp.data ?? [];
@@ -184,7 +197,14 @@ class BookingPageBloc extends Bloc<BookingPageEvent, BookingPageState> {
     emit(state.copyWith(status: BookingStatus.loading));
     try {
       final pos = await LocationService().getUserCurrentLocation();
+
       if (pos != null) {
+        // Lưu vị trí vào state và gọi lại sự kiện tìm kiếm
+        emit(state.copyWith(
+          userLat: pos.latitude.toString(),
+          userLong: pos.longitude.toString(),
+          currentPage: 0, // Reset về trang đầu khi tìm gần nhất
+        ));
         add(FetchStationsEvent());
       } else {
         emit(state.copyWith(

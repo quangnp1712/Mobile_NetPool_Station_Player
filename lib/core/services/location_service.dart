@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:geolocator/geolocator.dart';
+import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
 import 'package:mobile_netpool_station_player/core/utils/shared_preferences_helper.dart';
 
 abstract class ILocationService {
@@ -10,8 +11,18 @@ abstract class ILocationService {
 class LocationService extends ILocationService {
   @override
   Future getUserCurrentLocation() async {
-    bool isServiceEnabled = await Geolocator.isLocationServiceEnabled();
     final prefs = SharedPreferencesHelper.preferences;
+    if (prefs.containsKey("latitude") && prefs.containsKey("longitude")) {
+      double? lat = prefs.getDouble("latitude");
+      double? long = prefs.getDouble("longitude");
+      if (lat != null && long != null) {
+        DebugLogger.printLog("Location retrieved from Prefs: $lat, $long");
+        return PositionModel(latitude: lat, longitude: long);
+      }
+    }
+
+    bool isServiceEnabled = await Geolocator.isLocationServiceEnabled();
+
     if (isServiceEnabled == false) {
       return null;
     }
@@ -69,4 +80,10 @@ class LocationService extends ILocationService {
       return null;
     }
   }
+}
+
+class PositionModel {
+  final double latitude;
+  final double longitude;
+  PositionModel({required this.latitude, required this.longitude});
 }

@@ -36,6 +36,9 @@ const Color kNeonPink = Color(0xFFE100FF); // Màu hồng tím neon mới
 const Color kSuccessGreen = Color(0xFF00FF94);
 const Color kErrorRed = Color(0xFFFF2E63);
 
+const Color kPrimaryNeon = Color(0xFF00F0FF);
+const Color kSecondaryPurple = Color(0xFF7C3AED);
+
 class AppColors {
   static const bgDark = Color(0xFF3B1F5A);
   static const bgBlue = Color.fromARGB(255, 30, 232, 251);

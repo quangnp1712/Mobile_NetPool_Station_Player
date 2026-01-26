@@ -5,6 +5,12 @@ import 'package:get/get.dart';
 import 'package:mobile_netpool_station_player/core/router/routes.dart';
 import 'package:mobile_netpool_station_player/core/theme/app_colors.dart';
 import 'package:mobile_netpool_station_player/core/utils/debug_logger.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching/models/matching_detail_response_model.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching/models/matching_model.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching/pages/5.2_Matching_Detail/matching_detail_page.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching/repository/matching_repository.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.3_Matching_Create/pages/1.matching_create_page.dart';
+import 'package:mobile_netpool_station_player/features/Common/snackbar/snackbar.dart';
 
 class Station {
   final String id;
@@ -139,12 +145,18 @@ class MatchingPage extends StatefulWidget {
 
 class _MatchingPageState extends State<MatchingPage> {
   final TextEditingController _searchController = TextEditingController();
+  final MatchingRepository _repo = MatchingRepository();
   String _searchQuery = "";
 
   bool _isNearMe = false;
+  bool _isLoading = true; // State loading ban đầu
+  bool _isSearchingApi = false; // State khi đang gọi API
   String? _selectedProvince;
   String? _selectedDistrict;
   String _selectedTag = "All";
+
+  // List này sẽ chứa dữ liệu hiển thị (Fake hoặc Result thật)
+  List<TeamLobby> _displayLobbies = [];
 
   final List<String> _provinces = ["Hồ Chí Minh", "Hà Nội", "Đà Nẵng"];
   final List<String> _districts = [
@@ -157,10 +169,98 @@ class _MatchingPageState extends State<MatchingPage> {
 
   final List<String> _tags = ["All", "LoL", "Valorant", "CS2", "Ranking"];
 
-  List<TeamLobby> get _filteredLobbies {
-    List<TeamLobby> list = fakeLobbies;
+  @override
+  void initState() {
+    super.initState();
+    _initialLoading();
+  }
 
-    if (_searchQuery.isNotEmpty) {
+  // Fake loading ban đầu cho mượt
+  void _initialLoading() async {
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _displayLobbies = fakeLobbies; // Load mock data ban đầu
+      });
+    }
+  }
+
+  // Hàm mapping từ Model thật sang Model UI (Trick)
+  TeamLobby _convertModelToLobby(MatchMakingModel model) {
+    return TeamLobby(
+      id: model.matchMakingId.toString(),
+      title: model.typeName ?? model.matchMakingCode ?? "Phòng chơi",
+      gameName: "Game", // Có thể map từ resources nếu có
+      gameImageUrl: model.station?.avatar ??
+          "https://cdn-icons-png.flaticon.com/512/808/808439.png",
+      rank: "Tự do",
+      currentMembers: model.participants?.length ?? 0,
+      maxMembers: model.limitParticipant ?? 0,
+      hostName: "Chủ phòng",
+      stationName: model.station?.stationName ?? "Unknown Station",
+      address: model.station?.address ?? "Unknown Address",
+      distance: model.station?.distance ?? 0.0,
+      spaceType: model.description ?? "Zone",
+      startTime: model.startAt != null
+          ? "${model.startAt!.hour}:${model.startAt!.minute} ${model.startAt!.day}/${model.startAt!.month}"
+          : "Chưa xác định",
+    );
+  }
+
+  // Hàm gọi API tìm kiếm
+  Future<void> _handleSearchById(String id) async {
+    if (id.isEmpty) {
+      // Reset về mock data nếu ô tìm kiếm trống
+      setState(() {
+        _displayLobbies = fakeLobbies;
+        _searchQuery = "";
+      });
+      return;
+    }
+
+    setState(() {
+      _isSearchingApi = true;
+    });
+
+    final result = await _repo.findDetail(id);
+
+    if (mounted) {
+      setState(() {
+        _isSearchingApi = false;
+      });
+
+      if (result['success'] == true && result['body']['data'] != null) {
+        try {
+          MatchMakingDetailModelResponse realModel =
+              MatchMakingDetailModelResponse.fromMap(result['body']);
+
+          // Trick: Convert model thật sang UI model và chỉ hiển thị 1 kết quả
+          setState(() {
+            _displayLobbies = [_convertModelToLobby(realModel.data!)];
+            _searchQuery = id;
+          });
+        } catch (e) {
+          ShowSnackBar(context, "Không thể xử lý dữ liệu: $e", false);
+        }
+      } else {
+        ShowSnackBar(
+            context, result['message'] ?? "Không tìm thấy phòng", false);
+      }
+    }
+  }
+
+  // Filter local cho mock data (nếu đang không hiển thị kết quả API)
+  List<TeamLobby> get _filteredLobbies {
+    // Nếu đang hiển thị kết quả search API (chỉ có 1 item) thì trả về luôn
+    if (_displayLobbies.length == 1 && _searchQuery.isNotEmpty) {
+      return _displayLobbies;
+    }
+
+    List<TeamLobby> list = _displayLobbies;
+
+    // Local filter cho mock data
+    if (_searchQuery.isNotEmpty && list.length > 1) {
       list = list
           .where((p) =>
               p.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
@@ -171,7 +271,7 @@ class _MatchingPageState extends State<MatchingPage> {
           .toList();
     }
 
-    if (_selectedTag != "All") {
+    if (_selectedTag != "All" && list.length > 1) {
       if (_selectedTag == "Ranking") {
         list = list.where((p) => p.rank.contains("+")).toList();
       } else if (_selectedTag == "LoL") {
@@ -183,7 +283,7 @@ class _MatchingPageState extends State<MatchingPage> {
       }
     }
 
-    if (_isNearMe) {
+    if (_isNearMe && list.length > 1) {
       list = list.where((p) => p.distance < 3.0).toList();
       list.sort((a, b) => a.distance.compareTo(b.distance));
     }
@@ -205,17 +305,37 @@ class _MatchingPageState extends State<MatchingPage> {
         children: [
           _buildHeader(context),
           Expanded(
-            child: _filteredLobbies.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 16),
-                    itemCount: _filteredLobbies.length,
-                    itemBuilder: (context, index) {
-                      return MatchCard(lobby: _filteredLobbies[index]);
-                    },
-                  ),
+            child: _isLoading
+                ? _buildLoadingState()
+                : _isSearchingApi
+                    ? _buildLoadingState() // Loading khi search API
+                    : _filteredLobbies.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
+                            itemCount: _filteredLobbies.length,
+                            itemBuilder: (context, index) {
+                              return MatchCard(lobby: _filteredLobbies[index]);
+                            },
+                          ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: AppColors.primaryNeon),
+          const SizedBox(height: 16),
+          Text(
+            "Đang tìm phòng...",
+            style: TextStyle(color: Colors.white.withOpacity(0.7)),
+          )
         ],
       ),
     );
@@ -252,12 +372,7 @@ class _MatchingPageState extends State<MatchingPage> {
                 children: [
                   InkWell(
                     onTap: () {
-                      // Xử lý sự kiện tạo phòng
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text("Tính năng tạo phòng đang phát triển"),
-                        backgroundColor: kPrimaryPurple,
-                        duration: Duration(seconds: 1),
-                      ));
+                      Get.to(() => CreateRoomPage());
                     },
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
@@ -351,7 +466,10 @@ class _MatchingPageState extends State<MatchingPage> {
                 IconButton(
                   icon:
                       const Icon(Icons.search, color: Colors.white54, size: 20),
-                  onPressed: () {},
+                  onPressed: () {
+                    // Gọi search API khi ấn nút kính lúp
+                    _handleSearchById(_searchController.text);
+                  },
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
                 ),
@@ -359,20 +477,30 @@ class _MatchingPageState extends State<MatchingPage> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
+                    onSubmitted: (value) {
+                      // Gọi search API khi ấn Enter
+                      _handleSearchById(value);
                     },
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                     decoration: const InputDecoration(
-                      hintText: "Tìm phòng, game, quán...",
+                      hintText: "Nhập ID phòng để tìm...",
                       hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.only(bottom: 5),
                     ),
                   ),
                 ),
+                if (_searchController.text.isNotEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.close,
+                        color: Colors.white54, size: 18),
+                    onPressed: () {
+                      _searchController.clear();
+                      _handleSearchById(""); // Reset về mock data
+                    },
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
               ],
             ),
           ),
@@ -469,6 +597,7 @@ class _MatchingPageState extends State<MatchingPage> {
                       _searchQuery = "";
                       _selectedTag = "All";
                       _isNearMe = false;
+                      _displayLobbies = fakeLobbies; // Reset về fake
                     });
                   },
                 ),
@@ -561,7 +690,11 @@ class MatchCard extends StatelessWidget {
         child: InkWell(
           onTap: () {
             DebugLogger.printLog("Tap on Lobby: ${lobby.title}");
-            Get.toNamed(matchingDetailPageRoute);
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => MatchingDetailPage(
+                        matchMakingId: int.parse(lobby.id))));
           },
           splashColor: AppColors.primaryNeon.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
@@ -733,7 +866,11 @@ class MatchCard extends StatelessWidget {
                           ]),
                       child: ElevatedButton(
                         onPressed: () {
-                          Get.toNamed(matchingDetailPageRoute);
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => MatchingDetailPage(
+                                      matchMakingId: int.parse(lobby.id))));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,

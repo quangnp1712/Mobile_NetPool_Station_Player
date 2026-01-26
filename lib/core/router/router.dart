@@ -16,8 +16,8 @@ import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Statio
 import 'package:mobile_netpool_station_player/features/3_Station_Page/3.1_Station_List/pages/station_page.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/bloc/booking_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/4_Booking_Page/pages/booking_page.dart';
-import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching_List/pages/matching_page.dart';
-import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.2_Matching_Detail/pages/matching_detail.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching/pages/5.1_Matching_List/matching_list_page.dart';
+import 'package:mobile_netpool_station_player/features/5_Matching_Page/5.1_Matching/pages/5.2_Matching_Detail/matching_detail_page.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/bloc/menu_page_bloc.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.1_Menu/pages/menu_page.dart';
 import 'package:mobile_netpool_station_player/features/6_Menu_Page/6.2_Profile/bloc/profile_page_bloc.dart';
@@ -134,7 +134,9 @@ class RouteGenerator {
       ),
       GetPage(
         name: matchingDetailPageRoute,
-        page: () => const MatchingDetailPage(),
+        page: () => MatchingDetailPage(
+          matchMakingId: Get.arguments as int,
+        ),
       ),
 
       //! 5: Menu Page //

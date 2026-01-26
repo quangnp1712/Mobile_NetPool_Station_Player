@@ -57,6 +57,9 @@ class BookingPageState extends Equatable {
   // -- update: Thêm field paymentUrl
   final String? paymentUrl;
 
+  final String? userLat;
+  final String? userLong;
+
   const BookingPageState({
     this.blocState = BookingBlocState.initial,
     this.status = BookingStatus.initial,
@@ -88,6 +91,8 @@ class BookingPageState extends Equatable {
     this.userBalance = 0.0,
     this.submissionStatus = BookingSubmissionStatus.initial,
     this.paymentUrl, // -- update
+    this.userLat,
+    this.userLong,
   });
 
   // ... getters totalPrice, endTime ...
@@ -142,6 +147,8 @@ class BookingPageState extends Equatable {
     BookingSubmissionStatus? submissionStatus,
     String? paymentUrl, // -- update
     bool clearPaymentUrl = false, // -- update helper
+    String? userLat,
+    String? userLong,
   }) {
     return BookingPageState(
       blocState: blocState ?? BookingBlocState.initial,
@@ -179,6 +186,8 @@ class BookingPageState extends Equatable {
       submissionStatus: submissionStatus ?? this.submissionStatus,
       paymentUrl:
           clearPaymentUrl ? null : (paymentUrl ?? this.paymentUrl), // -- update
+      userLat: userLat ?? this.userLat,
+      userLong: userLong ?? this.userLong,
     );
   }
 
@@ -210,6 +219,8 @@ class BookingPageState extends Equatable {
         areas,
         userBalance,
         submissionStatus,
+        userLat,
+        userLong,
         paymentUrl // -- update
       ];
 }
