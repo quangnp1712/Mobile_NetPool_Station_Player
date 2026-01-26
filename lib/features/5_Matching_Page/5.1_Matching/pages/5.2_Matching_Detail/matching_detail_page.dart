@@ -706,11 +706,10 @@ class _MatchingDetailPageState extends State<MatchingDetailPage> {
                               ]
                             : []),
                     child: ElevatedButton(
-                        onPressed:
-                            // (canJoin && !isFull)
-                            //     ? () => _showConfirmJoinDialog(context)
-                            //     : null,
-                            () => _showConfirmJoinDialog(context),
+                        onPressed: (canJoin && !isFull)
+                            ? () => _showConfirmJoinDialog(context)
+                            : null,
+                        // () => _showConfirmJoinDialog(context),
                         style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,

@@ -72,24 +72,24 @@ class _MenuPageState extends State<MenuPage> {
                     phoneNumber: state.accountInfo?.phone ?? "",
                   ),
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Hoạt động'),
-                  MenuOptionCard(
-                    icon: Icons.people_alt_outlined,
-                    title: 'Bạn bè & Nhóm',
-                    badgeCount: 3,
-                    onTap: () {},
-                  ),
-                  MenuOptionCard(
-                    icon: Icons.emoji_events_outlined,
-                    title: 'Thành tích & Huy hiệu',
-                    onTap: () {},
-                  ),
-                  MenuOptionCard(
-                    icon: Icons.bookmark_border,
-                    title: 'Kịch bản đã lưu',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 16),
+                  // _buildSectionHeader('Hoạt động'),
+                  // MenuOptionCard(
+                  //   icon: Icons.people_alt_outlined,
+                  //   title: 'Bạn bè & Nhóm',
+                  //   badgeCount: 3,
+                  //   onTap: () {},
+                  // ),
+                  // MenuOptionCard(
+                  //   icon: Icons.emoji_events_outlined,
+                  //   title: 'Thành tích & Huy hiệu',
+                  //   onTap: () {},
+                  // ),
+                  // MenuOptionCard(
+                  //   icon: Icons.bookmark_border,
+                  //   title: 'Kịch bản đã lưu',
+                  //   onTap: () {},
+                  // ),
+                  // const SizedBox(height: 16),
                   _buildSectionHeader('Tài khoản'),
                   MenuOptionCard(
                     icon: Icons.person_outline,
@@ -107,17 +107,17 @@ class _MenuPageState extends State<MenuPage> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  _buildSectionHeader('Ứng dụng'),
-                  MenuOptionCard(
-                    icon: Icons.settings_outlined,
-                    title: 'Cài đặt chung',
-                    onTap: () {},
-                  ),
-                  MenuOptionCard(
-                    icon: Icons.help_outline,
-                    title: 'Hỗ trợ & FAQ',
-                    onTap: () {},
-                  ),
+                  // _buildSectionHeader('Ứng dụng'),
+                  // MenuOptionCard(
+                  //   icon: Icons.settings_outlined,
+                  //   title: 'Cài đặt chung',
+                  //   onTap: () {},
+                  // ),
+                  // MenuOptionCard(
+                  //   icon: Icons.help_outline,
+                  //   title: 'Hỗ trợ & FAQ',
+                  //   onTap: () {},
+                  // ),
                   MenuLogoutButton(
                     onTap: () {
                       bloc.add(MenuLogoutRequested());
