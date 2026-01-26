@@ -327,30 +327,25 @@ class _MatchingDetailPageState extends State<MatchingDetailPage> {
     final dateFormat = DateFormat("dd/MM/yyyy");
     final currencyFormat = NumberFormat("#,##0", "vi_VN");
 
-    // 1. Tính toán Khung giờ từ Slots (Begin của slot đầu - End của slot cuối)
+    // 1. Tính toán Khung giờ từ Slots
     String timeSlotString = "Chưa xác định giờ";
     if (data.slots != null && data.slots!.isNotEmpty) {
-      // Giả sử slots đã được sort hoặc lấy đúng thứ tự
       String start = data.slots!.first.begin ?? "?";
       String end = data.slots!.last.end ?? "?";
 
-      // Format ngắn gọn HH:mm nếu string có dạng HH:mm:ss
       if (start.length > 5) start = start.substring(0, 5);
       if (end.length > 5) end = end.substring(0, 5);
 
       timeSlotString = "$start - $end";
     }
 
-    // 2. Tính toán Ngày chơi từ startAt -> expiredAt
+    // 2. Tính toán Ngày chơi
     List<String> dates = [];
     if (data.startAt != null && data.expiredAt != null) {
       DateTime current = data.startAt!;
-      // Lưu ý: expiredAt là ngày kết thúc
-      // Reset về 00:00:00 để so sánh ngày
       DateTime endDate = DateUtils.dateOnly(data.expiredAt!);
       DateTime iter = DateUtils.dateOnly(current);
 
-      // Loop từ ngày bắt đầu đến ngày kết thúc
       while (!iter.isAfter(endDate)) {
         dates.add(dateFormat.format(iter));
         iter = iter.add(const Duration(days: 1));
@@ -392,7 +387,6 @@ class _MatchingDetailPageState extends State<MatchingDetailPage> {
                             fontWeight: FontWeight.bold,
                             fontSize: 16))
                   ])),
-              // Layout Tổng tiền
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -405,6 +399,19 @@ class _MatchingDetailPageState extends State<MatchingDetailPage> {
                         fontWeight: FontWeight.bold,
                         fontSize: 16),
                   ),
+                  // HIỂN THỊ TIỀN CỌC NẾU CÓ
+                  if (data.totalDeposit != null && data.totalDeposit! > 0) ...[
+                    const SizedBox(height: 4),
+                    const Text("Cọc kích hoạt",
+                        style: TextStyle(color: kTextGrey, fontSize: 12)),
+                    Text(
+                      "${currencyFormat.format(data.totalDeposit ?? 0)}đ",
+                      style: const TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14),
+                    ),
+                  ]
                 ],
               )
             ],

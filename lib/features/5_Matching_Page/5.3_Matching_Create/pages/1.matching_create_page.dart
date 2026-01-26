@@ -422,6 +422,7 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                 final startSlot = state.selectedTimeSlot;
                 bool isSelected = false;
                 bool isInRange = false;
+                bool isAllowed = slot.allowBooking == true;
 
                 int startIndex = -1;
                 if (startSlot != null) {
@@ -438,9 +439,10 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                   if (index == startIndex) isSelected = true;
                 }
 
-                Color bgColor = kCardColor;
-                Color borderColor = Colors.white10;
-                Color textColor = Colors.white70;
+                Color bgColor = isAllowed ? kCardColor : Colors.white10;
+                Color borderColor =
+                    isAllowed ? Colors.white10 : Colors.transparent;
+                Color textColor = isAllowed ? Colors.white70 : Colors.white24;
 
                 if (isSelected) {
                   bgColor = kPrimaryPurple;
@@ -453,15 +455,18 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
                 }
 
                 return InkWell(
-                  onTap: () {
-                    if (startIndex == -1 || index <= startIndex) {
-                      _bloc.add(SelectTimeSlot(slot));
-                      _bloc.add(ChangeDuration(1.0));
-                    } else {
-                      double newDuration = (index - startIndex + 1).toDouble();
-                      _bloc.add(ChangeDuration(newDuration));
-                    }
-                  },
+                  onTap: isAllowed
+                      ? () {
+                          if (startIndex == -1 || index <= startIndex) {
+                            _bloc.add(SelectTimeSlot(slot));
+                            _bloc.add(ChangeDuration(1.0));
+                          } else {
+                            double newDuration =
+                                (index - startIndex + 1).toDouble();
+                            _bloc.add(ChangeDuration(newDuration));
+                          }
+                        }
+                      : null,
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -736,13 +741,6 @@ class _CreateRoomPageState extends State<CreateRoomPage> {
           title: "Chuyển khoản (QR)",
           description: "VietQR, MoMo, ZaloPay",
           icon: Icons.qr_code_2,
-          selectedId: state.paymentMethod,
-        ),
-        _buildPaymentCard(
-          id: 'DIRECT',
-          title: "Tiền mặt",
-          description: "Thanh toán tại quầy khi đến",
-          icon: Icons.money,
           selectedId: state.paymentMethod,
         ),
       ],

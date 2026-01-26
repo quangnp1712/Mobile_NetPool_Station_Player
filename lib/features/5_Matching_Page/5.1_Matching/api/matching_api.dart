@@ -10,4 +10,6 @@ class MatchingApi {
   //$ Matching join
   final String apiMatchingJoinUrl =
       "$domainUrl/v1/api/match-joining-registrations";
+
+  final String apiWalletUrl = "$domainUrl/v1/api/wallets";
 }

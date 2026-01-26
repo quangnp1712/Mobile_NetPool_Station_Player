@@ -343,28 +343,45 @@ class CreateRoomBloc extends Bloc<CreateRoomEvent, CreateRoomState> {
   Future<void> _onSelectDate(
       SelectDate event, Emitter<CreateRoomState> emit) async {
     emit(state.copyWith(
-      status: RoomStatus.loading,
-      selectedSchedule: event.schedule,
-      selectedTimeSlot: null,
-      timeSlots: [],
-      duration: 1.0,
-      selectedResources: [],
-      resources: [],
-      resourceGroups: [],
-      holdingDays: 1,
-      maxHoldingDays: 1,
-      canHold: false,
-    ));
-
+        status: RoomStatus.loading,
+        selectedSchedule: event.schedule,
+        selectedTimeSlot: null,
+        timeSlots: [],
+        duration: 1.0,
+        selectedResources: [],
+        resources: [],
+        resourceGroups: [],
+        holdingDays: 1,
+        maxHoldingDays: 1,
+        canHold: false));
     try {
       final res =
           await _repo.findAllTimeSlot(event.schedule.scheduleId.toString());
       List<TimeslotModel> slots = [];
       if (res['success'] == true) {
-        final schedule = ScheduleModelResponse.fromMap(res['body']).data;
-        slots = schedule?.timeSlots ?? [];
-      }
+        slots =
+            ScheduleModelResponse.fromMap(res['body']).data?.timeSlots ?? [];
 
+        DateTime now = DateTime.now();
+        DateTime? selectedDate = DateTime.tryParse(event.schedule.date ?? "");
+
+        if (selectedDate != null &&
+            selectedDate.year == now.year &&
+            selectedDate.month == now.month &&
+            selectedDate.day == now.day) {
+          slots = slots.map((slot) {
+            if (slot.begin == null) return slot;
+            try {
+              List<String> parts = slot.begin!.split(':');
+              int h = int.parse(parts[0]);
+              int m = int.parse(parts[1]);
+              DateTime slotTime = DateTime(now.year, now.month, now.day, h, m);
+              if (slotTime.isBefore(now)) slot.allowBooking = false;
+            } catch (_) {}
+            return slot;
+          }).toList();
+        }
+      }
       emit(state.copyWith(status: RoomStatus.success, timeSlots: slots));
     } catch (e) {
       emit(state.copyWith(

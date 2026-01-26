@@ -6,6 +6,7 @@ class MatchMakingModel {
   String? matchMakingCode;
   int? limitParticipant;
   double? totalPrice;
+  double? totalDeposit;
   DateTime? startAt;
   DateTime? expiredAt;
   DateTime? playAt;
@@ -27,6 +28,7 @@ class MatchMakingModel {
     this.matchMakingCode,
     this.limitParticipant,
     this.totalPrice,
+    this.totalDeposit,
     this.startAt,
     this.expiredAt,
     this.playAt,
@@ -50,6 +52,7 @@ class MatchMakingModel {
       matchMakingCode: map['matchMakingCode'] as String?,
       limitParticipant: map['limitParticipant'] as int?,
       totalPrice: (map['totalPrice'] as num?)?.toDouble(),
+      totalDeposit: (map['totalDeposit'] as num?)?.toDouble(),
 
       // CẬP NHẬT: Parse DateTime từ String (JSON: "2026-01-25")
       startAt: map['startAt'] != null
@@ -112,6 +115,7 @@ class MatchMakingModel {
       'matchMakingCode': matchMakingCode,
       'limitParticipant': limitParticipant,
       'totalPrice': totalPrice,
+      'totalDeposit': totalDeposit,
       'startAt': startAt?.toIso8601String(), // Cập nhật format String
       'expiredAt': expiredAt?.toIso8601String(),
       'playAt': playAt?.toIso8601String(),
